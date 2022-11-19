@@ -32,10 +32,14 @@ def plot_correlation_matrix(df: pd.DataFrame) -> None:
     plt.figure(figsize=(20, 20))
     sns.heatmap(corr_matrix, annot=True,
                 cmap='coolwarm', fmt='.2f', annot_kws={'size': 10}, linewidths=0.5, mask=mask)
-    # Annotate the correlation matrix:
     plt.title('Correlation Matrix with Spearman Correlation')
+    # save the plot:
+    plt.savefig(Path(plot_path, 'correlation_matrix.png'))
+    # show the plot:
+    plt.show()
 
-    # Save the plot:
+    # annotate the correlation coefficients:
+    plt.title('Correlation matrix')
     plot_path.mkdir(parents=True, exist_ok=True)
     plt.savefig(Path(plot_path, 'correlation_matrix.png'))
     plt.show()
