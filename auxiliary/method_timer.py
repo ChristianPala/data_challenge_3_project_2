@@ -1,4 +1,5 @@
-# Auxiliary library to time the execution of a function or a method:
+# Auxiliary library to time the execution of a function or a method, inherited from
+# the project 1 source code from Christian Berchtold and Christian Pala.
 # Libraries:
 from functools import wraps
 import time
