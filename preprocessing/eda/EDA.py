@@ -14,6 +14,34 @@ data_path: Path = Path('..', '..', 'data')
 
 
 # Functions:
+
+def category_mapping(feature_name: str) -> dict[int, str]:
+    """
+    Map the category labels to their corresponding values, auxiliary function for the legend
+    in the categorical features distribution plots.
+    @param feature_name: str: the name of the feature to be mapped.
+    :return: Dict[int, str]: the mapping for the category labels.
+    """
+    if feature_name == 'gender':
+        category_dict = {1: "male", 2: "female"}
+    elif feature_name == 'education':
+        category_dict = {1: "graduate school", 2: "university", 3: "high school", 4: "others"}
+    elif feature_name == 'marriage':
+        category_dict = {1: "married", 2: "single", 3: "others"}
+    elif feature_name.startswith('pay_'):
+        category_dict = {-2: "no consumption", -1: "paid fully", 0: "revolving credit", 1: "delay for 1 month",
+                         2: "delay for 2 months", 3: "delay for 3 months", 4: "delay for 4 months",
+                         5: "delay for 5 months", 6: "delay for 6 months", 7: "delay for 7 months",
+                         8: "delay for 8 months", 9: "delay for 9 months or more"}
+
+    elif feature_name == 'default':
+        category_dict = {0: "no default", 1: "default"}
+    else:
+        raise ValueError(f'Invalid feature name: {feature_name}')
+
+    return category_dict
+
+
 def plot_correlation_matrix(df: pd.DataFrame) -> None:
     """
     Plot the correlation matrix.
@@ -28,53 +56,83 @@ def plot_correlation_matrix(df: pd.DataFrame) -> None:
     corr_matrix = df[numerical_features].corr('spearman')
     # mask the upper triangle:
     mask = np.triu(np.ones_like(corr_matrix, dtype=bool))
+    # get the y_tick:
+    x_tick = corr_matrix.index
+    # replace the last y_tick label with an empty string:
+    y_tick = [col.replace('limit_bal', '') for col in x_tick]
+
     # plot the correlation matrix:
     plt.figure(figsize=(20, 20))
-    sns.heatmap(corr_matrix, annot=True,
-                cmap='coolwarm', fmt='.2f', annot_kws={'size': 10}, linewidths=0.5, mask=mask)
+    sns.heatmap(corr_matrix, annot=True, cbar=True, cmap='coolwarm', mask=mask,
+                fmt='.2f', annot_kws={'size': 10}, linewidths=0.5,
+                xticklabels=x_tick[:-1], yticklabels=y_tick)
+
     # Annotate the correlation matrix:
     plt.title('Correlation Matrix with Spearman Correlation')
-
     # Save the plot:
     plot_path.mkdir(parents=True, exist_ok=True)
     plt.savefig(Path(plot_path, 'correlation_matrix.png'))
-    plt.show()
+    plt.close()
 
 
 def plot_categorical_feature_distribution(df: pd.DataFrame) -> None:
     """
     Plot the distribution of the categorical features in the dataset.
-    :param df: pd.DataFrame: the dataframe containing the dataset.
-    :return: None
-    """
-    for feature in df.columns:
-        if df[feature].dtype == 'category' and feature != 'default':
-            plt.figure(figsize=(10, 10))
-            sns.countplot(x=feature, data=df)
-            plt.title(f'Distribution of {feature}')
-            plt.xlabel(feature)
-            plt.ylabel('Count')
-            plot_path.mkdir(parents=True, exist_ok=True)
-            plt.savefig(Path(plot_path, f'{feature}_distribution.png'))
-            plt.show()
-
-
-def plot_numerical_feature_distribution(df: pd.DataFrame) -> None:
-    """
-    Plot the distribution of the numerical features in the dataset.
     @param df: pd.DataFrame: the dataframe containing the dataset.
     :return: None
     """
     for feature in df.columns:
-        if df[feature].dtype != 'category' and feature != 'id':
+
+        if df[feature].dtype == 'category':
+            # get the labels for the x-axis and the mapping for the legend:
+            mapping = category_mapping(feature)
+            # legend labels, add the frequency of each category, keep the original order:
+            labels = [f'{mapping[cat]} ({df[feature].value_counts()[cat]})'
+                      for cat in df[feature].cat.categories]
+            # plot the distribution:
             plt.figure(figsize=(10, 10))
-            sns.histplot(x=feature, data=df, kde=True, bins='auto')
-            plt.title(f'Distribution of {feature}')
-            plt.xlabel(feature)
+            # order the categories by their frequency:
+            sns.countplot(x=feature, data=df, palette='tab10', hue=df[feature])
+            # map the x-axis labels:
+            plt.xticks(ticks=range(len(mapping)), labels=mapping.values(), rotation=15)
+            # set the legend:
+            plt.legend(labels=labels, loc='upper right', title=feature.capitalize())
+            # annotate the plot:
+            plt.title(f'Distribution of {feature.capitalize()}')
+            plt.xlabel(feature.capitalize())
             plt.ylabel('Count')
+            # Save the plot:
             plot_path.mkdir(parents=True, exist_ok=True)
             plt.savefig(Path(plot_path, f'{feature}_distribution.png'))
-            plt.show()
+            plt.close()
+
+
+def plot_numerical_feature_distribution(df: pd.DataFrame, log_transform: bool = False) -> None:
+    """
+    Plot the distribution of the numerical features in the dataset.
+    @param df: pd.DataFrame: the dataframe containing the dataset.
+    @param log_transform: bool: whether to apply a log transformation to the numerical features.
+    :return: None
+    """
+    for feature in df.columns:
+        if df[feature].dtype != 'category' and feature != 'id':
+
+            if log_transform:
+                # apply a log transformation to the feature avoiding the 0 values:
+                df[feature] = df[feature].apply(lambda x: np.log(x + 1))
+            plt.figure(figsize=(10, 10))
+            sns.histplot(x=feature, data=df, kde=True, bins='auto')
+            plt.title(f'Distribution of {feature.capitalize()}')
+            plt.xlabel(feature.capitalize())
+            plt.ylabel('Count')
+            plot_path.mkdir(parents=True, exist_ok=True)
+
+            if log_transform:
+                plt.savefig(Path(plot_path, f'{feature}_distribution_log_transformed.png'))
+            else:
+                plt.savefig(Path(plot_path, f'{feature}_distribution.png'))
+
+            plt.close()
 
 
 def main() -> None:
@@ -92,7 +150,7 @@ def main() -> None:
     plot_categorical_feature_distribution(df)
 
     # Plot the distribution of the numerical features:
-    plot_numerical_feature_distribution(df)
+    plot_numerical_feature_distribution(df, log_transform=True)
 
     # TODO: study the target variable and the features that are highly correlated with it.
 

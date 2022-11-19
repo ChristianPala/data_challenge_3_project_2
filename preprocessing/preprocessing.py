@@ -1,6 +1,5 @@
 # File to preprocess the creditor data from project 2 of the Data Challenge III course.
-# Authors: Fabio Loddo, Davide Gamba, Christian Pala
-# Date: 2022-11-19
+
 """
 Information about the dataset from professor Mitrovic in the Data Challenge III course (Project 2)
 introduction slides:
