@@ -1,11 +1,13 @@
 # Data Analysis:
 # Libraries:
 # Data manipulation:
-import pandas as pd
 from pathlib import Path
-import numpy as np
+
+import matplotlib
 # Plotting:
 import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
 import seaborn as sns
 
 # Global variables:
@@ -45,7 +47,7 @@ def category_mapping(feature_name: str) -> dict[int, str]:
 def plot_correlation_matrix(df: pd.DataFrame) -> None:
     """
     Plot the correlation matrix.
-    :param df: pd.DataFrame: the dataframe containing the dataset.
+    :param df: pd.DataFrame: the dataframe to compute the correlation matrix from.
     :return: None
     """
     # select only the numerical features:
@@ -78,7 +80,7 @@ def plot_correlation_matrix(df: pd.DataFrame) -> None:
 def plot_categorical_feature_distribution(df: pd.DataFrame) -> None:
     """
     Plot the distribution of the categorical features in the dataset.
-    @param df: pd.DataFrame: the dataframe containing the dataset.
+    @param df: pd.DataFrame: the dataframe with the categorical features.
     :return: None
     """
     for feature in df.columns:
@@ -110,7 +112,7 @@ def plot_categorical_feature_distribution(df: pd.DataFrame) -> None:
 def plot_numerical_feature_distribution(df: pd.DataFrame, log_transform: bool = False) -> None:
     """
     Plot the distribution of the numerical features in the dataset.
-    @param df: pd.DataFrame: the dataframe containing the dataset.
+    @param df: pd.DataFrame: the dataframe with the numerical features.
     @param log_transform: bool: whether to apply a log transformation to the numerical features.
     :return: None
     """
@@ -135,6 +137,63 @@ def plot_numerical_feature_distribution(df: pd.DataFrame, log_transform: bool = 
             plt.close()
 
 
+def plot_numerical_correlation_with_target(df: pd.DataFrame, target: str) -> None:
+    """
+    Plot the correlation of the numerical features with the target.
+    @param df: pd.DataFrame: the dataframe with the numerical features.
+    @param target: str: the target feature.
+    :return: None
+    """
+    # remove the id and the target:
+    features = df.drop(['id', target], axis=1)
+    # compute the correlation matrix on the numerical features:
+    corr_matrix = features.corrwith(df[target], method='spearman', numeric_only=True)
+    # plot the correlation matrix:
+    plt.figure(figsize=(15, 10))
+    sns.barplot(x=corr_matrix.index, y=corr_matrix.values, palette='coolwarm')
+    # Annotate the correlation matrix:
+    plt.title(f'Spearman correlation of defaulting with the numerical features')
+    plt.xlabel('Features')
+    plt.ylabel('Spearman Correlation')
+    # rotate the x-axis labels and decrease the font size:
+    plt.xticks(rotation=15, fontsize=10)
+    # Save the plot:
+    plot_path.mkdir(parents=True, exist_ok=True)
+    plt.savefig(Path(plot_path, f'correlation_with_{target}.png'))
+    plt.close()
+
+
+def plot_categorical_correlation_with_target(df: pd.DataFrame, target: str) -> None:
+    """
+    Plot the correlation of the categorical features with the target.
+    @param df: pd.DataFrame: the dataframe with the categorical features.
+    @param target: str: the target feature.
+    :return:
+    """
+    # Todo: Davide, Fabio, is there a better way to do this?
+    # select only the categorical features:
+    categorical_features = df.select_dtypes(include='category').columns
+    # remove the target:
+    categorical_features = categorical_features.drop(target)
+    # perform get dummies on the categorical features dataframe:
+    categorical_features = pd.get_dummies(df[categorical_features], drop_first=True)
+    # compute the correlation matrix on the categorical features:
+    corr_matrix = categorical_features.corrwith(df[target], method='pearson', numeric_only=True)
+    # plot the correlation matrix:
+    plt.figure(figsize=(20, 20))
+    sns.barplot(x=corr_matrix.index, y=corr_matrix.values, palette='coolwarm')
+    # Annotate the correlation matrix:
+    plt.title(f'Pearson correlation of one hot encoded categorical features with the target')
+    plt.xlabel('Features')
+    plt.ylabel('Pearson Correlation')
+    # rotate the x-axis labels and decrease the font size:
+    plt.xticks(rotation=90, fontsize=8)
+    # Save the plot:
+    plot_path.mkdir(parents=True, exist_ok=True)
+    plt.savefig(Path(plot_path, f'correlation_with_{target}_one_hot_encoded.png'))
+    plt.close()
+
+
 def main() -> None:
     """
     Main function.
@@ -146,15 +205,35 @@ def main() -> None:
     # Plot the correlation matrix:
     plot_correlation_matrix(df)
 
-    # Plot the distribution of the categorical features:
+    # Plot the distribution of the categorical features, target included:
     plot_categorical_feature_distribution(df)
 
     # Plot the distribution of the numerical features:
     plot_numerical_feature_distribution(df, log_transform=True)
+
+    # Plot the correlation of the numerical features with the target:
+    plot_numerical_correlation_with_target(df, target='default')
+
+    # Plot the correlation of the categorical features with the target:
+    plot_categorical_correlation_with_target(df, target='default')
 
     # TODO: study the target variable and the features that are highly correlated with it.
 
 
 if __name__ == '__main__':
     main()
+
+    """
+    Limit balance is important to predict defaulting, the higher the limit balance 
+    the lower the probability of defaulting.
+    
+    Paid amount features are important to predict defaulting, the higher the paid amount
+    the lower the probability of defaulting and vice versa. The feature group is also heavily
+    correlated among themselves, makes sense.
+    
+    Pay status features also seems important to predict defaulting, some categories are more
+    correlated with defaulting than others.
+    
+    The other features are not as important from the initial analysis.
+    """
 
