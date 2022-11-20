@@ -175,10 +175,15 @@ def plot_categorical_correlation_with_target(df: pd.DataFrame, target: str) -> N
     categorical_features = df.select_dtypes(include='category').columns
     # remove the target:
     categorical_features = categorical_features.drop(target)
-    # perform get dummies on the categorical features dataframe:
-    categorical_features = pd.get_dummies(df[categorical_features], drop_first=True)
+    nominal_features = [feature for feature in categorical_features if not feature.startswith('pay_stat_')]
+    # encode the nominal features, the pay_stat features are ordinal and already encoded:
+    nominal_features = pd.get_dummies(df[nominal_features])
+    # add the ordinal features:
+    ordinal_features = df[[feature for feature in categorical_features if feature.startswith('pay_stat_')]]
+    # concatenate the nominal and ordinal features:
+    categorical_features = pd.concat([nominal_features, ordinal_features], axis=1)
     # compute the correlation matrix on the categorical features:
-    corr_matrix = categorical_features.corrwith(df[target], method='pearson', numeric_only=True)
+    corr_matrix = categorical_features.corrwith(df[target], method='pearson', numeric_only=False)
     # plot the correlation matrix:
     plt.figure(figsize=(20, 20))
     sns.barplot(x=corr_matrix.index, y=corr_matrix.values, palette='coolwarm')
@@ -224,16 +229,19 @@ if __name__ == '__main__':
     main()
 
     """
-    Limit balance is important to predict defaulting, the higher the limit balance 
+    None of the features is very highly correlated with the target, which implies a good model
+    will require a good combination of features.
+    
+    Limit balance seems relatively important to predict defaulting, the higher the limit balance 
     the lower the probability of defaulting.
     
-    Paid amount features are important to predict defaulting, the higher the paid amount
-    the lower the probability of defaulting and vice versa. The feature group is also heavily
-    correlated among themselves, makes sense.
+    The payment status, in praticular in september, seems to be important to predict defaulting. The 
+    other payment status features are also relevant.
     
-    Pay status features also seems important to predict defaulting, some categories are more
-    correlated with defaulting than others.
+    Paid amount features are also noteworthy, again with a recency bias (the more recent the higher
+    the importance).
     
-    The other features are not as important from the initial analysis.
+    The other features are not as important from the initial analysis, hopefully combining them with
+    the other features will improve the model performance.
     """
 
