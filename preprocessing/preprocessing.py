@@ -1,4 +1,4 @@
-# File to preprocess the creditor data from project 2 of the Data Challenge III course.
+# Library to preprocess the creditor data from project 2 of the Data Challenge III course.
 
 """
 Information about the dataset from professor Mitrovic in the Data Challenge III course (Project 2)
@@ -13,6 +13,7 @@ consumer credit and his/her family (supplementary) credit
 •EDUCATION: Education (1 = graduate school; 2 = university; 3 = high school; 4 = others)
 •MARRIAGE: Marital status (1 = married; 2 = single; 3 = others)
 •AGE: Age (year)
+* Further clarification, 0 can be interpreted as a missing value.
 
 •History of past payment:
 •PAY_1 - PAY_6: Past monthly payment records (from April to September, 2005)
@@ -36,7 +37,9 @@ PAY_AMT2 = amount paid in August, 2005; . . .; PAY_AMT6 = amount paid in April, 
 # Data manipulation:
 from pathlib import Path
 import pandas as pd
-import numpy as np
+
+# imputation:
+from missing_values_handling import handle_missing_values
 
 # Console options:
 # pd.set_option('display.max_columns', None)
@@ -46,6 +49,8 @@ import numpy as np
 # Path to the dataset:
 data_path: Path = Path('..', 'data')
 excel_file: Path = Path(data_path, 'Project 2 Dataset.xls')
+# Imputation method:
+method: str = "supervised_imputation"
 
 
 # Functions:
@@ -127,18 +132,15 @@ def assign_categories(dataframe: pd.DataFrame) -> pd.DataFrame:
     categorical_features: list[str] = ["gender", "education", "marriage", "pay_stat_sep", "pay_stat_aug", "pay_stat_jul",
                                        "pay_stat_jun", "pay_stat_may", "pay_stat_apr", "default"]
 
-    # Education has 0, 5, 6 as values, which are not in the description of the dataset, we will map them to 4,
+    # Education has 0, 5, 6 as values, which are not in the description of the dataset, after clarification
+    # with professor Mitrovic we will map them 5 and 6 to 4 (others), 0 is a missing value:
     # which is the value for "others":
-    # TODO: Davide, Fabio, what do you think about this?
-    dataframe["education"] = dataframe["education"].map({0: 4, 1: 1, 2: 2, 3: 3, 4: 4, 5: 4, 6: 4})
-    # Marriage has 0 as a value, which is not in the description of the dataset, we will map it to 3,
-    # which is the value for "others":
-    dataframe["marriage"] = dataframe["marriage"].map({0: 3, 1: 1, 2: 2, 3: 3})
+    dataframe["education"] = dataframe["education"].map({1: 1, 2: 2, 3: 3, 4: 4, 5: 4, 6: 4})
+    # Marriage has 0 as a value, which is not in the description of the dataset, after clarification
+    # we consider it as a missing value and solve the issue before assigning the categories.
 
     # Assign categories to the categorical features:
     dataframe[categorical_features] = dataframe[categorical_features].astype('category')
-
-    print(dataframe[categorical_features].dtypes)
 
     return dataframe
 
@@ -183,12 +185,13 @@ def detect_outliers(dataframe: pd.DataFrame) -> None:
 
     # we have a lot of outliers and skewness in the numerical features.
     # TODO: Davide, Fabio, solutions? Maybe log transformation?
+    #  POST: I added a skewness library with methods to detect and mitigate skewness.
 
 
 def main() -> None:
     """
-    Main function.
-    :return: None
+    Main function. Load the dataset, preprocess it and save it.
+    :return: Save the preprocessed dataset as a csv and pickle file.
     """
     # Load the dataset:
     dataframe: pd.DataFrame = load_data()
@@ -205,9 +208,15 @@ def main() -> None:
     # Check for duplicated rows:
     print(f"Duplicated rows: {dataframe.duplicated().sum()}")
     print("--------------------")
-
+    """
+    No explicit missing values, but there are s few values in the dataset, which are not in the description, professor
+    Mitrovic clarified that if their values is 0, are missing values, so we will handle them as such.
+    """
     # Rename the columns:
     dataframe = rename_columns(dataframe)
+
+    # Handle missing values:
+    dataframe = handle_missing_values(dataframe, "unsupervised_imputation")
 
     # Assign categories to the categorical features:
     dataframe = assign_categories(dataframe)
