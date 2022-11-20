@@ -44,6 +44,11 @@ def handle_missing_values(dataframe: pd.DataFrame, method: str = "supervised_imp
     elif method == "supervised_imputation":
         # Impute the missing values with a supervised method:
         # Using random forest classifier to avoid preprocessing the data:
+        """
+        Using the random forest classifier from sklearn: 
+        https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.RandomForestClassifier.html to impute
+        the missing values in the education and marriage features.
+        """
         rf = RandomForestClassifier(n_estimators=100, random_state=0)
         # the test set is the one with the missing values:
         test_set = dataframe[dataframe["education"].isna() | dataframe["marriage"].isna()].copy()
@@ -60,6 +65,11 @@ def handle_missing_values(dataframe: pd.DataFrame, method: str = "supervised_imp
 
     elif method == "unsupervised_imputation":
         # Impute the missing values with the most similar instance using KNN:
+        """
+        using the k-nearest neighbors algorithm from the sklearn library:
+        https://scikit-learn.org/stable/modules/generated/sklearn.impute.KNNImputer.html to impute the missing values
+        in the education and marriage features.
+        """
         knn_imputer = KNNImputer(n_neighbors=1, metric="nan_euclidean")
         # assign NaN to the missing values in education and marriage:
         dataframe["education"].replace(0, np.nan, inplace=True)
