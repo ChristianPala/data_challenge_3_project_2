@@ -1,4 +1,5 @@
 # Auxiliary library to perform transformations on the data to reduce skewness
+from pathlib import Path
 
 # Libraries:
 import numpy as np
@@ -67,5 +68,49 @@ def estimate_skewness(df, columns):
     """
     df = df.copy()
     return df[columns].skew()
+
+
+def detect_outliers(dataframe: pd.DataFrame) -> None:
+    """
+    Detect outliers in the dataset.
+    @param dataframe: pd.DataFrame: the dataframe containing the dataset.
+    :return: None, prints the outliers found with each method.
+    """
+    # other outlier detection for numerical features:
+
+    # Inter-quartile range method:
+    print("Inter-quartile range method, number of outliers detected for each feature:")
+    for feature in dataframe.columns:
+        if dataframe[feature].dtypes != 'category' and feature != "id":
+            # calculate the first and third quartile:
+            q1 = dataframe[feature].quantile(0.25)
+            q3 = dataframe[feature].quantile(0.75)
+            # calculate the interquartile range:
+            iqr = q3 - q1
+            # calculate the lower and upper bound:
+            lower_bound = q1 - (1.5 * iqr)
+            upper_bound = q3 + (1.5 * iqr)
+            # print the number of outliers:
+            print(f"{feature}: "
+                  f"{len(dataframe[(dataframe[feature] < lower_bound) | (dataframe[feature] > upper_bound)])}")
+
+    # Z-score method:
+    print("--------------------")
+    print("Z-score method, number of outliers detected for each feature:")
+    for feature in dataframe.columns:
+        if dataframe[feature].dtypes != 'category' and feature != "id":
+            # calculate the mean:
+            mean = dataframe[feature].mean()
+            # calculate the standard deviation:
+            std = dataframe[feature].std()
+            # calculate the z-score:
+            z_score = (dataframe[feature] - mean) / std
+            # print the number of outliers:
+            print(f"{feature}: {len(dataframe[(z_score > 3) | (z_score < -3)])}")
+
+    # we have a lot of outliers and skewness in the numerical features.
+    # TODO: Davide, Fabio, solutions? Maybe log transformation?
+    #  POST: I added a skewness library with methods to detect and mitigate skewness.
+
 
 
