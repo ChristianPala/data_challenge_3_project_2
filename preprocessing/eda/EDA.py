@@ -199,6 +199,82 @@ def plot_categorical_correlation_with_target(df: pd.DataFrame, target: str) -> N
     plt.close()
 
 
+def plot_categorical_vs_target(df: pd.DataFrame, target: str) -> None:
+    """
+    Plot the correlation of each categorical features with the target.
+    @param df: pd.DataFrame: the dataframe with the categorical features.
+    @param target: str: the target feature.
+    :return:
+    """
+    for feature in df.columns:
+
+        if df[feature].dtype == 'category' and feature != target:
+            # get the labels for the x-axis and the mapping for the legend:
+            mapping = category_mapping(feature)
+
+            # Cross tabulation between our feature and the target
+            crosstab_results = pd.crosstab(index=df[feature], columns=df[target])
+
+            # Grouped bar chart between our feature and the target
+            crosstab_results.plot.bar(figsize=(10, 10), rot=0, color={0: "mediumpurple", 1: "gold"})
+
+            # map the x-axis labels:
+            plt.xticks(ticks=range(len(mapping)), labels=mapping.values(), rotation=15)
+            # set the legend:
+            plt.legend(labels=['Repaid the debt', 'Failed to repay the debt'], loc='upper right', title='Default')
+            # annotate the plot:
+            plt.title(f'{feature.capitalize()} vs Target')
+            plt.xlabel(feature.capitalize())
+            plt.ylabel('Count')
+            # Save the plot:
+            plot_path.mkdir(parents=True, exist_ok=True)
+            plt.savefig(Path(plot_path, f'{feature}_vs_target.png'))
+            plt.close()
+
+
+def plot_numerical_vs_target(df: pd.DataFrame, target: str, log_transform: bool = False) -> None:
+    """
+    Plot the correlation of the numerical features in the dataset versus the target feature.
+    @param df: pd.DataFrame: the dataframe with the numerical features.
+    @param target: str: the target feature.
+    @param log_transform: bool: whether to apply a log transformation to the numerical features.
+    :return: None
+    """
+    for feature in df.columns:
+        if df[feature].dtype != 'category' and feature != 'id':
+
+            if log_transform:
+                # apply a log transformation to the feature avoiding the 0 values:
+                df[feature] = df[feature].apply(lambda x: np.log(x + 1))
+
+            plt.figure(figsize=(10, 10))
+            # Set plot theme
+            sns.set_theme(style="ticks", palette="pastel")
+            # boxplot to show the numerical feature with respect to the target
+            sns.boxplot(x=target, y=feature,
+                        hue=target,
+                        palette=["m", "g"],
+                        data=df
+                        ).get_legend().remove()
+            sns.despine(offset=10, trim=True)
+
+            plt.title(f'{feature.capitalize()} vs Target')
+
+            # map the x-axis labels:
+            plt.xticks(ticks=[0, 1], labels=['Repaid the debt', 'Failed to repay the debt'])
+
+            plt.xlabel('Default')
+            plt.ylabel(feature.capitalize())
+            plot_path.mkdir(parents=True, exist_ok=True)
+
+            if log_transform:
+                plt.savefig(Path(plot_path, f'{feature}_log_transformed_vs_target.png'))
+            else:
+                plt.savefig(Path(plot_path, f'{feature}_vs_target.png'))
+
+            plt.close()
+
+
 def main() -> None:
     """
     Main function.
@@ -223,6 +299,10 @@ def main() -> None:
     plot_categorical_correlation_with_target(df, target='default')
 
     # TODO: study the target variable and the features that are highly correlated with it.
+
+    plot_categorical_vs_target(df, target='default')
+
+    plot_numerical_vs_target(df, target='default')
 
 
 if __name__ == '__main__':
