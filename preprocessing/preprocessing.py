@@ -40,6 +40,7 @@ import pandas as pd
 
 # imputation:
 from missing_values_handling import handle_missing_values
+from auxiliary.method_timer import measure_time
 
 # Console options:
 # pd.set_option('display.max_columns', None)
@@ -143,7 +144,7 @@ def assign_categories(dataframe: pd.DataFrame) -> pd.DataFrame:
 
     return dataframe
 
-
+@measure_time
 def main() -> None:
     """
     Main function. Load the dataset, preprocess it and save it.

@@ -21,13 +21,6 @@ def handle_missing_values(dataframe: pd.DataFrame, method: str = "supervised_imp
     :return: pd.DataFrame: the dataframe without missing values.
     """
 
-    # Display the number of missing values for each feature:
-    print("-" * 100)
-    print(f"Number of missing values for education: {len(dataframe[dataframe['education'] == 0])}")
-    print("-" * 100)
-    print(f"Number of missing values for marriage: {len(dataframe[dataframe['marriage'] == 0])}")
-    # We have 14 missing values for education and 54 for marriage.
-
     # Properly assign the 14 education and 54 marriage missing values to NaN values:
     dataframe["education"].replace(0, np.nan, inplace=True)
     dataframe["marriage"].replace(0, np.nan, inplace=True)
