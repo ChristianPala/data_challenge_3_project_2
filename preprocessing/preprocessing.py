@@ -38,6 +38,7 @@ PAY_AMT2 = amount paid in August, 2005; . . .; PAY_AMT6 = amount paid in April, 
 from pathlib import Path
 import pandas as pd
 
+from auxiliary.method_timer import measure_time
 # imputation:
 from missing_values_handling import handle_missing_values
 
@@ -49,8 +50,6 @@ from missing_values_handling import handle_missing_values
 # Path to the dataset:
 data_path: Path = Path('..', 'data')
 excel_file: Path = Path(data_path, 'Project 2 Dataset.xls')
-# Imputation method:
-method: str = "supervised_imputation"
 
 
 # Functions:
@@ -129,7 +128,8 @@ def assign_categories(dataframe: pd.DataFrame) -> pd.DataFrame:
     :return: pd.DataFrame: the dataframe with the categorical features as categories.
     """
     # Name of the categorical features from the dataset information:
-    categorical_features: list[str] = ["gender", "education", "marriage", "pay_stat_sep", "pay_stat_aug", "pay_stat_jul",
+    categorical_features: list[str] = ["gender", "education", "marriage", "pay_stat_sep", "pay_stat_aug",
+                                       "pay_stat_jul",
                                        "pay_stat_jun", "pay_stat_may", "pay_stat_apr", "default"]
 
     # Education has 0, 5, 6 as values, which are not in the description of the dataset, after clarification
@@ -145,49 +145,7 @@ def assign_categories(dataframe: pd.DataFrame) -> pd.DataFrame:
     return dataframe
 
 
-def detect_outliers(dataframe: pd.DataFrame) -> None:
-    """
-    Detect outliers in the dataset.
-    @param dataframe: pd.DataFrame: the dataframe containing the dataset.
-    :return: None, prints the outliers found with each method.
-    """
-    # other outlier detection for numerical features:
-
-    # Inter-quartile range method:
-    print("Inter-quartile range method, number of outliers detected for each feature:")
-    for feature in dataframe.columns:
-        if dataframe[feature].dtypes != 'category' and feature != "id":
-            # calculate the first and third quartile:
-            q1 = dataframe[feature].quantile(0.25)
-            q3 = dataframe[feature].quantile(0.75)
-            # calculate the interquartile range:
-            iqr = q3 - q1
-            # calculate the lower and upper bound:
-            lower_bound = q1 - (1.5 * iqr)
-            upper_bound = q3 + (1.5 * iqr)
-            # print the number of outliers:
-            print(f"{feature}: "
-                  f"{len(dataframe[(dataframe[feature] < lower_bound) | (dataframe[feature] > upper_bound)])}")
-
-    # Z-score method:
-    print("--------------------")
-    print("Z-score method, number of outliers detected for each feature:")
-    for feature in dataframe.columns:
-        if dataframe[feature].dtypes != 'category' and feature != "id":
-            # calculate the mean:
-            mean = dataframe[feature].mean()
-            # calculate the standard deviation:
-            std = dataframe[feature].std()
-            # calculate the z-score:
-            z_score = (dataframe[feature] - mean) / std
-            # print the number of outliers:
-            print(f"{feature}: {len(dataframe[(z_score > 3) | (z_score < -3)])}")
-
-    # we have a lot of outliers and skewness in the numerical features.
-    # TODO: Davide, Fabio, solutions? Maybe log transformation?
-    #  POST: I added a skewness library with methods to detect and mitigate skewness.
-
-
+@measure_time
 def main() -> None:
     """
     Main function. Load the dataset, preprocess it and save it.
@@ -198,16 +156,21 @@ def main() -> None:
 
     # inspect the dataset:
     print("Dataset information:")
-    print("--------------------")
+    print("-" * 100)
     inspect(dataframe)
-    print("--------------------")
+    print("-" * 100)
 
     # check for missing values and duplicates:
     # Check for missing values:
-    print(f"Missing values: {dataframe.isnull().sum().sum()}")
+
+    missing_values: int = dataframe.isnull().sum().sum() + len(dataframe[dataframe['EDUCATION'] == 0]) + \
+                          len(dataframe[dataframe['MARRIAGE'] == 0])
+
+    print(f"Missing values: {missing_values} ")
+    print("-" * 100)
     # Check for duplicated rows:
     print(f"Duplicated rows: {dataframe.duplicated().sum()}")
-    print("--------------------")
+    print("-" * 100)
     """
     No explicit missing values, but there are s few values in the dataset, which are not in the description, professor
     Mitrovic clarified that if their values is 0, are missing values, so we will handle them as such.
@@ -215,23 +178,26 @@ def main() -> None:
     # Rename the columns:
     dataframe = rename_columns(dataframe)
 
-    # Handle missing values:
-    dataframe = handle_missing_values(dataframe, "unsupervised_imputation")
+    # Handle missing values, save a copy for all methods supported:
+    methods: list[str] = ["drop", "ignore", "most_frequent_imputation",
+                          "supervised_imputation", "unsupervised_imputation"]
+    for method in methods:
+        # make a copy of the dataframe:
+        dataframe_copy: pd.DataFrame = dataframe.copy()
+        # handle missing values:
+        dataframe_copy = handle_missing_values(dataframe_copy, method)
+        # Assign categories to the categorical features:
+        dataframe_copy = assign_categories(dataframe_copy)
 
-    # Assign categories to the categorical features:
-    dataframe = assign_categories(dataframe)
+        # Save the data to pickle to maintain the categories:
+        dataframe_copy.to_pickle(Path(data_path, f"project_2_dataset_{method}.pkl"))
 
-    # Detect outliers:
-    detect_outliers(dataframe)
-    print("--------------------")
+        # Save the data to csv:
+        dataframe_copy.to_csv(Path(data_path, f"project_2_dataset_{method}.csv"), index=False)
 
-    # Save the data to pickle to maintain the categories:
-    dataframe.to_pickle(Path(data_path, "project_2_dataset.pkl"))
-
-    # Save the data to csv:
-    dataframe.to_csv(Path(data_path, "project_2_dataset.csv"), index=False)
+    print("Done!")
+    print("-" * 100)
 
 
 if __name__ == '__main__':
     main()
-
