@@ -63,11 +63,14 @@ def estimate_skewness(df, columns):
     Estimate the skewness of the columns in the dataframe, using Pandas implementation:
     https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.skew.html
     :param df: the dataframe to be analyzed
-    :param columns: the columns to be analyzed
+    :param columns: the columns to be analyzed, all if "all"
     :return: the skewness of the columns specified.
     """
     df = df.copy()
-    return df[columns].skew()
+    if columns == "all":
+        # return every column other than the id, reverse the order to have the most skewed first:
+        return df.drop(columns=["id"]).skew(numeric_only=True).sort_values(ascending=False)
+    return df[columns].skew(numeric_only=True)
 
 
 def detect_outliers(dataframe: pd.DataFrame) -> None:
@@ -183,3 +186,42 @@ def handle_outliers(dataframe: pd.DataFrame, method: str, strategy: str) -> pd.D
                     raise ValueError("The strategy is not supported.")
 
     return dataframe
+
+
+def main() -> None:
+
+    df = pd.read_pickle(Path('..', 'data', 'project_2_dataset.pkl'))
+    # print the skewness of the dataset:
+    print("Skewness of the dataset:")
+    print(estimate_skewness(df, "all"))
+    print("--------------------")
+
+    # print the outliers found with each method:
+    detect_outliers(df)
+    print("--------------------")
+    # apply box-cox transformation to the non-negative numerical features of the dataset:
+    numerical = df.select_dtypes(exclude='category').columns
+    # drop the id column:
+    numerical = numerical.drop("id")
+    # keep only the non-negative numerical features:
+    positive_numerical = numerical[df[numerical].min() >= 0]
+    negative_numerical = numerical[df[numerical].min() < 0]
+    # apply box-cox transformation:
+    df = boxcox_transform(df, positive_numerical)
+    # shift the negative numerical features by the minimum value + 1:
+    df[negative_numerical] = df[negative_numerical].apply(lambda x: x - x.min() + 1)
+    # apply box-cox transformation again:
+    df = boxcox_transform(df, negative_numerical)
+    # print the skewness of the dataset after the transformation:
+    print("Skewness of the dataset after the transformation:")
+    print(estimate_skewness(df, "all"))
+    print("--------------------")
+    # print the outliers found with each method:
+    detect_outliers(df)
+    print("--------------------")
+
+    # save the dataset:
+    df.to_pickle(Path('..', 'data', 'project_2_dataset_boxcox.pkl'))
+
+if __name__ == '__main__':
+    main()
