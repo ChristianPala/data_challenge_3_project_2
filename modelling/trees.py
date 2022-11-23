@@ -18,8 +18,13 @@ from train_test_validation_split import split_data
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, roc_auc_score, confusion_matrix, \
     classification_report
 
+# Timing:
+from auxiliary.method_timer import measure_time
+
 # Global variables
-logs_path = Path('..', 'logs')
+data_path = Path('..', 'data')
+results_path = Path('..', 'results')
+results_path.mkdir(exist_ok=True, parents=True)
 
 
 def generate_tree_model(model_type: str) -> BaseEstimator:
@@ -84,33 +89,51 @@ def evaluate_model(y_test: np.array, y_pred: np.array) -> dict:
     }
 
 
-def save_evaluation_results(evaluation_results: dict, model_type: str) -> None:
+def save_evaluation_results(evaluation_results: dict, model_type: str, name_addition: str = None) -> None:
     """
     This function saves the evaluation results to a file.
     @param evaluation_results: dict: the dictionary with the evaluation results.
     @param model_type: str: the type of the model.
+    @param name_addition: str: default = None: the name addition to the file name to save the results.
     :return: None. Saves the results to a file in the logs folder.
     """
-    with open(logs_path / f'{model_type}_base_evaluation_results.txt', 'w') as f:
+    with open(results_path / f'{model_type}_base_evaluation_results_{name_addition}.txt', 'w') as f:
         for key, value in evaluation_results.items():
             f.write(f'{key}: {value}\n')
 
 
+@measure_time
 def main() -> None:
     """
     Main function for the baseline results on decision trees, random forests, gradient boosting and
     xgboost classifiers on the project 2 dataset.
     @return: None, saves the results in the logs folder.
     """
-    df = pd.read_csv(Path('..', 'data', 'project_2_dataset.csv'))
-    x_train, x_test, y_train, y_test = split_data(df, 'default')
+    # get all the csv files in the data folder:
+    csv_files = list(data_path.glob('*.csv'))
     model_types = ['decision_tree', 'random_forest', 'gradient_boosting', 'xgboost']
-    models = [generate_tree_model(model_type) for model_type in model_types]
-    for model, model_type in zip(models, model_types):
-        fitted_model = fit_model(model, x_train, y_train)
-        y_pred = predict_model(fitted_model, x_test)
-        evaluation_results = evaluate_model(y_test, y_pred)
-        save_evaluation_results(evaluation_results, model_type)
+
+    for csv_file in csv_files:
+        # ignore the file which keeps missing values:
+        if csv_file.name == 'project_2_dataset_ignore.csv':
+            continue
+        # read the data:
+        df = pd.read_csv(csv_file)
+        # get the preprocessing steps from the name:
+        preprocessing_steps = csv_file.stem.split('_')[3:]
+        # split the data:
+        x_train, x_test, y_train, y_test = split_data(df, 'default')
+        # loop through the model types:
+        models = [generate_tree_model(model_type) for model_type in model_types]
+        for model, model_type in zip(models, model_types):
+            # fit the model:
+            fitted_model = fit_model(model, x_train, y_train)
+            # predict the target values:
+            y_pred = predict_model(fitted_model, x_test)
+            # evaluate the model:
+            evaluation_results = evaluate_model(y_test, y_pred)
+            # save the results:
+            save_evaluation_results(evaluation_results, model_type, '_'.join(preprocessing_steps))
 
 
 if __name__ == '__main__':

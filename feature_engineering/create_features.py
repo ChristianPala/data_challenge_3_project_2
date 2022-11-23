@@ -22,7 +22,8 @@ def pay_status_cumulative(df: pd.DataFrame) -> pd.DataFrame:
     :return: pd.DataFrame
     """
     df = df.copy()
-    df['pay_status_total'] = df[['pay_1', 'pay_2', 'pay_3', 'pay_4', 'pay_5', 'pay_6']].sum(axis=1)
+    df['pay_status_total'] = df[['pay_stat_sep', 'pay_stat_aug', 'pay_stat_jul', 'pay_stat_jun', 'pay_stat_may',
+                                 'pay_stat_apr']].sum(axis=1)
 
     return df
 
@@ -34,7 +35,8 @@ def total_bill_amount(df: pd.DataFrame) -> pd.DataFrame:
     :return: pd.DataFrame
     """
     df = df.copy()
-    df['total_bill_amount'] = df[['bill_amt1', 'bill_amt2', 'bill_amt3', 'bill_amt4', 'bill_amt5', 'bill_amt6']] \
+    df['total_bill_amount'] = df[['bill_amt_sep', 'bill_amt_aug', 'bill_amt_jul', 'bill_amt_jun', 'bill_amt_may',
+                                  'bill_amt_apr']] \
         .sum(axis=1)
 
     return df
@@ -47,7 +49,8 @@ def total_paid_amount(df: pd.DataFrame) -> pd.DataFrame:
     :return: pd.DataFrame
     """
     df = df.copy()
-    df['total_paid_amount'] = df[['pay_amt1', 'pay_amt2', 'pay_amt3', 'pay_amt4', 'pay_amt5', 'pay_amt6']].sum(axis=1)
+    df['total_paid_amount'] = df[['pay_amt_sep', 'pay_amt_aug', 'pay_amt_jul', 'pay_amt_jun', 'pay_amt_may',
+                                  'pay_amt_apr']].sum(axis=1)
 
     return df
 
