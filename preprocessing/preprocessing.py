@@ -99,24 +99,17 @@ def rename_columns(dataframe: pd.DataFrame) -> pd.DataFrame:
     :return: pd.DataFrame: the dataframe with the renamed columns.
     """
 
-    # TODO: Davide, Fabio, this is the logical order I used, should we compact it?
-    # Rename the columns for consistency and appropriateness:
-    dataframe.rename(columns={"PAY_0": "PAY_1", "SEX": "GENDER"}, inplace=True)
-
-    # rename the target feature:
-    dataframe.rename(columns={"default payment next month": "DEFAULT"}, inplace=True)
-
     # map all names to lower case:
     dataframe.columns = dataframe.columns.str.lower()
 
-    # improve readability:
-    dataframe.rename(columns={"pay_1": "pay_stat_sep", "pay_2": "pay_stat_aug", "pay_3": "pay_stat_jul",
+    # improve readability and correct typos:
+    dataframe.rename(columns={"pay_0": "pay_stat_sep", "pay_2": "pay_stat_aug", "pay_3": "pay_stat_jul",
                               "pay_4": "pay_stat_jun", "pay_5": "pay_stat_may", "pay_6": "pay_stat_apr",
                               "bill_amt1": "bill_amt_sep", "bill_amt2": "bill_amt_aug", "bill_amt3": "bill_amt_jul",
                               "bill_amt4": "bill_amt_jun", "bill_amt5": "bill_amt_may", "bill_amt6": "bill_amt_apr",
                               "pay_amt1": "pay_amt_sep", "pay_amt2": "pay_amt_aug", "pay_amt3": "pay_amt_jul",
-                              "pay_amt4": "pay_amt_jun", "pay_amt5": "pay_amt_may", "pay_amt6": "pay_amt_apr"},
-                     inplace=True)
+                              "pay_amt4": "pay_amt_jun", "pay_amt5": "pay_amt_may", "pay_amt6": "pay_amt_apr",
+                              "sex": "gender", "default payment next month": "default"}, inplace=True)
 
     return dataframe
 
@@ -143,6 +136,7 @@ def assign_categories(dataframe: pd.DataFrame) -> pd.DataFrame:
     dataframe[categorical_features] = dataframe[categorical_features].astype('category')
 
     return dataframe
+
 
 @measure_time
 def main() -> None:
