@@ -5,7 +5,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 from scipy.stats import boxcox
-from imblearn.over_sampling import SMOTE
+from imblearn.over_sampling import SMOTE, RandomOverSampler
 from imblearn.under_sampling import RandomUnderSampler
 from imblearn.pipeline import Pipeline
 
@@ -59,44 +59,6 @@ def cube_root_transform(df, columns):
     df = df.copy()
     df[columns] = df[columns].apply(lambda x: np.cbrt(x))
     return df
-
-
-def SMOTE_transform(df, target: str):
-    """
-    Transformation using the imbalance learn implementation of SMOTE(synthetic minority over-sampling technique):
-    https://imbalanced-learn.org/stable/references/generated/imblearn.over_sampling.SMOTE.html
-    The original paper on SMOTE suggested combining SMOTE with random under-sampling of the majority class.:
-    https://arxiv.org/abs/1106.1813
-    :param df: the dataframe to be analyzed
-    :param target: the column name of the target feature
-    :return: The target and the features dataframes where it has been applied the over-sampling/under-sampling pipeline.
-    """
-    df = df.copy()
-
-    # We split the target and the rest of the features
-    y = df[target]
-    X = df.drop([target], axis=1)
-
-    # Check the current balance of the target feature
-    # counter = collections.Counter(y)
-    # print(counter)
-
-    # Defining our over-sampler and under-sampler
-    over = SMOTE(sampling_strategy=0.1)
-    under = RandomUnderSampler(sampling_strategy=0.5)
-
-    # Using a pipeline to streamline the process
-    steps = [('o', over), ('u', under)]
-    pipeline = Pipeline(steps=steps)
-
-    # Transform the dataset
-    X, y = pipeline.fit_resample(X, y)
-
-    # Check the balance of the target feature after the resample
-    # counter = collections.Counter(y)
-    # print(counter)
-
-    return X, y
 
 
 def estimate_skewness(df, columns):
@@ -229,8 +191,107 @@ def handle_outliers(dataframe: pd.DataFrame, method: str, strategy: str) -> pd.D
     return dataframe
 
 
-def main() -> None:
+def smote_transform(train: pd.DataFrame, target: str) -> tuple[np.array, np.array]:
+    """
+    Transformation using the imbalance learn implementation of SMOTE(synthetic minority over-sampling technique):
+    https://imbalanced-learn.org/stable/references/generated/imblearn.over_sampling.SMOTE.html
+    The original paper on SMOTE suggested combining SMOTE with random under-sampling of the majority class.:
+    https://arxiv.org/abs/1106.1813
+    :param train: the dataframe to be analyzed
+    :param target: the column name of the target feature
+    :return: The target and the features after the SMOTE transformation
+    """
+    df = train.copy()
 
+    # We split the target and the rest of the features
+    y = df[target]
+    X = df.drop([target], axis=1)
+
+    # Check the current balance of the target feature
+    # counter = collections.Counter(y)
+    # print(counter)
+
+    # Defining our over-sampler and under-sampler
+    over = SMOTE(sampling_strategy=0.1)
+    under = RandomUnderSampler(sampling_strategy=0.5)
+
+    # Using a pipeline to streamline the process
+    steps = [('o', over), ('u', under)]
+    pipeline = Pipeline(steps=steps)
+
+    # Transform the dataset
+    x, y = pipeline.fit_resample(X, y)
+
+    # Check the balance of the target feature after the resample
+    # counter = collections.Counter(y)
+    # print(counter)
+
+    return x, y
+
+
+def undersample_transform(train: pd.DataFrame, target: str) -> tuple[np.array, np.array]:
+    """
+    Transformation using the imbalance learn implementation of Random under-sampling:
+    https://imbalanced-learn.org/stable/references/generated/imblearn.under_sampling.RandomUnderSampler.html
+    :param train: the dataframe to be analyzed
+    :param target: the column name of the target feature
+    :return: The target and the features dataframes where under-sampling has been applied.
+    """
+    df = train.copy()
+
+    # We split the target and the rest of the features
+    y = df[target]
+    x = df.drop([target], axis=1)
+
+    # Check the current balance of the target feature
+    # counter = collections.Counter(y)
+    # print(counter)
+
+    # Defining our under-sampler
+    under = RandomUnderSampler(sampling_strategy=0.5)
+
+    # Transform the dataset
+    x, y = under.fit_resample(x, y)
+
+    # Check the balance of the target feature after the resample
+    # counter = collections.Counter(y)
+    # print(counter)
+
+    return x, y
+
+
+def oversample_transform(train: pd.DataFrame, target: str) -> tuple[np.array, np.array]:
+    """
+    Transformation using the imbalance learn implementation of Random over-sampling:
+    https://imbalanced-learn.org/stable/references/generated/imblearn.over_sampling.RandomOverSampler.html
+    :param train: the dataframe to be analyzed
+    :param target: the column name of the target feature
+    :return: The target and the features dataframes where over-sampling has been applied.
+    """
+    df = train.copy()
+
+    # We split the target and the rest of the features
+    y = df[target]
+    x = df.drop([target], axis=1)
+
+    # Check the current balance of the target feature
+    # counter = collections.Counter(y)
+    # print(counter)
+
+    # Defining our over-sampler
+    over = RandomOverSampler(sampling_strategy=0.1)
+
+    # Transform the dataset
+    x, y = over.fit_resample(x, y)
+
+    # Check the balance of the target feature after the resample
+    # counter = collections.Counter(y)
+    # print(counter)
+
+    return x, y
+
+
+def main() -> None:
     df = pd.read_pickle(Path('..', 'data', 'project_2_dataset.pkl'))
     # print the skewness of the dataset:
     print("Skewness of the dataset:")
@@ -261,8 +322,6 @@ def main() -> None:
     detect_outliers(df)
     print("--------------------")
 
-    # save the dataset:
-    df.to_pickle(Path('..', 'data', 'project_2_dataset_boxcox.pkl'))
 
 if __name__ == '__main__':
     main()
