@@ -40,7 +40,7 @@ import pandas as pd
 
 from auxiliary.method_timer import measure_time
 # imputation:
-from missing_values_handling import handle_missing_values
+from preprocessing.missing_values_handling import handle_missing_values
 
 # Console options:
 # pd.set_option('display.max_columns', None)
@@ -146,32 +146,34 @@ def assign_categories(dataframe: pd.DataFrame) -> pd.DataFrame:
 
 
 @measure_time
-def main() -> None:
+def preprocessor_main(suppress_print=False) -> None:
     """
     Main function. Load the dataset, preprocess it and save it.
+    @param suppress_print: bool: if True, suppress the prints to the console.
     :return: Save the preprocessed dataset as a csv and pickle file.
     """
     # Load the dataset:
     dataframe: pd.DataFrame = load_data()
 
     # inspect the dataset:
-    print("Dataset information:")
-    print("-" * 100)
-    inspect(dataframe)
-    print("-" * 100)
+    if not suppress_print:
+        print("Dataset information:")
+        print("-" * 100)
+        inspect(dataframe)
+        print("-" * 100)
 
-    # check for missing values and duplicates:
-    # Check for missing values:
+        # check for missing values and duplicates:
+        # Check for missing values:
 
-    missing_values: int = dataframe.isnull().sum().sum() + len(dataframe[dataframe['EDUCATION'] == 0]) + \
-                          len(dataframe[dataframe['MARRIAGE'] == 0])
+        missing_values: int = dataframe.isnull().sum().sum() + len(dataframe[dataframe['EDUCATION'] == 0]) + \
+                              len(dataframe[dataframe['MARRIAGE'] == 0])
 
-    print(f"Missing values: {missing_values} ")
-    print("-" * 100)
-    # Check for duplicated rows:
-    print(f"Duplicated rows: {dataframe.duplicated().sum()}")
-    print("-" * 100)
-    """
+        print(f"Missing values: {missing_values} ")
+        print("-" * 100)
+        # Check for duplicated rows:
+        print(f"Duplicated rows: {dataframe.duplicated().sum()}")
+        print("-" * 100)
+        """
     No explicit missing values, but there are s few values in the dataset, which are not in the description, professor
     Mitrovic clarified that if their values is 0, are missing values, so we will handle them as such.
     """
@@ -179,8 +181,7 @@ def main() -> None:
     dataframe = rename_columns(dataframe)
 
     # Handle missing values, save a copy for all methods supported:
-    methods: list[str] = ["drop", "ignore", "most_frequent_imputation",
-                          "supervised_imputation", "unsupervised_imputation"]
+    methods: list[str] = ["drop", "most_frequent_imputation", "supervised_imputation", "unsupervised_imputation"]
     for method in methods:
         # make a copy of the dataframe:
         dataframe_copy: pd.DataFrame = dataframe.copy()
@@ -195,9 +196,10 @@ def main() -> None:
         # Save the data to csv:
         dataframe_copy.to_csv(Path(data_path, f"project_2_dataset_{method}.csv"), index=False)
 
-    print("Done!")
-    print("-" * 100)
+    if not suppress_print:
+        print("Preprocessing completed.")
+        print("-" * 100)
 
 
 if __name__ == '__main__':
-    main()
+    preprocessor_main()

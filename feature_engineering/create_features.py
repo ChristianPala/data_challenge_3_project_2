@@ -2,15 +2,14 @@
 # SUPSI Bachelor in Data Science, 2022.
 
 # Libraries:
-import pandas as pd
-import numpy as np
-
 # Data manipulation:
+import pandas as pd
 from pathlib import Path
 
+# Timing:
 from auxiliary.method_timer import measure_time
 
-# global variables:
+# Global variables:
 data_path = Path("..", "data")
 
 
@@ -56,7 +55,7 @@ def total_paid_amount(df: pd.DataFrame) -> pd.DataFrame:
 
 
 @measure_time
-def main() -> None:
+def feature_engineering_main() -> None:
     """
     This function creates the new features and saves the dataset with the new features on all the csv files in the data
     folder.
@@ -76,10 +75,12 @@ def main() -> None:
         df = total_bill_amount(df)
         df = total_paid_amount(df)
 
-        # save the new dataset:
-        df.to_csv(csv_file, index=False)
+        file_name = csv_file.stem + "_augmented.csv"
+
+        df.to_csv(Path(data_path, file_name), index=False)
 
 
+# Driver:
 if __name__ == '__main__':
-    main()
+    feature_engineering_main()
 #  Todo: Davide, Fabio, ideas for other new features?

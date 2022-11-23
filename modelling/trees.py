@@ -6,13 +6,14 @@ import numpy as np
 
 # Data manipulation
 from pathlib import Path
+import regex as re
 
 # Modelling
 from sklearn.base import BaseEstimator
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
 from xgboost import XGBClassifier
-from train_test_validation_split import split_data
+from modelling.train_test_validation_split import split_data
 
 # Metrics
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, roc_auc_score, confusion_matrix, \
@@ -71,7 +72,7 @@ def predict_model(model: BaseEstimator, x_test: np.array) -> np.array:
     return model.predict(x_test)
 
 
-def evaluate_model(y_test: np.array, y_pred: np.array) -> dict:
+def evaluate_model(y_test: np.array, y_pred: np.array) -> dict[str, float]:
     """
     This function evaluates the model's performance.
     @param y_test: np.array: the target values for the test data.
@@ -79,10 +80,10 @@ def evaluate_model(y_test: np.array, y_pred: np.array) -> dict:
     :return: Dictionary with the metrics.
     """
     return {
+        'f1': f1_score(y_test, y_pred),
         'accuracy': accuracy_score(y_test, y_pred),
         'precision': precision_score(y_test, y_pred),
         'recall': recall_score(y_test, y_pred),
-        'f1': f1_score(y_test, y_pred),
         'roc_auc': roc_auc_score(y_test, y_pred),
         'confusion_matrix': confusion_matrix(y_test, y_pred),
         'classification_report': classification_report(y_test, y_pred)
@@ -99,11 +100,11 @@ def save_evaluation_results(evaluation_results: dict, model_type: str, name_addi
     """
     with open(results_path / f'{model_type}_base_evaluation_results_{name_addition}.txt', 'w') as f:
         for key, value in evaluation_results.items():
-            f.write(f'{key}: {value}\n')
+            f.write(f'{key}: {value} \n')
 
 
 @measure_time
-def main() -> None:
+def trees_main() -> None:
     """
     Main function for the baseline results on decision trees, random forests, gradient boosting and
     xgboost classifiers on the project 2 dataset.
@@ -114,9 +115,6 @@ def main() -> None:
     model_types = ['decision_tree', 'random_forest', 'gradient_boosting', 'xgboost']
 
     for csv_file in csv_files:
-        # ignore the file which keeps missing values:
-        if csv_file.name == 'project_2_dataset_ignore.csv':
-            continue
         # read the data:
         df = pd.read_csv(csv_file)
         # get the preprocessing steps from the name:
@@ -124,17 +122,19 @@ def main() -> None:
         # split the data:
         x_train, x_test, y_train, y_test = split_data(df, 'default')
         # loop through the model types:
-        models = [generate_tree_model(model_type) for model_type in model_types]
-        for model, model_type in zip(models, model_types):
+        for model_type in model_types:
+            # generate the model:
+            model = generate_tree_model(model_type=model_type)
             # fit the model:
-            fitted_model = fit_model(model, x_train, y_train)
+            model = fit_model(model=model, x_train=x_train, y_train=y_train)
             # predict the target values:
-            y_pred = predict_model(fitted_model, x_test)
+            y_pred = predict_model(model=model, x_test=x_test)
             # evaluate the model:
-            evaluation_results = evaluate_model(y_test, y_pred)
+            evaluation_results = evaluate_model(y_test=y_test, y_pred=y_pred)
             # save the results:
-            save_evaluation_results(evaluation_results, model_type, '_'.join(preprocessing_steps))
+            save_evaluation_results(evaluation_results=evaluation_results, model_type=model_type,
+                                    name_addition='_'.join(preprocessing_steps))
 
 
 if __name__ == '__main__':
-    main()
+    trees_main()
