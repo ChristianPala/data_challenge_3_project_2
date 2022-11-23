@@ -291,6 +291,7 @@ def oversample_transform(train: pd.DataFrame, target: str) -> tuple[np.array, np
     return x, y
 
 
+# The main function, for now only on the features.
 def main() -> None:
     df = pd.read_pickle(Path('..', 'data', 'project_2_dataset.pkl'))
     # print the skewness of the dataset:
