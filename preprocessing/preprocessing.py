@@ -42,6 +42,8 @@ import pandas as pd
 from missing_values_handling import handle_missing_values
 from auxiliary.method_timer import measure_time
 
+from sklearn.preprocessing import StandardScaler, MinMaxScaler, RobustScaler, normalize
+
 # Console options:
 # pd.set_option('display.max_columns', None)
 
@@ -136,6 +138,27 @@ def assign_categories(dataframe: pd.DataFrame) -> pd.DataFrame:
     dataframe[categorical_features] = dataframe[categorical_features].astype('category')
 
     return dataframe
+
+"""
+Scales the data by using one of three scaling methods, namely the Standard Scaler, the Minmax and the Robust scaler.
+"""
+def scale_data(dataframe: pd.DataFrame, columns: list[str], method: str = "Standard") -> pd.DataFrame:
+
+    if method == "Robust":
+        scaler = RobustScaler()
+    elif method == "MinMax":
+        scaler = MinMaxScaler()
+    else:
+        scaler = StandardScaler()
+    
+    scaled_data = scaler.fit_transform(dataframe[columns])
+
+    return scaled_data
+
+def normalize_data(dataframe: pd.DataFrame, columns: list[str]) -> pd.DataFrame:
+    normalized = normalize(dataframe[columns])
+    return normalized
+        
 
 
 @measure_time
