@@ -165,7 +165,7 @@ def plot_numerical_correlation_with_target(df: pd.DataFrame, target: str) -> Non
 
 def plot_categorical_correlation_with_target(df: pd.DataFrame, target: str) -> None:
     """
-    Plot the correlation of the categorical features with the target.
+    Plot the correlation o the categorical features with the target.
     @param df: pd.DataFrame: the dataframe with the categorical features.
     @param target: str: the target feature.
     :return:

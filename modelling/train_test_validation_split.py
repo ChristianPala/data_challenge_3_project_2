@@ -33,19 +33,23 @@ def split_data(df: pd.DataFrame, target: str, test_size: float = 0.2, val_size: 
     @param validation: bool: default = False: whether to split the data into train and validation sets.
     :return: x_train, x_val, x_test, y_train, y_val, y_test as np.arrays.
     """
+    # if id is in the dataframe, set it as the index:
+    if "id" in df.columns:
+        df.set_index("id", inplace=True)
+
     # Splitting the data:
-    X_train, X_test, y_train, y_test = train_test_split(df.drop(target, axis=1),
+    x_train, x_test, y_train, y_test = train_test_split(df.drop(target, axis=1),
                                                         df[target],
                                                         test_size=test_size,
                                                         random_state=random_state)
     if not validation:
-        return X_train, X_test, y_train, y_test
+        return x_train, x_test, y_train, y_test
 
     # Splitting the test set into test and validation sets:
-    X_test, X_val, y_test, y_val = train_test_split(X_test,
+    x_test, x_val, y_test, y_val = train_test_split(x_test,
                                                     y_test,
                                                     test_size=val_size,
                                                     random_state=random_state)
 
-    return X_train, X_val, X_test, y_train, y_val, y_test
+    return x_train, x_val, x_test, y_train, y_val, y_test
 

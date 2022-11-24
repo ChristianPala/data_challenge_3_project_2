@@ -16,8 +16,11 @@ def handle_missing_values(dataframe: pd.DataFrame, method: str = "supervised_imp
     education and marriage categorical features..
     @param dataframe: pd.DataFrame: the dataframe containing the dataset.
     @param method: str: default is supervised_imputation. The method to use to handle the missing values.
-    Supports the following strategies: drop, ignore, most_frequent_imputation,
-    supervised_imputation, unsupervised_imputation.
+    Supports the following strategies:
+    - drop,
+    - most_frequent_imputation,
+    - supervised_imputation
+    - unsupervised_imputation.
     :return: pd.DataFrame: the dataframe without missing values.
     """
 
@@ -75,10 +78,6 @@ def handle_missing_values(dataframe: pd.DataFrame, method: str = "supervised_imp
         dataframe["marriage"].replace(0, np.nan, inplace=True)
         # impute the missing values:
         dataframe = pd.DataFrame(knn_imputer.fit_transform(dataframe), columns=dataframe.columns)
-
-    elif method == "ignore":
-        # Ignore the missing values:
-        pass
 
     else:
         raise ValueError(f"Method {method} not supported, possible choices are 'drop' or 'impute'.")

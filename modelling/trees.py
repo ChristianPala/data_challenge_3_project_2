@@ -23,7 +23,7 @@ from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_sc
 from auxiliary.method_timer import measure_time
 
 # Global variables
-data_path = Path('..', 'data')
+missing_values_handled_path = Path("..", "data", "missing_values_handled")
 results_path = Path('..', 'results')
 results_path.mkdir(exist_ok=True, parents=True)
 
@@ -110,15 +110,15 @@ def trees_main() -> None:
     xgboost classifiers on the project 2 dataset.
     @return: None, saves the results in the logs folder.
     """
-    # get all the csv files in the data folder:
-    csv_files = list(data_path.glob('*.csv'))
-    model_types = ['decision_tree', 'random_forest', 'gradient_boosting', 'xgboost']
+    # get all the csv files in the missing_values_handled folder
+    csv_files: list[Path] = list(missing_values_handled_path.glob('*.csv'))
+    model_types: list[str] = ['decision_tree', 'random_forest', 'gradient_boosting', 'xgboost']
 
     for csv_file in csv_files:
         # read the data:
         df = pd.read_csv(csv_file)
         # get the preprocessing steps from the name:
-        preprocessing_steps = csv_file.stem.split('_')[3:]
+        preprocessing_steps: list[str] = csv_file.stem.split('_')[3:]
         # split the data:
         x_train, x_test, y_train, y_test = split_data(df, 'default')
         # loop through the model types:
