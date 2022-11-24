@@ -6,7 +6,7 @@ import numpy as np
 
 # Data manipulation
 from pathlib import Path
-import regex as re
+
 
 # Modelling
 from sklearn.base import BaseEstimator

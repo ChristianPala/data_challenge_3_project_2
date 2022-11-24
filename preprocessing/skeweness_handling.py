@@ -8,6 +8,14 @@ from scipy.stats import boxcox
 from imblearn.over_sampling import SMOTE, RandomOverSampler
 from imblearn.under_sampling import RandomUnderSampler
 from imblearn.pipeline import Pipeline
+from sklearn.ensemble import IsolationForest
+
+# Global variables:
+# data path:
+DATA_PATH = Path(__file__).parent.parent / "data"
+
+# logs path:
+LOGS_PATH = Path(__file__).parent.parent / "logs"
 
 
 def boxcox_transform(df: pd.DataFrame, columns: list[str]) -> pd.DataFrame:
@@ -76,7 +84,7 @@ def estimate_skewness(df, columns):
     return df[columns].skew(numeric_only=True)
 
 
-def detect_outliers(dataframe: pd.DataFrame) -> None:
+def detect_outliers_statistically(dataframe: pd.DataFrame) -> None:
     """
     Detect outliers in the dataset.
     @param dataframe: pd.DataFrame: the dataframe containing the dataset.
@@ -115,7 +123,7 @@ def detect_outliers(dataframe: pd.DataFrame) -> None:
             print(f"{feature}: {len(dataframe[(z_score > 3) | (z_score < -3)])}")
 
 
-def handle_outliers(dataframe: pd.DataFrame, method: str, strategy: str) -> pd.DataFrame:
+def handle_outliers_statistically(dataframe: pd.DataFrame, method: str, strategy: str) -> pd.DataFrame:
     """
     Drop outliers in the dataset.
     @param dataframe: pd.DataFrame: the dataframe containing the dataset.
@@ -291,37 +299,41 @@ def oversample_transform(train: pd.DataFrame, target: str) -> tuple[np.array, np
     return x, y
 
 
+def isolation_forest_outlier_detection(df: pd.DataFrame, target: str) -> tuple[np.array, np.array]:
+    """
+    Transformation using the isolation forest algorithm.
+    :param df: the dataframe to be analyzed
+    :param target: the column name of the target feature
+    :return: The target and the features dataframes where the isolation forest algorithm has been applied.
+    """
+    df = df.copy()
+
+    # Split the target and the rest of the features
+    # Todo: is it correct to do this on the whole dataset?
+    x = df.drop([target], axis=1).values
+
+    # define the isolation forest model for outlier detection
+    iso = IsolationForest(contamination=0.1, n_estimators=1000)
+
+    # fit the model:
+    iso.fit(x)
+
+    # calculate the anomaly score s = 2^-(E(h(x))/c(n)) from professor Cannelli's slides:
+    anomaly_score = 2 ** -(iso.decision_function(x) / iso.offset_)
+
+    # get the outliers in the dataset:
+    outliers = df[anomaly_score < 0.5]
+
+    # save the outliers to a csv file:
+    outliers.to_csv(Path(LOGS_PATH, "outliers.csv", index=False))
+
+
 # The main function, for now only on the features.
 def main() -> None:
-    df = pd.read_pickle(Path('..', 'data', 'project_2_dataset.pkl'))
-    # print the skewness of the dataset:
-    print("Skewness of the dataset:")
-    print(estimate_skewness(df, "all"))
-    print("--------------------")
+    df = pd.read_csv(Path(DATA_PATH, "project_2_dataset_drop.csv"), index_col=0)
 
-    # print the outliers found with each method:
-    detect_outliers(df)
-    print("--------------------")
-    # apply box-cox transformation to the non-negative numerical features of the dataset:
-    numerical = df.select_dtypes(exclude='category').columns
-    # drop the id column:
-    numerical = numerical.drop("id")
-    # keep only the non-negative numerical features:
-    positive_numerical = numerical[df[numerical].min() >= 0]
-    negative_numerical = numerical[df[numerical].min() < 0]
-    # apply box-cox transformation:
-    df = boxcox_transform(df, positive_numerical)
-    # shift the negative numerical features by the minimum value + 1:
-    df[negative_numerical] = df[negative_numerical].apply(lambda x: x - x.min() + 1)
-    # apply box-cox transformation again:
-    df = boxcox_transform(df, negative_numerical)
-    # print the skewness of the dataset after the transformation:
-    print("Skewness of the dataset after the transformation:")
-    print(estimate_skewness(df, "all"))
-    print("--------------------")
-    # print the outliers found with each method:
-    detect_outliers(df)
-    print("--------------------")
+    # work in progress on the isolation forest algorithm:
+    isolation_forest_outlier_detection(df, "default")
 
 
 if __name__ == '__main__':
