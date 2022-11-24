@@ -54,6 +54,7 @@ data_path: Path = Path('..', 'data')
 excel_file: Path = Path(data_path, 'Project 2 Dataset.xls')
 
 
+
 # Functions:
 def load_data() -> pd.DataFrame:
     """
@@ -139,11 +140,20 @@ def assign_categories(dataframe: pd.DataFrame) -> pd.DataFrame:
 
     return dataframe
 
-"""
-Scales the data by using one of three scaling methods, namely the Standard Scaler, the Minmax and the Robust scaler.
-"""
-def scale_data(dataframe: pd.DataFrame, columns: list[str], method: str = "Standard") -> pd.DataFrame:
 
+def scale_data(dataframe: pd.DataFrame, columns: list[str], method: str = "Standard") -> pd.DataFrame:
+    """
+    Scales the data by using one of three scaling methods, namely the Standard Scaler, the Minmax and the Robust scaler.
+    @param dataframe: pd.DataFrame: the dataframe containing the dataset.
+    @param columns: the features that need scaling
+    @param method: the type of scaler that needs to be used. It's possible to choose between MinmaxScaler, RobustRobust or StandardScaler, which is chosen by default.
+    :return: pd.DataFrame: the dataframe with the scaled features.
+    """
+
+    # Copying the dataframe to normalize
+    scaled_data = dataframe
+
+    # Selecting the scaler
     if method == "Robust":
         scaler = RobustScaler()
     elif method == "MinMax":
@@ -151,12 +161,25 @@ def scale_data(dataframe: pd.DataFrame, columns: list[str], method: str = "Stand
     else:
         scaler = StandardScaler()
     
-    scaled_data = scaler.fit_transform(dataframe[columns])
+    # Scale each feature with the scaler of choice
+    scaled_data[columns] = scaler.fit_transform(scaled_data[columns])
 
     return scaled_data
 
 def normalize_data(dataframe: pd.DataFrame, columns: list[str]) -> pd.DataFrame:
-    normalized = normalize(dataframe[columns])
+
+    """
+    Normalizes the data for the specified columns.
+    @param dataframe: pd.DataFrame: the dataframe containing the dataset.
+    @param columns: the features that need to be normalized
+    :return: pd.DataFrame: the dataframe with the nromalized features.
+    """
+
+    # Copying the dataframe to normalize
+    normalized = dataframe
+
+    # Normalizing each feature
+    normalized[columns] = normalize(normalized[columns], axis=0)
     return normalized
         
 
@@ -193,6 +216,13 @@ def main() -> None:
     """
     # Rename the columns:
     dataframe = rename_columns(dataframe)
+
+    print(dataframe.head())
+
+    dataframe = scale_data(dataframe, ["limit_bal"], method="MinMax")
+    dataframe = normalize_data(dataframe, ["age"])
+
+    print(dataframe.head())
 
     # Handle missing values, save a copy for all methods supported:
     methods: list[str] = ["drop", "ignore", "most_frequent_imputation",
