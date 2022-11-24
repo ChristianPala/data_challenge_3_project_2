@@ -3,6 +3,7 @@
 from preprocessing.preprocessor import preprocessor_main
 from feature_engineering.create_features import feature_engineering_main
 from modelling.trees import trees_main
+from preprocessing.scaling import scaling_main
 
 
 def main() -> None:
@@ -12,7 +13,8 @@ def main() -> None:
     :return: None
     """
     preprocessor_main(suppress_print=True)
-    feature_engineering_main()
+    # feature_engineering_main() seems useless.
+    scaling_main()
     trees_main()
 
 

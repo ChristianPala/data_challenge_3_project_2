@@ -50,6 +50,8 @@ from preprocessing.missing_values_handling import handle_missing_values
 # Path to the dataset:
 data_path: Path = Path('..', 'data')
 excel_file: Path = Path(data_path, 'Project 2 Dataset.xls')
+missing_values_path = Path(data_path, "missing_values_handled")
+missing_values_path.mkdir(parents=True, exist_ok=True)
 
 
 # Functions:
@@ -187,7 +189,7 @@ def preprocessor_main(suppress_print=False) -> None:
         dataframe_copy.to_pickle(Path(data_path, f"project_2_dataset_{method}.pkl"))
 
         # Save the data to csv:
-        dataframe_copy.to_csv(Path(data_path, f"project_2_dataset_{method}.csv"), index=False)
+        dataframe_copy.to_csv(Path(missing_values_path, f"project_2_dataset_{method}.csv"), index=False)
 
     if not suppress_print:
         print("Preprocessing completed.")

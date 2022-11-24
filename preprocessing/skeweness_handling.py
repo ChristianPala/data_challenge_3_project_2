@@ -10,12 +10,12 @@ from imblearn.under_sampling import RandomUnderSampler
 from imblearn.pipeline import Pipeline
 from sklearn.ensemble import IsolationForest
 
-# Global variables:
-# data path:
-DATA_PATH = Path(__file__).parent.parent / "data"
+from auxiliary.method_timer import measure_time
 
+# Global variables:
+data_path = Path("..", "data")
 # logs path:
-LOGS_PATH = Path(__file__).parent.parent / "logs"
+logs_path = Path("..", "logs")
 
 
 def boxcox_transform(df: pd.DataFrame, columns: list[str]) -> pd.DataFrame:
@@ -80,7 +80,7 @@ def estimate_skewness(df, columns):
     df = df.copy()
     if columns == "all":
         # return every column other than the id, reverse the order to have the most skewed first:
-        return df.drop(columns=["id"]).skew(numeric_only=True).sort_values(ascending=False)
+        return df.skew(numeric_only=True).sort_values(ascending=False)
     return df[columns].skew(numeric_only=True)
 
 
@@ -299,42 +299,97 @@ def oversample_transform(train: pd.DataFrame, target: str) -> tuple[np.array, np
     return x, y
 
 
-def isolation_forest_outlier_detection(df: pd.DataFrame, target: str) -> tuple[np.array, np.array]:
+def isolation_forest_outlier_detection(train: pd.DataFrame, target: str) -> pd.DataFrame:
     """
     Transformation using the isolation forest algorithm.
-    :param df: the dataframe to be analyzed
+    :param train: the train dataframe to be analyzed
     :param target: the column name of the target feature
     :return: The target and the features dataframes where the isolation forest algorithm has been applied.
     """
-    df = df.copy()
+    df = train.copy()
 
     # Split the target and the rest of the features
-    # Todo: is it correct to do this on the whole dataset?
-    x = df.drop([target], axis=1).values
+    y_train = df[target]
+    x_train = df.drop([target], axis=1)
 
-    # define the isolation forest model for outlier detection
-    iso = IsolationForest(contamination=0.1, n_estimators=1000)
+    # Define the isolation forest model
+    model = IsolationForest(contamination=0.1)
 
-    # fit the model:
-    iso.fit(x)
+    # Fit the model
+    model.fit(x_train)
 
-    # calculate the anomaly score s = 2^-(E(h(x))/c(n)) from professor Cannelli's slides:
-    anomaly_score = 2 ** -(iso.decision_function(x) / iso.offset_)
+    # Predict the outliers
+    y_pred = model.predict(x_train)
 
-    # get the outliers in the dataset:
-    outliers = df[anomaly_score < 0.5]
+    # Filter the outliers
+    mask = y_pred != -1
 
-    # save the outliers to a csv file:
-    outliers.to_csv(Path(LOGS_PATH, "outliers.csv", index=False))
+    # Filter the outliers
+    x_train, y_train = x_train[mask], y_train[mask]
+
+    # combine the target and the features
+    train = pd.concat([x_train, y_train], axis=1)
+
+    return train
 
 
 # The main function, for now only on the features.
-def main() -> None:
-    df = pd.read_csv(Path(DATA_PATH, "project_2_dataset_drop.csv"), index_col=0)
+def shift_negative_values(features: pd.DataFrame) -> pd.DataFrame:
+    """
+    Shifts the negative values of the features to the positive values.
+    @param features: the features dataframe to be analyzed
+    :return: The features dataframe where the negative values have been shifted to the positive values.
+    """
+    # We find the minimum value of each feature
+    for feature in features.columns:
+        # exclude the categorical features and the id:
+        if features[feature].dtype != "category":
+            # shift the negative values to the positive values:
+            features[feature] = features[feature].apply(lambda x: x - features[feature].min() + 1 if x < 0 else x)
+    return features
 
-    # work in progress on the isolation forest algorithm:
-    isolation_forest_outlier_detection(df, "default")
+
+@measure_time
+def skewness_main(filename: str, suppress_print=False) -> pd.DataFrame:
+    """
+    The main function of the skewness module.
+    @param filename: str: the name of the file for which the skewness will be handled.
+    @param suppress_print: bool: if True, the print statements will be suppressed.
+    @return: pd.DataFrame: the dataframe with the skewness handled.
+    """
+    df = pd.read_csv(filename)
+
+    # assign the categorical features:
+    categorical_features: list[str] = ["gender", "education", "marriage", "pay_stat_sep", "pay_stat_aug",
+                                       "pay_stat_jul",
+                                       "pay_stat_jun", "pay_stat_may", "pay_stat_apr", "default"]
+
+    df = df.astype({feature: "category" for feature in categorical_features})
+
+    # set the id as the index:
+    df.set_index("id", inplace=True)
+
+    # shift the negative values to positive values with min + 1:
+    df = shift_negative_values(df)
+
+    # estimate the skewness of the features:
+    if not suppress_print:
+        print(estimate_skewness(df, "all"))
+
+    # get the numerical features names by excluding the categorical features and the id:
+    numerical_features: list[str] = df.select_dtypes(exclude="category").columns
+
+    # apply the box-cox transformation to the features:
+    features = log_transform(df, numerical_features)
+
+    if not suppress_print:
+        print(estimate_skewness(df, "all"))
+
+    # substitute the numerical features with the transformed features:
+    df[numerical_features] = features[numerical_features]
+
+    return df
 
 
 if __name__ == '__main__':
-    main()
+    skewness_main()
