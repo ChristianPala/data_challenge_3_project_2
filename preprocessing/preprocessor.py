@@ -32,10 +32,10 @@ BILL_AMT6 = amount of bill statement in April, 2005.•Amount of previous paymen
 •PAY_AMT1 - PAY_AMT6: PAY_AMT1 = amount paid in September, 2005;
 PAY_AMT2 = amount paid in August, 2005; . . .; PAY_AMT6 = amount paid in April, 2005
 """
-
 # Libraries:
 # Data manipulation:
 from pathlib import Path
+import shutil
 import pandas as pd
 
 from auxiliary.method_timer import measure_time
@@ -50,8 +50,8 @@ from preprocessing.missing_values_handling import handle_missing_values
 # Path to the dataset:
 data_path: Path = Path('..', 'data')
 excel_file: Path = Path(data_path, 'Project 2 Dataset.xls')
+
 missing_values_path = Path(data_path, "missing_values_handled")
-missing_values_path.mkdir(parents=True, exist_ok=True)
 
 
 # Functions:
@@ -150,6 +150,11 @@ def preprocessor_main(suppress_print=False) -> None:
     # Load the dataset:
     dataframe: pd.DataFrame = load_data()
 
+    # Cleaning paths:
+    if missing_values_path.exists() and missing_values_path.is_dir():
+        shutil.rmtree(missing_values_path)
+    missing_values_path.mkdir(parents=True, exist_ok=True)
+
     # inspect the dataset:
     if not suppress_print:
         print("Dataset information:")
@@ -186,7 +191,7 @@ def preprocessor_main(suppress_print=False) -> None:
         dataframe_copy = assign_categories(dataframe_copy)
 
         # Save the data to pickle to maintain the categories:
-        dataframe_copy.to_pickle(Path(data_path, f"project_2_dataset_{method}.pkl"))
+        # dataframe_copy.to_pickle(Path(data_path, f"project_2_dataset_{method}.pkl"))
 
         # Save the data to csv:
         dataframe_copy.to_csv(Path(missing_values_path, f"project_2_dataset_{method}.csv"), index=False)

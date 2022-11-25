@@ -1,4 +1,5 @@
 # modelling with decision trees, random forests and gradient boosting
+import shutil
 
 # Libraries
 import pandas as pd
@@ -25,7 +26,6 @@ from auxiliary.method_timer import measure_time
 # Global variables
 missing_values_handled_path = Path("..", "data", "missing_values_handled")
 results_path = Path('..', 'results')
-results_path.mkdir(exist_ok=True, parents=True)
 
 
 def generate_tree_model(model_type: str) -> BaseEstimator:
@@ -79,14 +79,19 @@ def evaluate_model(y_test: np.array, y_pred: np.array) -> dict[str, float]:
     @param y_pred: np.array: the predicted target values.
     :return: Dictionary with the metrics.
     """
+
+    df = pd.DataFrame(classification_report(y_test, y_pred, output_dict=True)).transpose()
+    cf = confusion_matrix(y_test, y_pred, normalize='true')
+
     return {
         'f1': f1_score(y_test, y_pred),
         'accuracy': accuracy_score(y_test, y_pred),
         'precision': precision_score(y_test, y_pred),
         'recall': recall_score(y_test, y_pred),
         'roc_auc': roc_auc_score(y_test, y_pred),
-        'confusion_matrix': confusion_matrix(y_test, y_pred),
-        'classification_report': classification_report(y_test, y_pred)
+        'confusion_matrix': np.array2string(cf, separator=', '),
+        'classification_report': df
+
     }
 
 
@@ -96,11 +101,21 @@ def save_evaluation_results(evaluation_results: dict, model_type: str, name_addi
     @param evaluation_results: dict: the dictionary with the evaluation results.
     @param model_type: str: the type of the model.
     @param name_addition: str: default = None: the name addition to the file name to save the results.
-    :return: None. Saves the results to a file in the logs folder.
+    :return: None. Saves the results to a file in the results' folder.
     """
+
+    # write the results to a file:
     with open(results_path / f'{model_type}_base_evaluation_results_{name_addition}.txt', 'w') as f:
         for key, value in evaluation_results.items():
-            f.write(f'{key}: {value} \n')
+            if key == 'confusion_matrix':
+                f.write(f'{key}\n {value}\n')
+            elif key == 'classification_report':
+                # Todo: Davide, Fabio, should we create a print interface for the classification report?
+                # empty line
+                f.write('\n')
+                value.to_csv(f, mode='a', header=True, sep='\t')
+            else:
+                f.write(f'{key}: {value}\n')
 
 
 @measure_time
@@ -108,11 +123,16 @@ def trees_main() -> None:
     """
     Main function for the baseline results on decision trees, random forests, gradient boosting and
     xgboost classifiers on the project 2 dataset.
-    @return: None, saves the results in the logs folder.
+    @return: None, saves the results in the results' folder.
     """
     # get all the csv files in the missing_values_handled folder
     csv_files: list[Path] = list(missing_values_handled_path.glob('*.csv'))
     model_types: list[str] = ['decision_tree', 'random_forest', 'gradient_boosting', 'xgboost']
+
+    # clean the results' directory:
+    if results_path.exists() and results_path.is_dir():
+        shutil.rmtree(results_path, ignore_errors=True)
+    results_path.mkdir(exist_ok=True, parents=True)
 
     for csv_file in csv_files:
         # read the data:

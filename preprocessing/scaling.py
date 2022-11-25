@@ -1,10 +1,11 @@
 # Library to scale and normalize the data.
 
-
 # Libraries:
 # Data manipulation:
 import pandas as pd
 from pathlib import Path
+import shutil
+
 
 # Scaling and normalization:
 from sklearn.preprocessing import RobustScaler, MinMaxScaler, StandardScaler, normalize
@@ -22,7 +23,6 @@ missing_values_path = Path(data_path, "missing_values_handled")
 missing_values_path.mkdir(exist_ok=True)
 # path to the scaling data:
 scaled_datasets_path = Path("..", "data", "scaled_datasets")
-scaled_datasets_path.mkdir(parents=True, exist_ok=True)
 
 
 def scale_data(train: pd.DataFrame, test: pd.DataFrame, columns: list[str], method: str = "Standard") \
@@ -86,6 +86,11 @@ def scaling_main() -> None:
     """
     # get all the csv files in the missing_values_handled folder:
     csv_files: list[Path] = list(missing_values_path.glob("*.csv"))
+
+    # Cleaning paths:
+    if scaled_datasets_path.exists() and scaled_datasets_path.is_dir():
+        shutil.rmtree(scaled_datasets_path)
+    scaled_datasets_path.mkdir(parents=True, exist_ok=True)
 
     # iterate over the csv files:
     for file in csv_files:
