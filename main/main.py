@@ -13,7 +13,7 @@ def main() -> None:
     :return: None
     """
     preprocessor_main(suppress_print=True)
-    # feature_engineering_main() seems useless.
+    feature_engineering_main()
     scaling_main()
     trees_main()
 

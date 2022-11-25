@@ -11,7 +11,7 @@ from auxiliary.method_timer import measure_time
 
 # Global variables:
 data_path = Path("..", "data")
-
+missing_values_handled_path = Path(data_path, "missing_values_handled")
 
 # Functions:
 def pay_status_cumulative(df: pd.DataFrame) -> pd.DataFrame:
@@ -63,7 +63,7 @@ def feature_engineering_main() -> None:
     """
 
     # get all the csv files in the data folder:
-    csv_files = list(data_path.glob('*.csv'))
+    csv_files = list(missing_values_handled_path.glob('*.csv'))
 
     # loop over the csv files:
     for csv_file in csv_files:
@@ -77,7 +77,7 @@ def feature_engineering_main() -> None:
 
         file_name = csv_file.stem + "_augmented.csv"
 
-        df.to_csv(Path(data_path, file_name), index=False)
+        df.to_csv(Path(missing_values_handled_path, file_name), index=False)
 
 
 # Driver:
