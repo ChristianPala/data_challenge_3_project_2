@@ -43,7 +43,7 @@ def create_logreg_model() -> LogisticRegression:
     This function creates a logistic regression model.
     :return: LogisticRegression: the model.
     """
-    model = LogisticRegression()
+    model = LogisticRegression(random_state=42)
     return model
 
 
@@ -52,7 +52,7 @@ def create_svm_model() -> SVC:
     This function creates a svm model.
     :return: SVC: the model.
     """
-    model = SVC()
+    model = SVC(random_state=42)
     return model
 
 
