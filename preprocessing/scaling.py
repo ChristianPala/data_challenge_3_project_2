@@ -5,15 +5,13 @@
 import pandas as pd
 from pathlib import Path
 import shutil
-
-
 # Scaling and normalization:
 from sklearn.preprocessing import RobustScaler, MinMaxScaler, StandardScaler, normalize
-
-from auxiliary.method_timer import measure_time
 # Modelling:
 from modelling.train_test_validation_split import split_data
 from preprocessing.skeweness_handling import skewness_main
+# Timing:
+from auxiliary.method_timer import measure_time
 
 # Global variables:
 # Path to the data folder:

@@ -4,6 +4,7 @@ from preprocessing.preprocessor import preprocessor_main
 from feature_engineering.create_features import feature_engineering_main
 from modelling.trees import trees_main
 from preprocessing.scaling import scaling_main
+from modelling.neural_network import neural_network_main
 
 
 def main() -> None:
@@ -16,6 +17,7 @@ def main() -> None:
     feature_engineering_main()
     scaling_main()
     trees_main()
+    neural_network_main()
 
 
 if __name__ == '__main__':
