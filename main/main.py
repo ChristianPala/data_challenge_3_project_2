@@ -1,5 +1,6 @@
 # main file to run the project pipeline:
 from modelling.knn_logreg_naiveb_svc import other_models_main
+from modelling.sort_base_models_by_f_1_score import sort_all_results_by_f_1_score
 from preprocessing.preprocessor import preprocessor_main
 from feature_engineering.create_features import feature_engineering_main
 from modelling.trees import trees_main
@@ -21,6 +22,8 @@ def main() -> None:
     trees_main()
     neural_network_main()
     other_models_main()
+    sort_all_results_by_f_1_score()
+    # Undersampling , oversampling and SMOTE:
     # Tuning:
     # Explaining:
 
