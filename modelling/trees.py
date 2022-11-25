@@ -26,6 +26,8 @@ from auxiliary.method_timer import measure_time
 # Global variables
 missing_values_handled_path = Path("..", "data", "missing_values_handled")
 results_path = Path('..', 'results')
+trees_results_path = Path(results_path, 'trees')
+trees_results_path.mkdir(parents=True, exist_ok=True)
 
 
 def generate_tree_model(model_type: str) -> BaseEstimator:
@@ -105,7 +107,7 @@ def save_evaluation_results(evaluation_results: dict, model_type: str, name_addi
     """
 
     # write the results to a file:
-    with open(results_path / f'{model_type}_base_evaluation_results_{name_addition}.txt', 'w') as f:
+    with open(trees_results_path / f'{model_type}_base_evaluation_results_{name_addition}.txt', 'w') as f:
         for key, value in evaluation_results.items():
             if key == 'confusion_matrix':
                 f.write(f'{key}\n {value}\n')
@@ -129,10 +131,10 @@ def trees_main() -> None:
     csv_files: list[Path] = list(missing_values_handled_path.glob('*.csv'))
     model_types: list[str] = ['decision_tree', 'random_forest', 'gradient_boosting', 'xgboost']
 
-    # clean the results' directory:
-    if results_path.exists() and results_path.is_dir():
-        shutil.rmtree(results_path, ignore_errors=True)
-    results_path.mkdir(exist_ok=True, parents=True)
+    # clean the trees results' directory:
+    if trees_results_path.exists() and trees_results_path.is_dir():
+        shutil.rmtree(trees_results_path, ignore_errors=True)
+    trees_results_path.mkdir(exist_ok=True, parents=True)
 
     for csv_file in csv_files:
         # read the data:
