@@ -13,7 +13,10 @@ from tuning.balance_classes import balance_classes_main
 from tuning.balanced_trees import balanced_trees_main
 from tuning.balanced_neural_network import balanced_neural_network_main
 from tuning.balanced_knn_logreg_naiveb_svc import balanced_other_models_main
-from tqdm import tqdm
+import pprint
+
+# Global variable to store the execution times during the pipeline:
+from auxiliary.method_timer import execution_times
 
 
 def main() -> None:
@@ -38,7 +41,6 @@ def main() -> None:
     Augmented datasets are usually better than the original ones.
     Supervised and unsupervised imputation are usually better than most frequent and drop.
     Scaled datasets are usually better than the original ones.
-    We will proceed with the augmented datasets, (un)-supervised imputation and scaled datasets.
     """
     # Tuning:
     # ----------------------------------------------
@@ -53,6 +55,8 @@ def main() -> None:
     # Explaining:
     # ----------------------------------------------
     # ...
+    # pretty print the execution times dictionary:
+    pprint.pprint(execution_times)
 
 
 if __name__ == '__main__':
