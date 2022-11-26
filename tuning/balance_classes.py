@@ -7,6 +7,8 @@ import pandas as pd
 from pathlib import Path
 import shutil
 
+from tqdm import tqdm
+
 from auxiliary.method_timer import measure_time
 # Modelling:
 from modelling.train_test_validation_split import split_data
@@ -16,13 +18,7 @@ from imblearn.pipeline import Pipeline
 from imblearn.combine import SMOTETomek
 
 # Global variables:
-# Path to the data folder:
-data_path = Path("..", "data")
-balanced_datasets_path = Path(data_path, "balanced_training_datasets")
-# Path to the missing_values_handled folder:
-missing_values_path = Path(data_path, "missing_values_handled")
-# Path to the scaled_datasets folder:
-scaled_datasets_path = Path(data_path, "scaled_datasets")
+from config import balanced_datasets_path, scaled_datasets_path
 
 
 # Functions:
@@ -187,7 +183,7 @@ def smote_tomek(train: pd.DataFrame, target: str) -> pd.DataFrame:
 
     # We split the target and the rest of the features
     y = df[target]
-    X = df.drop([target], axis=1)
+    x = df.drop([target], axis=1)
 
     # Check the current balance of the target feature
     # counter = collections.Counter(y)
@@ -197,7 +193,7 @@ def smote_tomek(train: pd.DataFrame, target: str) -> pd.DataFrame:
     over = SMOTETomek(sampling_strategy="auto", random_state=42, n_jobs=-1)
 
     # Transform the dataset
-    x, y = over.fit_resample(X, y)
+    x, y = over.fit_resample(x, y)
 
     # Check the balance of the target feature after the resample
     # counter = collections.Counter(y)
@@ -261,9 +257,10 @@ def perform_balancing(tr: pd.DataFrame, vl: pd.DataFrame, tst: pd.DataFrame, tar
 
     # remove project_2_dataset from the file stem
     file_stem = file_stem.replace("project_2_dataset_", "")
-
+    # remove "augmented" from the file stem since all the dataframes are augmented
+    file_stem = file_stem.replace("_augmented", "")
     # save the dataframes
-    save_dataframes(tr, vl, tst, Path(f"../data/balanced_training_datasets/{method}/{file_stem}"))
+    save_dataframes(tr, vl, tst, Path(balanced_datasets_path, f"{method}", f"{file_stem}"))
 
 
 @measure_time
@@ -273,18 +270,24 @@ def balance_classes_main(suppress_print=True) -> None:
     @param suppress_print: bool: whether to suppress the print statements.
     @return: None. Saves the csv files in the balanced_training_datasets folder.
     """
+
+    if not scaled_datasets_path.exists() and scaled_datasets_path.is_dir():
+        raise FileNotFoundError(f"Could not find the scaled datasets in {scaled_datasets_path}")
+
+    # TODO: Davide, Fabio, check the assumptions below in your experiments.
     # get all the files in the scaling folder, since it performed better than the non-scaled data:
     csv_files = list(scaled_datasets_path.glob("*.csv"))
-    # remove the "drop" and "most_frequent" strategies since the other missing value strategies performed better in
-    # all cases:
-    csv_files = [file for file in csv_files if "drop" not in file.name and "most_frequent" not in file.name]
+    # remove the "drop" and "most_frequent" strategies since the other missing value strategies performed better:
+    # csv_files = [file for file in csv_files if "drop" not in file.name and "most_frequent" not in file.name]
+    # remove the non-augmented datasets, since the augmented ones performed better:
+    # csv_files = [file for file in csv_files if "augmented" in file.name]
 
     # clean the balanced_training_datasets folder:
     if balanced_datasets_path.exists() and balanced_datasets_path.is_dir():
         shutil.rmtree(balanced_datasets_path)
     balanced_datasets_path.mkdir(exist_ok=True)
 
-    for file in csv_files:
+    for file in tqdm(csv_files, desc="Balancing the datasets", unit='file', total=len(csv_files)):
         # read the csv file:
         dataframe = pd.read_csv(file)
         # Split the data:
@@ -295,7 +298,7 @@ def balance_classes_main(suppress_print=True) -> None:
 
         # perform the balancing with all the methods:
         methods = ["undersampled", "oversampled", "smote", "borderline_smote", "smote_tomek_links"]
-        for method in methods:
+        for method in tqdm(methods, total=len(methods), desc="Balancing methods", unit="method"):
             perform_balancing(training_dataframe, validation_dataframe, test_dataframe, "default", method, file.stem)
             if not suppress_print:
                 print(f"Finished balancing with {method} for {file.stem}")

@@ -1,16 +1,66 @@
-# Auxiliary library to sort all the base models in the results sub-folders by their f1 score and print
-# the best overall model to the console.
-
+# Auxiliary library to save the model results to a csv file.
 # Libraries:
 # Data manipulation:
 from pathlib import Path
+import pandas as pd
+import numpy as np
 import shutil
-
+# Metrics:
+from sklearn.metrics import f1_score, accuracy_score, precision_score, recall_score, roc_auc_score, \
+    classification_report, confusion_matrix
 # Global variables:
 from config import trees_results_path, neural_networks_results_path, other_models_results_path
 
 
 # Functions:
+def evaluate_model(y_test: np.array, y_pred: np.array) -> dict[str, float]:
+    """
+    This function evaluates the model's performance.
+    @param y_test: np.array: the target values for the test data.
+    @param y_pred: np.array: the predicted target values.
+    :return: Dictionary with the metrics.
+    """
+    y_pred = np.where(y_pred > 0.5, 1, 0)
+    df = pd.DataFrame(classification_report(y_test, y_pred, output_dict=True)).transpose()
+
+    return {
+        'f1': f1_score(y_test, y_pred),
+        'accuracy': accuracy_score(y_test, y_pred),
+        'precision': precision_score(y_test, y_pred),
+        'recall': recall_score(y_test, y_pred),
+        'roc_auc': roc_auc_score(y_test, y_pred),
+        'confusion_matrix': np.array2string(confusion_matrix(y_test, y_pred, normalize='true'), precision=2,
+                                            separator=', '),
+        'classification_report': df
+    }
+
+
+def save_evaluation_results(evaluation_results: dict, model_type: str, save_path: Path,
+                            dataset_name: str) -> None:
+    """
+    This function saves the evaluation results of the various models to a .txt file.
+    @param evaluation_results: dict: the dictionary with the evaluation results.
+    @param model_type: str: the type of the model.
+    @param save_path: Path: the path to save the results to.
+    @param dataset_name: str: the name of the dataset to save the results for.
+    :return: None. Saves the results to a file in the results' folder.
+    """
+    # ensure the path exists:
+    save_path.mkdir(parents=True, exist_ok=True)
+
+    # write the results to a file:
+    with open(save_path / f'{model_type}_{dataset_name}.txt', 'w') as f:
+        for key, value in evaluation_results.items():
+            if key == 'confusion_matrix':
+                f.write(f'{key}\n {value}\n')
+            elif key == 'classification_report':
+                # empty line
+                f.write('\n')
+                value.to_csv(f, mode='a', header=True, sep='\t')
+            else:
+                f.write(f'{key}: {value}\n')
+
+
 def sort_results_by_f_1_score(path: Path) -> Path:
     """
     This function sorts all the models in the results subfolders by their f1 score.
