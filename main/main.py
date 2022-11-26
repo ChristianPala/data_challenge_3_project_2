@@ -6,6 +6,7 @@ from feature_engineering.create_features import feature_engineering_main
 from modelling.trees import trees_main
 from preprocessing.scaling import scaling_main
 from modelling.neural_network import neural_network_main
+from tuning.balance_classes import balance_classes_main
 
 
 def main() -> None:
@@ -24,6 +25,7 @@ def main() -> None:
     other_models_main()
     sort_all_results_by_f_1_score()
     # Undersampling , oversampling and SMOTE:
+    balance_classes_main()
     # Tuning:
     # Explaining:
 
