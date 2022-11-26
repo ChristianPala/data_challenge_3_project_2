@@ -21,15 +21,17 @@ missing_values_path = Path(data_path, "missing_values_handled")
 missing_values_path.mkdir(exist_ok=True)
 # path to the scaling data:
 scaled_datasets_path = Path("..", "data", "scaled_datasets")
+scaled_datasets_path.mkdir(exist_ok=True)
 
 
-def scale_data(train: pd.DataFrame, test: pd.DataFrame, columns: list[str], method: str = "Standard") \
-        -> pd.DataFrame:
+def scale_data(training: pd.DataFrame, validation: pd.DataFrame, testing: pd.DataFrame,
+               columns: list[str], method: str = "Standard") -> pd.DataFrame:
     """
     Scale the data using the specified method, taken from Scikit-learn's preprocessing module:
     https://scikit-learn.org/stable/modules/classes.html#module-sklearn.preprocessing
-    @param train: pd.DataFrame: the dataframe containing the training data.
-    @param test: pd.DataFrame: the dataframe containing the test data.
+    @param training: pd.DataFrame: the dataframe containing the training data.
+    @param validation: pd.DataFrame: the dataframe containing the validation data.
+    @param testing: pd.DataFrame: the dataframe containing the test data.
     @param columns: list[str]: the list of columns to scale.
     @param method: the method to use for scaling. Supported methods are: "Standard", "MinMax", "Robust".
     @return: the scaled dataset.
@@ -42,35 +44,42 @@ def scale_data(train: pd.DataFrame, test: pd.DataFrame, columns: list[str], meth
         scaler = StandardScaler()
 
     # fit the scaler on the training data:
-    scaler.fit(train[columns])
+    scaler.fit(training[columns])
     # scale the training data:
-    train[columns] = scaler.transform(train[columns])
+    training[columns] = scaler.transform(training[columns])
+
+    # scale the validation data:
+    validation[columns] = scaler.transform(validation[columns])
 
     # scale the test data:
-    test[columns] = scaler.transform(test[columns])
+    testing[columns] = scaler.transform(testing[columns])
 
     # merge the training and test data:
-    dataframe: pd.DataFrame = pd.concat([train, test], axis=0)
+    dataframe: pd.DataFrame = pd.concat([training, validation, testing], axis=0)
 
     return dataframe
 
 
-def normalize_data(train: pd.DataFrame, test: pd.DataFrame, columns: list[str]) -> (pd.DataFrame, pd.DataFrame):
+def normalize_data(training: pd.DataFrame, validation: pd.DataFrame,  testing: pd.DataFrame,
+                   columns: list[str]) -> (pd.DataFrame, pd.DataFrame):
     """
     Normalize the data using Scikit-learn's normalize method:
     https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.normalize.html
-    @param train: the dataframe containing the training data.
-    @param test: the dataframe containing the test data.
+    @param training: the dataframe containing the training data.
+    @param validation: the dataframe containing the validation data.
+    @param testing: the dataframe containing the test data.
     @param columns: the list of columns to normalize.
     @return: the normalized dataset
     """
-
+    # Todo: Ask professor Mitrovic if we can normalize like this.
     # normalize the training data:
-    train[columns] = normalize(train[columns])
+    training[columns] = normalize(training[columns])
+    # normalize the validation data:
+    validation[columns] = normalize(validation[columns])
     # normalize the test data:
-    test[columns] = normalize(test[columns])
+    testing[columns] = normalize(testing[columns])
     # merge the training and test data:
-    dataframe: pd.DataFrame = pd.concat([train, test], axis=0)
+    dataframe: pd.DataFrame = pd.concat([training, validation, testing], axis=0)
 
     return dataframe
 
@@ -106,12 +115,12 @@ def scaling_main() -> None:
                 # in this case we need to transform the data to be approximately normally distributed:
                 dataframe = skewness_main(file, suppress_print=True)
 
-            x_train, x_test, y_train, y_test = split_data(dataframe, "default", validation=False)
+            x_train, x_val, x_test, y_train, y_val, y_test = split_data(dataframe, "default", validation=True)
 
-            dataframe: pd.DataFrame = scale_data(x_train, x_test, x_train.columns, method=method)
+            dataframe: pd.DataFrame = scale_data(x_train, x_val, x_test, x_train.columns, method=method)
 
             # add back the target column:
-            dataframe["default"] = pd.concat([y_train, y_test], axis=0)
+            dataframe["default"] = pd.concat([y_train, y_val, y_test], axis=0)
 
             # Save the scaled data in the scaled_datasets folder:
             dataframe.to_csv(Path(scaled_datasets_path,
@@ -120,10 +129,10 @@ def scaling_main() -> None:
 
             # Normalize the data if the method is Standard or Robust, since min-max scaling is already normalized:
             if method in ["Standard", "Robust"]:
-                dataframe: pd.DataFrame = normalize_data(x_train, x_test, x_train.columns)
+                dataframe: pd.DataFrame = normalize_data(x_train, x_val, x_test, x_train.columns)
 
                 # add back the target column:
-                dataframe["default"] = pd.concat([y_train, y_test], axis=0)
+                dataframe["default"] = pd.concat([y_train, y_val, y_test], axis=0)
 
                 # Save the normalized data:
                 dataframe.to_csv(Path(scaled_datasets_path,

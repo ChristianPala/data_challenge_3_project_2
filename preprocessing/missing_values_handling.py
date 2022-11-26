@@ -27,13 +27,17 @@ def handle_missing_values(dataframe: pd.DataFrame, method: str = "supervised_imp
     # make a copy of the dataframe:
     dataframe: pd.DataFrame = dataframe.copy()
 
-    # Properly assign the 14 education and 54 marriage missing values to NaN values:
-    dataframe["education"].replace(0, np.nan, inplace=True)
-    dataframe["marriage"].replace(0, np.nan, inplace=True)
+    # check if the dataframe contains missing values, otherwise return the dataframe:
+    if dataframe.isnull().sum().sum() == 0 and len(dataframe[dataframe['education'] == 0]) == 0 and \
+            len(dataframe[dataframe['marriage'] == 0]) == 0:
+        return dataframe
+
     # store the indexes of the missing values:
     missing_indexes_e = dataframe[dataframe["education"].isna()].index
     missing_indexes_m = dataframe[dataframe["marriage"].isna()].index
 
+    print("Missing values in education: ", len(missing_indexes_e))
+    print("Missing values in marriage: ", len(missing_indexes_m))
     if method == "drop":
         # Drop the missing values, i.e. rows with education or marriage equal to 0:
         dataframe.dropna(inplace=True)
