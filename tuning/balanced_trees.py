@@ -28,7 +28,7 @@ def balanced_trees_main() -> None:
     model_types: list[str] = ['decision_tree', 'random_forest', 'gradient_boosting', 'xgboost']
 
     # For each sub-folder in the balanced datasets' folder:
-    for sub in tqdm(sub_folder, desc="trees balanced", unit="folder", total=len(sub_folder)):
+    for sub in tqdm(sub_folder, desc="trees balanced", unit="folder", total=len(sub_folder), colour="green"):
         # Load the data:
         data = load_balanced_datasets(balanced_datasets_path / sub)
         # For each dataset:
@@ -39,7 +39,7 @@ def balanced_trees_main() -> None:
             x_validation = validation.drop("default", axis=1)
             y_validation = validation["default"]
 
-            for model_name in tqdm(model_types, desc="models", unit="model", total=len(model_types)):
+            for model_name in tqdm(model_types, desc="models", unit="model", total=len(model_types), colour="blue"):
                 # Generate the model:
                 model = generate_tree_model(model_name)
                 # Fit the model:

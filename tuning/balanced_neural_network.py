@@ -51,11 +51,11 @@ def balanced_neural_network_main() -> None:
     sub_folder = ["borderline_smote", "oversampled", "smote", "smote_tomek_links", "undersampled"]
 
     # For each sub-folder in the balanced datasets' folder:
-    for sub in tqdm(sub_folder, desc="Balanced neural networks", unit="folder", total=len(sub_folder)):
+    for sub in tqdm(sub_folder, desc="Balanced neural networks", unit="folder", total=len(sub_folder), colour="green"):
         # Load the data:
         data = load_balanced_datasets(balanced_datasets_path / sub)
         # For each dataset:
-        for train, validation, file_name in tqdm(data, desc="datasets", unit="dataset", total=len(data)):
+        for train, validation, file_name in tqdm(data, desc="datasets", unit="dataset", total=len(data), colour="blue"):
             # split the train and validation data:
             x_train = train.drop("default", axis=1)
             y_train = train["default"]

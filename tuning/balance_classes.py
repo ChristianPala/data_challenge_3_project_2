@@ -287,7 +287,7 @@ def balance_classes_main(suppress_print=True) -> None:
         shutil.rmtree(balanced_datasets_path)
     balanced_datasets_path.mkdir(exist_ok=True)
 
-    for file in tqdm(csv_files, desc="Balancing the datasets", unit='file', total=len(csv_files)):
+    for file in tqdm(csv_files, desc="Balancing the datasets", unit='file', total=len(csv_files), colour="green"):
         # read the csv file:
         dataframe = pd.read_csv(file)
         # Split the data:

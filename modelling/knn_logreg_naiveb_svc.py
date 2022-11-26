@@ -106,7 +106,7 @@ def other_models_main() -> None:
     naive_bayes_model: GaussianNB = create_naive_bayes_model()
 
     # loop through the csv files:
-    for csv_file in tqdm(csv_files, desc='Other models', unit='file', total=len(csv_files)):
+    for csv_file in tqdm(csv_files, desc='Other models', unit='file', total=len(csv_files), colour='green'):
         # read the csv file:
         df = pd.read_csv(csv_file, index_col=0)
         # split the data into train and test:

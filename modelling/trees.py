@@ -83,7 +83,7 @@ def trees_main() -> None:
         shutil.rmtree(trees_results_path, ignore_errors=True)
     trees_results_path.mkdir(exist_ok=True, parents=True)
 
-    for csv_file in tqdm(csv_files, desc='Tree models', unit='file', total=len(csv_files)):
+    for csv_file in tqdm(csv_files, desc='Tree models', unit='file', total=len(csv_files), colour='green'):
         # read the data:
         df = pd.read_csv(csv_file)
         # get the preprocessing steps from the name:
@@ -91,7 +91,7 @@ def trees_main() -> None:
         # split the data:
         x_train, x_val, _, y_train, y_val, _ = split_data(df, 'default', validation=True)
         # loop through the model types:
-        for model_type in model_types:
+        for model_type in tqdm(model_types, desc='Model types', unit='model', total=len(model_types), colour='blue'):
             # generate the model:
             model = generate_tree_model(model_type=model_type)
             # fit the model:

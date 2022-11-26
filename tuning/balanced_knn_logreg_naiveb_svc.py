@@ -29,7 +29,7 @@ def balanced_other_models_main() -> None:
     sub_folder = ["borderline_smote", "oversampled", "smote", "smote_tomek_links", "undersampled"]
 
     # For each sub-folder in the balanced datasets' folder:
-    for sub in tqdm(sub_folder, desc="other models balanced", unit="folder", total=len(sub_folder)):
+    for sub in tqdm(sub_folder, desc="other models balanced", unit="folder", total=len(sub_folder), colour="green"):
         # Load the data:
         data = load_balanced_datasets(balanced_datasets_path / sub)
         # For each dataset:
