@@ -15,7 +15,6 @@ from imblearn.under_sampling import RandomUnderSampler
 from imblearn.pipeline import Pipeline
 from imblearn.combine import SMOTETomek
 
-
 # Global variables:
 # Path to the data folder:
 data_path = Path("..", "data")
@@ -210,6 +209,63 @@ def smote_tomek(train: pd.DataFrame, target: str) -> pd.DataFrame:
     return df
 
 
+def save_dataframes(train: pd.DataFrame, val: pd.DataFrame, test: pd.DataFrame, path: Path) -> None:
+    """
+    Save the dataframes to disk, auxiliary function to perform_balancing.
+    @param train: the training dataframe
+    @param val: the validation dataframe
+    @param test: the test dataframe
+    @param path: the path to save the dataframes
+    :return: None
+    """
+    # ensure the path exists
+    path.mkdir(parents=True, exist_ok=True)
+
+    # save the dataframes
+    train.to_csv(path / "train.csv", index=False)
+    val.to_csv(path / "val.csv", index=False)
+    test.to_csv(path / "test.csv", index=False)
+
+
+def perform_balancing(tr: pd.DataFrame, vl: pd.DataFrame, tst: pd.DataFrame, target: str, method: str,
+                      file_stem: str) -> None:
+    """
+    Perform the balancing of the dataframes and save them to disk.
+    @param tr: the training dataframe
+    @param vl: the validation dataframe
+    @param tst: the test dataframe
+    @param target: the target feature's name
+    @param method: the balancing method to use, one of:
+    - undersampled,
+    - oversampled,
+    - smote,
+    - borderline_smote,
+    - smote_tomek_links
+    @param file_stem: the path to save the dataframes to.
+    :return: None
+    """
+
+    # perform the rebalancing
+    if method == "undersampled":
+        tr = undersample_transform(tr, target)
+    elif method == "oversampled":
+        tr = oversample_transform(tr, target)
+    elif method == "smote":
+        tr = smote_transform(tr, target)
+    elif method == "borderline_smote":
+        tr = borderline_smote(tr, target)
+    elif method == "smote_tomek_links":
+        tr = smote_tomek(tr, target)
+    else:
+        raise ValueError(f"Unknown method {method}")
+
+    # remove project_2_dataset from the file stem
+    file_stem = file_stem.replace("project_2_dataset_", "")
+
+    # save the dataframes
+    save_dataframes(tr, vl, tst, Path(f"../data/balanced_training_datasets/{method}/{file_stem}"))
+
+
 @measure_time
 def balance_classes_main(suppress_print=True) -> None:
     """
@@ -217,11 +273,13 @@ def balance_classes_main(suppress_print=True) -> None:
     @param suppress_print: bool: whether to suppress the print statements.
     @return: None. Saves the csv files in the balanced_training_datasets folder.
     """
-    # get all the files in the missing_values_handled and scaling folders:
-    csv_files = list(missing_values_path.glob("*.csv")) + list(scaled_datasets_path.glob("*.csv"))
+    # get all the files in the scaling folder, since it performed better than the non-scaled data:
+    csv_files = list(scaled_datasets_path.glob("*.csv"))
+    # remove the "drop" and "most_frequent" strategies since the other missing value strategies performed better in
+    # all cases:
+    csv_files = [file for file in csv_files if "drop" not in file.name and "most_frequent" not in file.name]
 
     # clean the balanced_training_datasets folder:
-    balanced_datasets_path = Path(data_path, "balanced_training_datasets")
     if balanced_datasets_path.exists() and balanced_datasets_path.is_dir():
         shutil.rmtree(balanced_datasets_path)
     balanced_datasets_path.mkdir(exist_ok=True)
@@ -230,72 +288,18 @@ def balance_classes_main(suppress_print=True) -> None:
         # read the csv file:
         dataframe = pd.read_csv(file)
         # Split the data:
-        x_train, _, _, y_train, _, _ = split_data(dataframe, "default", validation=True)
+        x_train, x_val, x_test, y_train, y_val, y_test = split_data(dataframe, "default", validation=True)
         training_dataframe = pd.DataFrame(pd.concat([x_train, y_train], axis=1))
-        # Show the balance of the classes if not suppressed:
-        if not suppress_print:
-            print(f"Balance of classes in {file.name} before balancing:")
-            show_balance(training_dataframe)
-        # Under-sample the data:
-        under_sampled: pd.DataFrame = undersample_transform(training_dataframe, "default")
-        # Show the balance of the classes if not suppressed:
-        if not suppress_print:
-            print(f"Balance of classes in {file.name} after undersampling:")
-            show_balance(under_sampled)
-        # Save the undersampled data:
-        # Path to the undersampled data:
-        undersampled_path = Path(balanced_datasets_path, "undersampled")
-        undersampled_path.mkdir(exist_ok=True)
-        under_sampled.to_csv(Path(undersampled_path, f"training_under_sampled_{file.name}"), index=False)
+        validation_dataframe = pd.DataFrame(pd.concat([x_val, y_val], axis=1))
+        test_dataframe = pd.DataFrame(pd.concat([x_test, y_test], axis=1))
 
-        # Over-sample the data:
-        over_sampled: pd.DataFrame = oversample_transform(training_dataframe, "default")
-        if not suppress_print:
-            print(f"Balance of classes in {file.name} after oversampling:")
-            show_balance(over_sampled)
-        # Save the oversampled data:
-        # Path to the oversampled data:
-        oversampled_path = Path(balanced_datasets_path, "oversampled")
-        oversampled_path.mkdir(exist_ok=True)
-        over_sampled.to_csv(Path(oversampled_path, f"training_over_sampled_{file.name}"), index=False)
-
-        # SMOTE the data:
-        smote: pd.DataFrame = smote_transform(training_dataframe, "default")
-        # Show the balance of the classes:
-        if not suppress_print:
-            print(f"Balance of classes in {file.name} after SMOTE:")
-            show_balance(smote)
-        # Save the SMOTE data:
-        # Path to the SMOTE data:
-        smote_path = Path(balanced_datasets_path, "smote")
-        smote_path.mkdir(exist_ok=True)
-        smote.to_csv(Path(smote_path, f"training_smote_{file.name}"), index=False)
-
-        # Borderline SMOTE the data:
-        borderline_smote_df: pd.DataFrame = borderline_smote(training_dataframe, "default")
-        # Show the balance of the classes:
-        if not suppress_print:
-            print(f"Balance of classes in {file.name} after borderline SMOTE:")
-            show_balance(borderline_smote_df)
-        # Save the borderline SMOTE data:
-        # Path to the borderline SMOTE data:
-        borderline_smote_path = Path(balanced_datasets_path, "borderline_smote")
-        borderline_smote_path.mkdir(exist_ok=True)
-        borderline_smote_df.to_csv(Path(borderline_smote_path, f"training_borderline_smote_{file.name}"), index=False)
-
-        # SMOTE Tomek links the data:
-        smote_tomek_links: pd.DataFrame = smote_tomek(training_dataframe, "default")
-        # Show the balance of the classes:
-        if not suppress_print:
-            print(f"Balance of classes in {file.name} after SMOTE Tomek links:")
-            show_balance(smote_tomek_links)
-        # Save the SMOTE Tomek links data:
-        # Path to the tomek_links_smote data:
-        tomek_links_smote_path = Path(balanced_datasets_path, "tomek_links_smote")
-        tomek_links_smote_path.mkdir(exist_ok=True)
-        smote_tomek_links.to_csv(Path(tomek_links_smote_path, f"training_smote_tomek_links_{file.name}"), index=False)
+        # perform the balancing with all the methods:
+        methods = ["undersampled", "oversampled", "smote", "borderline_smote", "smote_tomek_links"]
+        for method in methods:
+            perform_balancing(training_dataframe, validation_dataframe, test_dataframe, "default", method, file.stem)
+            if not suppress_print:
+                print(f"Finished balancing with {method} for {file.stem}")
 
 
 if __name__ == "__main__":
     balance_classes_main()
-

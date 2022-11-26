@@ -7,10 +7,7 @@ from pathlib import Path
 import shutil
 
 # Global variables:
-results_path: Path = Path("..", "results")
-trees_results_path: Path = Path(results_path, "trees")
-neural_networks_results_path: Path = Path(results_path, "neural_network")
-other_models_results_path: Path = Path(results_path, "other_models")
+from config import trees_results_path, neural_networks_results_path, other_models_results_path
 
 
 # Functions:
@@ -25,7 +22,7 @@ def sort_results_by_f_1_score(path: Path) -> Path:
     # txt files are ordered by key, value pairs, f1 score is the first value.
     # Sort the models' results by their f1 score:
     models_results.sort(key=lambda x: float(x.read_text().split(",")[0].split(":")[1].split("\n")[0]))
-    # store the best model in the best_models subfolder:
+    # store the best model in the best_models sub-folder:
     best_models_path: Path = Path(path, "best_models")
     best_models_path.mkdir(parents=True, exist_ok=True)
     shutil.copy(models_results[-1], best_models_path)
@@ -57,6 +54,10 @@ def sort_all_results_by_f_1_score(suppress_print=False) -> None:
     This function sorts all the models in the results subfolders by their f1 score.
     :return: None.
     """
+
+    if not trees_results_path.exists() and neural_networks_results_path.exists() and other_models_results_path.exists():
+        raise FileNotFoundError("The results sub-folders do not exist. Please run the base models first.")
+
     tree: Path = sort_results_by_f_1_score(trees_results_path)
     nn: Path = sort_results_by_f_1_score(neural_networks_results_path)
     other: Path = sort_results_by_f_1_score(other_models_results_path)

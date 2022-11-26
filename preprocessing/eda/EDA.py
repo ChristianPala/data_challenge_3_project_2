@@ -2,21 +2,20 @@
 # Libraries:
 # Data manipulation:
 from pathlib import Path
-
-import matplotlib
 # Plotting:
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import seaborn as sns
-
+# Timing:
+from auxiliary.method_timer import measure_time
 # Global variables:
-plot_path: Path = Path('plots')
-data_path: Path = Path('..', '..', 'data')
+from config import plot_path, csv_file_path
+if not plot_path:
+    plot_path.mkdir(parents=True, exist_ok=True)
 
 
 # Functions:
-
 def category_mapping(feature_name: str) -> dict[int, str]:
     """
     Map the category labels to their corresponding values, auxiliary function for the legend
@@ -52,8 +51,6 @@ def plot_correlation_matrix(df: pd.DataFrame) -> None:
     """
     # select only the numerical features:
     numerical_features = df.select_dtypes(exclude='category').columns
-    # exclude the id column:
-    numerical_features = numerical_features.drop('id')
     # compute the correlation matrix:
     corr_matrix = df[numerical_features].corr('spearman')
     # mask the upper triangle:
@@ -145,7 +142,7 @@ def plot_numerical_correlation_with_target(df: pd.DataFrame, target: str) -> Non
     :return: None
     """
     # remove the id and the target:
-    features = df.drop(['id', target], axis=1)
+    features = df.drop([target], axis=1)
     # compute the correlation matrix on the numerical features:
     corr_matrix = features.corrwith(df[target], method='spearman', numeric_only=True)
     # plot the correlation matrix:
@@ -199,13 +196,24 @@ def plot_categorical_correlation_with_target(df: pd.DataFrame, target: str) -> N
     plt.close()
 
 
-def main() -> None:
+@measure_time
+def eda_main() -> None:
     """
     Main function.
     :return: None. Plot the correlation matrix and the distribution of the categorical features.
     """
-    # Load the pickle file:
-    df: pd.DataFrame = pd.read_pickle(Path(data_path, 'project_2_dataset.pkl'))
+    # Load the dataset:
+    if not csv_file_path.exists():
+        raise FileNotFoundError(f'Invalid data path: {csv_file_path}')
+
+    df = pd.read_csv(csv_file_path)
+
+    # Name of the categorical features from the dataset information:
+    categorical_features: list[str] = ["gender", "education", "marriage", "pay_stat_sep", "pay_stat_aug",
+                                       "pay_stat_jul",
+                                       "pay_stat_jun", "pay_stat_may", "pay_stat_apr", "default"]
+    # Assign the categorical features:
+    df[categorical_features] = df[categorical_features].astype('category')
 
     # Plot the correlation matrix:
     plot_correlation_matrix(df)
@@ -222,11 +230,10 @@ def main() -> None:
     # Plot the correlation of the categorical features with the target:
     plot_categorical_correlation_with_target(df, target='default')
 
-    # TODO: study the target variable and the features that are highly correlated with it.
 
-
+# Driver:
 if __name__ == '__main__':
-    main()
+    eda_main()
 
     """
     None of the features is very highly correlated with the target, which implies a good model

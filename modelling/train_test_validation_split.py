@@ -1,21 +1,14 @@
 # Auxiliary library for splitting the data into train, test and validation sets using
-# sklearn.model_selection.train_test_split.
-from typing import Union, Tuple, Any
 
 # Libraries:
 import pandas as pd
 import numpy as np
 
-
-# Data manipulation:
-from pathlib import Path
-
 # Splitting the data:
 from sklearn.model_selection import train_test_split
 
-
-# Global variables:
-data_path = Path("..", "data")
+# Type hints:
+from typing import Union
 
 
 # Functions:

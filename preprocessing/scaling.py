@@ -14,14 +14,7 @@ from preprocessing.features_skeweness_handling import skewness_main
 from auxiliary.method_timer import measure_time
 
 # Global variables:
-# Path to the data folder:
-data_path = Path("..", "data")
-# Path to the missing_values_handled folder:
-missing_values_path = Path(data_path, "missing_values_handled")
-missing_values_path.mkdir(exist_ok=True)
-# path to the scaling data:
-scaled_datasets_path = Path("..", "data", "scaled_datasets")
-scaled_datasets_path.mkdir(exist_ok=True)
+from config import scaled_datasets_path, missing_values_path
 
 
 def scale_data(training: pd.DataFrame, validation: pd.DataFrame, testing: pd.DataFrame,
@@ -91,6 +84,10 @@ def scaling_main() -> None:
     @param: filename: str: default = project_2_dataset_unsupervised_imputation.csv: the name of the csv file to scale.
     :return: None: execute the scaling library.
     """
+
+    if not missing_values_path.exists():
+        raise FileNotFoundError("The missing values path does not exist. Cannot scale the data.")
+
     # get all the csv files in the missing_values_handled folder:
     csv_files: list[Path] = list(missing_values_path.glob("*.csv"))
 

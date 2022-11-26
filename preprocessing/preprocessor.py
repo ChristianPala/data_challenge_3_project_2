@@ -16,17 +16,10 @@ from modelling.train_test_validation_split import split_data
 # pd.set_option('display.max_columns', None)
 
 # Global variables:
-# Path to the dataset:
-data_path: Path = Path('..', 'data')
-# Path to the Excel file:
-excel_file: Path = Path(data_path, 'Project 2 Dataset.xls')
-# Raise an error if the dataframe is not in the directory:
+from config import excel_file, missing_values_path
+
 if not excel_file.is_file():
-    raise FileNotFoundError('The dataset is not in the directory.')
-# Other paths:
-# Path to the preprocessed data:
-missing_values_path = Path(data_path, "missing_values_handled")
-missing_values_path.mkdir(parents=True, exist_ok=True)
+    raise FileNotFoundError('The dataset is not in the directory. Please download it from the course website.')
 
 
 # Functions:
