@@ -1,13 +1,19 @@
 # main file to run the project pipeline:
-from modelling.knn_logreg_naiveb_svc import other_models_main
-from modelling.sort_base_models_by_f_1_score import sort_all_results_by_f_1_score
+# Libraries:
+# Main files for the project:
 from preprocessing.eda.EDA import eda_main
 from preprocessing.preprocessor import preprocessor_main
 from feature_engineering.create_features import feature_engineering_main
-from modelling.trees import trees_main
 from preprocessing.scaling import scaling_main
+from modelling.trees import trees_main
 from modelling.neural_network import neural_network_main
+from modelling.knn_logreg_naiveb_svc import other_models_main
+from modelling.model_evaluator import sort_all_results_by_f_1_score
 from tuning.balance_classes import balance_classes_main
+from tuning.balanced_trees import balanced_trees_main
+from tuning.balanced_neural_network import balanced_neural_network_main
+from tuning.balanced_knn_logreg_naiveb_svc import balanced_other_models_main
+from tqdm import tqdm
 
 
 def main() -> None:
@@ -28,11 +34,22 @@ def main() -> None:
     neural_network_main()
     other_models_main()
     sort_all_results_by_f_1_score()
+    """
+    Augmented datasets are usually better than the original ones.
+    Supervised and unsupervised imputation are usually better than most frequent and drop.
+    Scaled datasets are usually better than the original ones.
+    We will proceed with the augmented datasets, (un)-supervised imputation and scaled datasets.
+    """
     # Tuning:
     # ----------------------------------------------
-    # Undersampling , oversampling and SMOTE:
+    # Under-sampling , over-sampling and SMOTE variants:
     balance_classes_main()
-    # ...
+    balanced_trees_main()
+    balanced_neural_network_main()
+    balanced_other_models_main()
+    # tuned trees:
+    # tuned neural network:
+    # tuned other models:
     # Explaining:
     # ----------------------------------------------
     # ...

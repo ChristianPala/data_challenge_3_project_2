@@ -1,7 +1,9 @@
-# Library with the global paths:
+# Configuration file for the project.
+# Path: config.py
+# Libraries:
 from pathlib import Path
-
 # Global variables:
+# ------------------------------------------------------------
 project_root_path: Path = Path(__file__).parent
 # Data folder:
 data_path: Path = Path(project_root_path, "data")
@@ -25,3 +27,14 @@ csv_file_path = Path(missing_values_path, 'project_2_dataset_drop.csv')
 trees_results_path: Path = Path(results_path, "trees_baseline")
 neural_networks_results_path: Path = Path(results_path, "neural_network_baseline")
 other_models_results_path: Path = Path(results_path, "other_models_baseline")
+# sub-folders for the results of the balanced models:
+trees_balanced_results_path: Path = Path(results_path, "trees_balanced")
+neural_networks_balanced_results_path: Path = Path(results_path, "neural_network_balanced")
+other_models_balanced_results_path: Path = Path(results_path, "other_models_balanced")
+# sub-folders for the results of the tuned models:
+trees_tuned_results_path: Path = Path(results_path, "trees_tuned")
+neural_tuned_results_path: Path = Path(results_path, "neural_network_tuned")
+other_models_tuned_results_path: Path = Path(results_path, "other_models_tuned")
+# sub-folders for the model explainability folders:
+# ...
+# ------------------------------------------------------------
