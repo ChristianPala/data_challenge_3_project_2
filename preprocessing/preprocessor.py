@@ -1,57 +1,32 @@
 # Library to preprocess the creditor data from project 2 of the Data Challenge III course.
-
-"""
-Information about the dataset from professor Mitrovic in the Data Challenge III course (Project 2)
-introduction slides:
-
-Current available amount of credit in NT dollars:
-•LIMIT_BAL: Amount of the given credit: it includes both the individual
-
-Demographic:
-consumer credit and his/her family (supplementary) credit
-•GENDER: Gender (1 = male; 2 = female).
-•EDUCATION: Education (1 = graduate school; 2 = university; 3 = high school; 4 = others)
-•MARRIAGE: Marital status (1 = married; 2 = single; 3 = others)
-•AGE: Age (year)
-* Further clarification, 0 can be interpreted as a missing value.
-
-•History of past payment:
-•PAY_1 - PAY_6: Past monthly payment records (from April to September, 2005)
-as follows: PAY_1 = the repayment status in September, 2005;
-PAY_2 = the repayment status in August, 2005; . . .;
-PAY_6 = the repayment status in April, 2005.
-•The measurement scale for the repayment status is:
- -2: No consumption; -1: Paid in full; 0: The use of revolving credit;
- 1 = payment delay for one month; 2 = payment delay for two months; . . .;
- 8 = payment delay for eight months; 9 = payment delay for nine months and above
-
-•Amount of bill statement:
-•BILL_AMT1 - BILL_AMT6: BILL_AMT1 = amount of bill statement in September, 2005;
-BILL_AMT2 = amount of bill statement in August, 2005; . . .;
-BILL_AMT6 = amount of bill statement in April, 2005.•Amount of previous payment:
-•PAY_AMT1 - PAY_AMT6: PAY_AMT1 = amount paid in September, 2005;
-PAY_AMT2 = amount paid in August, 2005; . . .; PAY_AMT6 = amount paid in April, 2005
-"""
 # Libraries:
 # Data manipulation:
 from pathlib import Path
 import shutil
+import numpy as np
 import pandas as pd
-
+# Timing
 from auxiliary.method_timer import measure_time
-# imputation:
+# Imputation:
 from preprocessing.missing_values_handling import handle_missing_values
+# Modelling
+from modelling.train_test_validation_split import split_data
 
 # Console options:
 # pd.set_option('display.max_columns', None)
 
-
 # Global variables:
 # Path to the dataset:
 data_path: Path = Path('..', 'data')
+# Path to the Excel file:
 excel_file: Path = Path(data_path, 'Project 2 Dataset.xls')
-
+# Raise an error if the dataframe is not in the directory:
+if not excel_file.is_file():
+    raise FileNotFoundError('The dataset is not in the directory.')
+# Other paths:
+# Path to the preprocessed data:
 missing_values_path = Path(data_path, "missing_values_handled")
+missing_values_path.mkdir(parents=True, exist_ok=True)
 
 
 # Functions:
@@ -116,26 +91,21 @@ def rename_columns(dataframe: pd.DataFrame) -> pd.DataFrame:
     return dataframe
 
 
-def assign_categories(dataframe: pd.DataFrame) -> pd.DataFrame:
+def remap_education_and_marriage(dataframe: pd.DataFrame) -> pd.DataFrame:
     """
-    Assign categories to the categorical features.
+    Correct the values of the education column.
     @param dataframe: pd.DataFrame: the dataframe containing the dataset.
     :return: pd.DataFrame: the dataframe with the categorical features as categories.
     """
-    # Name of the categorical features from the dataset information:
-    categorical_features: list[str] = ["gender", "education", "marriage", "pay_stat_sep", "pay_stat_aug",
-                                       "pay_stat_jul",
-                                       "pay_stat_jun", "pay_stat_may", "pay_stat_apr", "default"]
-
     # Education has 0, 5, 6 as values, which are not in the description of the dataset, after clarification
     # with professor Mitrovic we will map them 5 and 6 to 4 (others), 0 is a missing value:
     # which is the value for "others":
     dataframe["education"] = dataframe["education"].map({1: 1, 2: 2, 3: 3, 4: 4, 5: 4, 6: 4})
     # Marriage has 0 as a value, which is not in the description of the dataset, after clarification
     # we consider it as a missing value and solve the issue before assigning the categories.
-
-    # Assign categories to the categorical features:
-    dataframe[categorical_features] = dataframe[categorical_features].astype('category')
+    # Properly assign the 14 education and 54 marriage missing values to NaN values:
+    dataframe["education"].replace(0, np.nan, inplace=True)
+    dataframe["marriage"].replace(0, np.nan, inplace=True)
 
     return dataframe
 
@@ -180,25 +150,38 @@ def preprocessor_main(suppress_print=False) -> None:
     # Rename the columns:
     dataframe = rename_columns(dataframe)
 
-    # Handle missing values, save a copy for all methods supported:
+    # Assign categories to the categorical features:
+    dataframe = remap_education_and_marriage(dataframe).copy()
+
+    # split the dataset into training, testing and validation:
+    x_train, x_val, x_test, y_train, y_val, y_test = split_data(dataframe, 'default', validation=True)
+
+    # combine training, validation and testing:
+    training_dataframe = pd.DataFrame(pd.concat([x_train, y_train], axis=1))
+    validation_dataframe = pd.DataFrame(pd.concat([x_val, y_val], axis=1))
+    testing_dataframe = pd.DataFrame(pd.concat([x_test, y_test], axis=1))
+
+    # missing values imputation methods:
     methods: list[str] = ["drop", "most_frequent_imputation", "supervised_imputation", "unsupervised_imputation"]
+
+    # preprocess the training, validation and testing datasets:
     for method in methods:
-        # make a copy of the dataframe:
-        dataframe_copy: pd.DataFrame = dataframe.copy()
-        # handle missing values:
-        dataframe_copy = handle_missing_values(dataframe_copy, method)
-        # Assign categories to the categorical features:
-        dataframe_copy = assign_categories(dataframe_copy)
+        # preprocess the training dataset:
+        training_dataframe = handle_missing_values(training_dataframe, method)
+        # preprocess the validation dataset:
+        validation_dataframe = handle_missing_values(validation_dataframe, method)
+        # preprocess the testing dataset:
+        testing_dataframe = handle_missing_values(testing_dataframe, method)
 
-        # Save the data to pickle to maintain the categories:
-        # dataframe_copy.to_pickle(Path(data_path, f"project_2_dataset_{method}.pkl"))
+        # merge the training, validation and testing datasets:
+        dataframe = pd.DataFrame(pd.concat([training_dataframe, validation_dataframe, testing_dataframe],
+                                           axis=0))
+        # save the preprocessed dataset in the missing_values_path:
+        dataframe.to_csv(Path(missing_values_path, f"project_2_dataset_{method}.csv"), index=False)
 
-        # Save the data to csv:
-        dataframe_copy.to_csv(Path(missing_values_path, f"project_2_dataset_{method}.csv"), index=False)
-
-    if not suppress_print:
-        print("Preprocessing completed.")
-        print("-" * 100)
+        if not suppress_print:
+            print("Preprocessing completed.")
+            print("-" * 100)
 
 
 if __name__ == '__main__':

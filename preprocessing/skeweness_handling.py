@@ -366,8 +366,9 @@ def skewness_main(filename: str, suppress_print=False) -> pd.DataFrame:
 
     df = df.astype({feature: "category" for feature in categorical_features})
 
-    # set the id as the index:
-    df.set_index("id", inplace=True)
+    # set the id as the index if it exists:
+    if "id" in df.columns:
+        df.set_index("id", inplace=True)
 
     # shift the negative values to positive values with min + 1:
     df = shift_negative_values(df)
