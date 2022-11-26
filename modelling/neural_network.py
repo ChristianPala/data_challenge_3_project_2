@@ -86,7 +86,7 @@ def neural_network_main() -> None:
     # get all the csv files in the scaled_datasets folder:
     csv_files: list[Path] = list(scaled_datasets_path.glob('*.csv'))
 
-    for csv_file in tqdm(csv_files, desc='Neural networks', unit='file', total=len(csv_files)):
+    for csv_file in tqdm(csv_files, desc='Neural networks', unit='file', total=len(csv_files), colour='green'):
         # read the csv file:
         df = pd.read_csv(csv_file)
 
