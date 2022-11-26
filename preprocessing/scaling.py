@@ -9,7 +9,7 @@ import shutil
 from sklearn.preprocessing import RobustScaler, MinMaxScaler, StandardScaler, normalize
 # Modelling:
 from modelling.train_test_validation_split import split_data
-from preprocessing.skeweness_handling import skewness_main
+from preprocessing.features_skeweness_handling import skewness_main
 # Timing:
 from auxiliary.method_timer import measure_time
 
@@ -107,11 +107,11 @@ def scaling_main() -> None:
         # get the missing values method used to impute the data:
         missing_values_method = file.stem.split("_")[3:]
 
-        methods = ["Standard", "MinMax", "Robust"]
+        methods = ["standard_scaler", "minmax_scaler", "robust_scaler"]
 
         for method in methods:
 
-            if method in ["Standard", "Robust"]:
+            if method in ["standard_scaler", "robust_scaler"]:
                 # in this case we need to transform the data to be approximately normally distributed:
                 dataframe = skewness_main(file, suppress_print=True)
 
@@ -128,7 +128,7 @@ def scaling_main() -> None:
                              index=False)
 
             # Normalize the data if the method is Standard or Robust, since min-max scaling is already normalized:
-            if method in ["Standard", "Robust"]:
+            if method in ["standard_scaler", "robust_scaler"]:
                 dataframe: pd.DataFrame = normalize_data(x_train, x_val, x_test, x_train.columns)
 
                 # add back the target column:

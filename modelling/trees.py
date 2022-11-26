@@ -26,8 +26,6 @@ from auxiliary.method_timer import measure_time
 # Global variables
 missing_values_handled_path = Path("..", "data", "missing_values_handled")
 results_path = Path('..', 'results')
-trees_results_path = Path(results_path, 'trees')
-trees_results_path.mkdir(parents=True, exist_ok=True)
 
 
 def generate_tree_model(model_type: str) -> BaseEstimator:
@@ -97,14 +95,20 @@ def evaluate_model(y_test: np.array, y_pred: np.array) -> dict[str, float]:
     }
 
 
-def save_evaluation_results(evaluation_results: dict, model_type: str, name_addition: str = None) -> None:
+def save_evaluation_results(evaluation_results: dict, model_type: str, name_addition: str = None,
+                            path_addition: Path = None) -> None:
     """
     This function saves the evaluation results to a file.
     @param evaluation_results: dict: the dictionary with the evaluation results.
     @param model_type: str: the type of the model.
     @param name_addition: str: default = None: the name addition to the file name to save the results.
+    @param path_addition: Path: default = None: the path addition to the file name to save the results.
     :return: None. Saves the results to a file in the results' folder.
     """
+    trees_results_path = Path(results_path, 'trees')
+
+    if path_addition:
+        trees_results_path = Path(trees_results_path, path_addition)
 
     # write the results to a file:
     with open(trees_results_path / f'{model_type}_base_evaluation_results_{name_addition}.txt', 'w') as f:
@@ -132,6 +136,7 @@ def trees_main() -> None:
     model_types: list[str] = ['decision_tree', 'random_forest', 'gradient_boosting', 'xgboost']
 
     # clean the trees results' directory:
+    trees_results_path = Path(results_path, 'trees')
     if trees_results_path.exists() and trees_results_path.is_dir():
         shutil.rmtree(trees_results_path, ignore_errors=True)
     trees_results_path.mkdir(exist_ok=True, parents=True)

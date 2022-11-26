@@ -24,8 +24,6 @@ from auxiliary.method_timer import measure_time
 # Global variables:
 scaled_datasets_path: Path = Path("..", "data", "scaled_datasets")
 results_path: Path = Path("..", "results")
-other_models_results_path: Path = Path(results_path, "other_models")
-other_models_results_path.mkdir(parents=True, exist_ok=True)
 
 
 # Functions:
@@ -111,14 +109,22 @@ def evaluate_model(y_test: np.array, y_pred: np.array) -> dict[str, float]:
     }
 
 
-def save_evaluation_results(evaluation_results: dict, model_type: str, name_addition: str = None) -> None:
+def save_evaluation_results(evaluation_results: dict, model_type: str, name_addition: str = None,
+                            path_addition: Path = None) -> None:
     """
     This function saves the evaluation results to a file.
     @param evaluation_results: dict: the dictionary with the evaluation results.
     @param model_type: str: the type of the model.
     @param name_addition: str: default = None: the name addition to the file name to save the results.
+    @param path_addition: Path: default = None: the path addition to the path to save the results.
     :return: None. Saves the results to a file in the results' folder.
     """
+
+    other_models_results_path: Path = Path(results_path, "other_models")
+    other_models_results_path.mkdir(parents=True, exist_ok=True)
+
+    if path_addition:
+        other_models_results_path = Path(other_models_results_path, path_addition)
 
     # write the results to a file:
     with open(other_models_results_path / f'{model_type}_base_evaluation_results_{name_addition}.txt', 'w') as f:
@@ -134,7 +140,7 @@ def save_evaluation_results(evaluation_results: dict, model_type: str, name_addi
 
 
 @measure_time
-def other_models_main() -> None:
+def other_models_main(additonal_subfolder_path: str = None) -> None:
     """
     This function creates the knn, logistic regression and svm base models and evaluates them
     on the project's dataset
@@ -144,9 +150,10 @@ def other_models_main() -> None:
     csv_files: list[Path] = list(scaled_datasets_path.glob('*.csv'))
 
     # clean the neural networks results' directory:
+    other_models_results_path: Path = Path(results_path, "other_models")
     if other_models_results_path.exists() and other_models_results_path.is_dir():
         shutil.rmtree(other_models_results_path, ignore_errors=True)
-    other_models_results_path.mkdir(exist_ok=True, parents=True)
+    other_models_results_path.mkdir(parents=True, exist_ok=True)
 
     # create the models:
     knn_model: KNeighborsClassifier = create_knn_model()
@@ -181,6 +188,12 @@ def other_models_main() -> None:
         svm_evaluation_results = evaluate_model(y_test, svm_y_pred)
 
         # save the results:
+        if additonal_subfolder_path is not None:
+            save_evaluation_results(knn_evaluation_results, 'knn', additonal_subfolder_path)
+            save_evaluation_results(logreg_evaluation_results, 'logreg', additonal_subfolder_path)
+            save_evaluation_results(naive_bayes_evaluation_results, 'naive_bayes', additonal_subfolder_path)
+            save_evaluation_results(svm_evaluation_results, 'svm', additonal_subfolder_path)
+
         save_evaluation_results(knn_evaluation_results, 'knn', csv_file.stem)
         save_evaluation_results(logreg_evaluation_results, 'logreg', csv_file.stem)
         save_evaluation_results(naive_bayes_evaluation_results, 'naive_bayes', csv_file.stem)

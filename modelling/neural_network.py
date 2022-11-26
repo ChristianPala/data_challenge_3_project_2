@@ -21,7 +21,6 @@ from auxiliary.method_timer import measure_time
 # Global variables:
 results_path: Path = Path("..", "results")
 results_path.mkdir(parents=True, exist_ok=True)
-neural_network_results_path: Path = Path(results_path, "neural_network")
 scaled_datasets_path: Path = Path("..", "data", "scaled_datasets")
 
 
@@ -92,14 +91,22 @@ def evaluate_model(y_test: np.array, y_pred: np.array) -> dict[str, float]:
     }
 
 
-def save_evaluation_results(evaluation_results: dict, model_type: str, name_addition: str = None) -> None:
+def save_evaluation_results(evaluation_results: dict, model_type: str, name_addition: str = None,
+                            path_addition: Path = None) -> None:
     """
     This function saves the evaluation results to a file.
     @param evaluation_results: dict: the dictionary with the evaluation results.
     @param model_type: str: the type of the model.
     @param name_addition: str: default = None: the name addition to the file name to save the results.
+    @param path_addition: Path: default = None: the path addition to the path to save the results.
     :return: None. Saves the results to a file in the results' folder.
     """
+
+    neural_network_results_path: Path = Path(results_path, "neural_network")
+    neural_network_results_path.mkdir(parents=True, exist_ok=True)
+
+    if path_addition:
+        neural_network_results_path = Path(neural_network_results_path, path_addition)
 
     # write the results to a file:
     with open(neural_network_results_path / f'{model_type}_base_evaluation_results_{name_addition}.txt', 'w') as f:
@@ -121,10 +128,11 @@ def neural_network_main() -> None:
     Main method to execute the neural network library.
     :return: None.
     """
-    # get all the csv files in the missing_values_handled folder
+    # get all the csv files in the scaled_datasets folder:
     csv_files: list[Path] = list(scaled_datasets_path.glob('*.csv'))
 
     # clean the neural networks results' directory:
+    neural_network_results_path: Path = Path(results_path, "neural_network")
     if neural_network_results_path.exists() and neural_network_results_path.is_dir():
         shutil.rmtree(neural_network_results_path, ignore_errors=True)
     neural_network_results_path.mkdir(exist_ok=True, parents=True)

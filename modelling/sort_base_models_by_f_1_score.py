@@ -61,16 +61,11 @@ def sort_all_results_by_f_1_score(suppress_print=False) -> None:
     nn: Path = sort_results_by_f_1_score(neural_networks_results_path)
     other: Path = sort_results_by_f_1_score(other_models_results_path)
 
-    tree_score: float = float(tree.read_text().split(",")[0].split(":")[1].split("\n")[0])
-    nn_score: float = float(nn.read_text().split(",")[0].split(":")[1].split("\n")[0])
-    other_score: float = float(other.read_text().split(",")[0].split(":")[1].split("\n")[0])
-
     best = get_best_overall_model(tree, nn, other)
+
     best_score = best.read_text().split(",")[0].split(":")[1].split("\n")[0]
     model_description: str = best.name.split('.')[0].replace('_', ' ') \
-        .replace('base evaluation results project 2 dataset ', 'with ')
-    model_description = model_description.rsplit(' ', 1)[0] + ", imputation strategy: " + \
-                        model_description.rsplit(' ', 1)[1]
+        .replace('base evaluation results project 2 dataset ', '')
 
     if not suppress_print:
         print(f"The best overall base model is {model_description}, with an f1 score of {round(float(best_score), 3)}")
