@@ -1,31 +1,25 @@
 # modelling with decision trees, random forests and gradient boosting
-import shutil
-
 # Libraries
+# Data manipulation
 import pandas as pd
 import numpy as np
-
-# Data manipulation
 from pathlib import Path
-
-
+import shutil
 # Modelling
 from sklearn.base import BaseEstimator
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
 from xgboost import XGBClassifier
 from modelling.train_test_validation_split import split_data
-
 # Metrics
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, roc_auc_score, confusion_matrix, \
     classification_report
-
 # Timing:
 from auxiliary.method_timer import measure_time
-
 # Global variables
-missing_values_handled_path = Path("..", "data", "missing_values_handled")
-results_path = Path('..', 'results')
+from config import missing_values_path, trees_results_path
+if not trees_results_path.exists():
+    trees_results_path.mkdir(parents=True)
 
 
 def generate_tree_model(model_type: str) -> BaseEstimator:
@@ -105,13 +99,11 @@ def save_evaluation_results(evaluation_results: dict, model_type: str, name_addi
     @param path_addition: Path: default = None: the path addition to the file name to save the results.
     :return: None. Saves the results to a file in the results' folder.
     """
-    trees_results_path = Path(results_path, 'trees')
 
-    if path_addition:
-        trees_results_path = Path(trees_results_path, path_addition)
+    path = trees_results_path / path_addition if path_addition else trees_results_path
 
     # write the results to a file:
-    with open(trees_results_path / f'{model_type}_base_evaluation_results_{name_addition}.txt', 'w') as f:
+    with open(path / f'{model_type}_base_evaluation_results_{name_addition}.txt', 'w') as f:
         for key, value in evaluation_results.items():
             if key == 'confusion_matrix':
                 f.write(f'{key}\n {value}\n')
@@ -132,11 +124,11 @@ def trees_main() -> None:
     @return: None, saves the results in the results' folder.
     """
     # get all the csv files in the missing_values_handled folder
-    csv_files: list[Path] = list(missing_values_handled_path.glob('*.csv'))
+    if not missing_values_path.exists():
+        raise ValueError('The missing values file does not exist. Cannot continue.')
+    csv_files: list[Path] = list(missing_values_path.glob('*.csv'))
     model_types: list[str] = ['decision_tree', 'random_forest', 'gradient_boosting', 'xgboost']
 
-    # clean the trees results' directory:
-    trees_results_path = Path(results_path, 'trees')
     if trees_results_path.exists() and trees_results_path.is_dir():
         shutil.rmtree(trees_results_path, ignore_errors=True)
     trees_results_path.mkdir(exist_ok=True, parents=True)
@@ -147,7 +139,7 @@ def trees_main() -> None:
         # get the preprocessing steps from the name:
         preprocessing_steps: list[str] = csv_file.stem.split('_')[3:]
         # split the data:
-        x_train, x_test, y_train, y_test = split_data(df, 'default')
+        x_train, x_val, _, y_train, y_val, _ = split_data(df, 'default', validation=True)
         # loop through the model types:
         for model_type in model_types:
             # generate the model:
@@ -155,9 +147,9 @@ def trees_main() -> None:
             # fit the model:
             model = fit_model(model=model, x_train=x_train, y_train=y_train)
             # predict the target values:
-            y_pred = predict_model(model=model, x_test=x_test)
+            y_pred = predict_model(model=model, x_test=x_val)
             # evaluate the model:
-            evaluation_results = evaluate_model(y_test=y_test, y_pred=y_pred)
+            evaluation_results = evaluate_model(y_test=y_val, y_pred=y_pred)
             # save the results:
             save_evaluation_results(evaluation_results=evaluation_results, model_type=model_type,
                                     name_addition='_'.join(preprocessing_steps))

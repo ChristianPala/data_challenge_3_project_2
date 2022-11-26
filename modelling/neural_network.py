@@ -19,9 +19,10 @@ from modelling.train_test_validation_split import split_data
 from auxiliary.method_timer import measure_time
 
 # Global variables:
-results_path: Path = Path("..", "results")
-results_path.mkdir(parents=True, exist_ok=True)
-scaled_datasets_path: Path = Path("..", "data", "scaled_datasets")
+from config import results_path, scaled_datasets_path
+
+if not results_path.exists():
+    results_path.mkdir(parents=True, exist_ok=True)
 
 
 # Functions:
@@ -54,7 +55,7 @@ def fit_model(model: Sequential, x_train: np.array, y_train: np.array,  epochs: 
     @param epochs: int: default = 10: the number of epochs to train the model.
     :return: Fitted model object.
     """
-    model.fit(x_train, y_train, epochs=epochs)
+    model.fit(x_train, y_train, epochs=epochs, batch_size=32, verbose=0)
     return model
 
 
@@ -65,7 +66,7 @@ def predict_model(model: Sequential, x_test: np.array) -> np.array:
     @param x_test: np.array: the test data.
     :return: Predicted target values as np.array.
     """
-    return model.predict(x_test)
+    return model.predict(x_test, verbose=0)
 
 
 def evaluate_model(y_test: np.array, y_pred: np.array) -> dict[str, float]:
@@ -128,6 +129,9 @@ def neural_network_main() -> None:
     Main method to execute the neural network library.
     :return: None.
     """
+    if not scaled_datasets_path.exists():
+        raise FileNotFoundError('The scaled datasets folder and files do not exist. Create them first.')
+
     # get all the csv files in the scaled_datasets folder:
     csv_files: list[Path] = list(scaled_datasets_path.glob('*.csv'))
 
@@ -144,7 +148,7 @@ def neural_network_main() -> None:
         df = pd.read_csv(csv_file)
 
         # split the data into train and test:
-        x_train, x_test, y_train, y_test = split_data(df, 'default')
+        x_train, x_val, _, y_train, y_val, _ = split_data(df, 'default', validation=True)
 
         # if the dataset is not augmented, the size is 23, else it's 26:
         if 'augmented' in csv_file.name:
@@ -159,10 +163,10 @@ def neural_network_main() -> None:
         model = fit_model(model, x_train, y_train)
 
         # predict the target values:
-        y_pred = predict_model(model, x_test)
+        y_pred = predict_model(model, x_val)
 
         # evaluate the model:
-        evaluation_results = evaluate_model(y_test, y_pred)
+        evaluation_results = evaluate_model(y_val, y_pred)
 
         # save the evaluation results:
         save_evaluation_results(evaluation_results=evaluation_results,
@@ -174,4 +178,5 @@ def neural_network_main() -> None:
 
 if __name__ == '__main__':
     neural_network_main()
+
 

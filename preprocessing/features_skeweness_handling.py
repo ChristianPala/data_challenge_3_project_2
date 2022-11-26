@@ -9,11 +9,13 @@ from sklearn.ensemble import IsolationForest
 from auxiliary.method_timer import measure_time
 
 # Global variables:
-data_path = Path("..", "data")
-# logs path:
-logs_path = Path("..", "logs")
+from config import logs_path
+
+if not logs_path.exists():
+    logs_path.mkdir(parents=True)
 
 
+# Functions:
 def boxcox_transform(df: pd.DataFrame, columns: list[str]) -> pd.DataFrame:
     """
     Boxcox transform the columns in the dataframe, following the SciPy implementation:
@@ -254,5 +256,6 @@ def skewness_main(filename: str, suppress_print=False) -> pd.DataFrame:
     return df
 
 
+# Driver
 if __name__ == '__main__':
     skewness_main()

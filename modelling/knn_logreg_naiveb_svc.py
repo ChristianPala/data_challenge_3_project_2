@@ -5,7 +5,6 @@
 from pathlib import Path
 import numpy as np
 import shutil
-
 import pandas as pd
 # Modelling:
 from sklearn.base import BaseEstimator
@@ -13,17 +12,13 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.svm import SVC
 from sklearn.naive_bayes import GaussianNB
-
 from sklearn.metrics import f1_score, accuracy_score, precision_score, recall_score, roc_auc_score, \
     classification_report, confusion_matrix
 from modelling.train_test_validation_split import split_data
-
 # Timing:
 from auxiliary.method_timer import measure_time
-
 # Global variables:
-scaled_datasets_path: Path = Path("..", "data", "scaled_datasets")
-results_path: Path = Path("..", "results")
+from config import results_path, scaled_datasets_path, other_models_results_path
 
 
 # Functions:
@@ -140,17 +135,19 @@ def save_evaluation_results(evaluation_results: dict, model_type: str, name_addi
 
 
 @measure_time
-def other_models_main(additonal_subfolder_path: str = None) -> None:
+def other_models_main(additional_sub_folder_path: str = None) -> None:
     """
     This function creates the knn, logistic regression and svm base models and evaluates them
     on the project's dataset
     """
+    if not scaled_datasets_path.exists():
+        raise FileNotFoundError(f'The path {scaled_datasets_path} does not exist. '
+                                f'Please create the scaled datasets first.')
 
     # get all the csv files in the missing_values_handled folder
     csv_files: list[Path] = list(scaled_datasets_path.glob('*.csv'))
 
-    # clean the neural networks results' directory:
-    other_models_results_path: Path = Path(results_path, "other_models")
+    # clean the results folder
     if other_models_results_path.exists() and other_models_results_path.is_dir():
         shutil.rmtree(other_models_results_path, ignore_errors=True)
     other_models_results_path.mkdir(parents=True, exist_ok=True)
@@ -166,7 +163,7 @@ def other_models_main(additonal_subfolder_path: str = None) -> None:
         # read the csv file:
         df = pd.read_csv(csv_file, index_col=0)
         # split the data into train and test:
-        x_train, x_test, y_train, y_test = split_data(df, 'default')
+        x_train, x_val, _, y_train, y_val, _ = split_data(df, 'default', validation=True)
 
         # fit the models:
         knn_model = fit_model(knn_model, x_train, y_train)
@@ -174,25 +171,24 @@ def other_models_main(additonal_subfolder_path: str = None) -> None:
         naive_bayes_model = fit_model(naive_bayes_model, x_train, y_train)
         svm_model = fit_model(svm_model, x_train, y_train)
 
-
         # predict the target values:
-        knn_y_pred = predict(knn_model, x_test)
-        logreg_y_pred = predict(logreg_model, x_test)
-        naive_bayes_y_pred = predict(naive_bayes_model, x_test)
-        svm_y_pred = predict(svm_model, x_test)
+        knn_y_pred = predict(knn_model, x_val)
+        logreg_y_pred = predict(logreg_model, x_val)
+        naive_bayes_y_pred = predict(naive_bayes_model, x_val)
+        svm_y_pred = predict(svm_model, x_val)
 
         # evaluate the models:
-        knn_evaluation_results = evaluate_model(y_test, knn_y_pred)
-        logreg_evaluation_results = evaluate_model(y_test, logreg_y_pred)
-        naive_bayes_evaluation_results = evaluate_model(y_test, naive_bayes_y_pred)
-        svm_evaluation_results = evaluate_model(y_test, svm_y_pred)
+        knn_evaluation_results = evaluate_model(y_val, knn_y_pred)
+        logreg_evaluation_results = evaluate_model(y_val, logreg_y_pred)
+        naive_bayes_evaluation_results = evaluate_model(y_val, naive_bayes_y_pred)
+        svm_evaluation_results = evaluate_model(y_val, svm_y_pred)
 
         # save the results:
-        if additonal_subfolder_path is not None:
-            save_evaluation_results(knn_evaluation_results, 'knn', additonal_subfolder_path)
-            save_evaluation_results(logreg_evaluation_results, 'logreg', additonal_subfolder_path)
-            save_evaluation_results(naive_bayes_evaluation_results, 'naive_bayes', additonal_subfolder_path)
-            save_evaluation_results(svm_evaluation_results, 'svm', additonal_subfolder_path)
+        if additional_sub_folder_path is not None:
+            save_evaluation_results(knn_evaluation_results, 'knn', additional_sub_folder_path)
+            save_evaluation_results(logreg_evaluation_results, 'logreg', additional_sub_folder_path)
+            save_evaluation_results(naive_bayes_evaluation_results, 'naive_bayes', additional_sub_folder_path)
+            save_evaluation_results(svm_evaluation_results, 'svm', additional_sub_folder_path)
 
         save_evaluation_results(knn_evaluation_results, 'knn', csv_file.stem)
         save_evaluation_results(logreg_evaluation_results, 'logreg', csv_file.stem)
