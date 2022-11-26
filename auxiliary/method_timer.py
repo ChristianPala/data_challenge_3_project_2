@@ -5,6 +5,9 @@ from functools import wraps
 import time
 from typing import Callable, Any
 
+# Global variables:
+execution_times = {}
+
 
 # Functions:
 def measure_time(func: Callable) -> Callable:
@@ -21,6 +24,6 @@ def measure_time(func: Callable) -> Callable:
         total_time = end_time - start_time
         print(f'Function {func.__name__}{args} {kwargs} Took {total_time:.3f} seconds to complete')
         print("-" * 100)
+        execution_times[func.__name__] = total_time
         return result
     return timeit_wrapper
-

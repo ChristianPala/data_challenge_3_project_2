@@ -55,7 +55,7 @@ def balanced_neural_network_main() -> None:
         # Load the data:
         data = load_balanced_datasets(balanced_datasets_path / sub)
         # For each dataset:
-        for train, validation, file_name in tqdm(data, desc="datasets", unit="dataset", total=len(data), colour="blue"):
+        for train, validation, file_name in tqdm(data, desc="datasets", unit="dataset", colour="yellow"):
             # split the train and validation data:
             x_train = train.drop("default", axis=1)
             y_train = train["default"]
