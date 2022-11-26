@@ -27,7 +27,7 @@ def create_knn_model() -> KNeighborsClassifier:
     This function creates a knn model.
     :return: KNeighborsClassifier: the model.
     """
-    model = KNeighborsClassifier(n_neighbors=5)
+    model = KNeighborsClassifier(n_neighbors=5, n_jobs=-1)
     return model
 
 
@@ -36,7 +36,7 @@ def create_logreg_model() -> LogisticRegression:
     This function creates a logistic regression model.
     :return: LogisticRegression: the model.
     """
-    model = LogisticRegression(random_state=42)
+    model = LogisticRegression(random_state=42, n_jobs=-1)
     return model
 
 
