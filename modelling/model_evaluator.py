@@ -9,7 +9,8 @@ import shutil
 from sklearn.metrics import f1_score, accuracy_score, precision_score, recall_score, roc_auc_score, \
     classification_report, confusion_matrix
 # Global variables:
-from config import trees_results_path, neural_networks_results_path, other_models_results_path
+from config import trees_results_path, neural_networks_results_path, other_models_results_path, results_path, \
+    trees_balanced_results_path, neural_networks_balanced_results_path, other_models_balanced_results_path
 
 
 # Functions:
@@ -68,7 +69,7 @@ def sort_results_by_f_1_score(path: Path) -> Path:
     :return: None.
     """
     # Get all the models' results:
-    models_results = list(path.glob("*.txt"))
+    models_results = list(path.rglob("*.txt"))
     # txt files are ordered by key, value pairs, f1 score is the first value.
     # Sort the models' results by their f1 score:
     models_results.sort(key=lambda x: float(x.read_text().split(",")[0].split(":")[1].split("\n")[0]))
@@ -82,12 +83,13 @@ def sort_results_by_f_1_score(path: Path) -> Path:
 
 def get_best_overall_model(tree: Path, neural_network: Path, other_model: Path) -> Path:
     """
-    This function gets the best overall model.
+    This function gets the best overall model, assumes the paths are sorted by f1 score.
     @param tree: str: the name of the best tree model.
     @param neural_network: str: the name of the best neural network model.
     @param other_model: str: the name of the best other model.
     :return: str: the name of the best overall model.
     """
+
     # get the f1 scores:
     tree_f1_score: float = float(tree.read_text().split(",")[0].split(":")[1].split("\n")[0])
     neural_network_f1_score: float = float(neural_network.read_text().split(",")[0].split(":")[1].split("\n")[0])
@@ -99,18 +101,16 @@ def get_best_overall_model(tree: Path, neural_network: Path, other_model: Path) 
     return best_model
 
 
-def sort_all_results_by_f_1_score(suppress_print=False) -> None:
+def sort_all_results_by_f_1_score(tree_path: Path, neural_network_path: Path, other_models_path: Path,
+                                  suppress_print=False) -> None:
     """
     This function sorts all the models in the results subfolders by their f1 score.
     :return: None.
     """
 
-    if not trees_results_path.exists() and neural_networks_results_path.exists() and other_models_results_path.exists():
-        raise FileNotFoundError("The results sub-folders do not exist. Please run the base models first.")
-
-    tree: Path = sort_results_by_f_1_score(trees_results_path)
-    nn: Path = sort_results_by_f_1_score(neural_networks_results_path)
-    other: Path = sort_results_by_f_1_score(other_models_results_path)
+    tree: Path = sort_results_by_f_1_score(tree_path)
+    nn: Path = sort_results_by_f_1_score(neural_network_path)
+    other: Path = sort_results_by_f_1_score(other_models_path)
 
     best = get_best_overall_model(tree, nn, other)
 
@@ -122,5 +122,67 @@ def sort_all_results_by_f_1_score(suppress_print=False) -> None:
         print(f"The best overall base model is {model_description}, with an f1 score of {round(float(best_score), 3)}")
 
 
-if __name__ == "__main__":
-    sort_all_results_by_f_1_score()
+def get_best_model_by_type(model_type: str, path: Path) -> Path:
+    """
+    This function gets the best model of a specific type.
+    @param model_type: str: the type of the model.
+    @param path: Path: the path to the results' subfolder.
+    :return: Path: the path to the best model.
+    """
+    # Get all the models' results:
+    models_results = list(path.rglob("*.txt"))
+    # txt files are ordered by key, value pairs, f1 score is the first value.
+    # Sort the models' results by their f1 score:
+    models_results.sort(key=lambda x: float(x.read_text().split(",")[0].split(":")[1].split("\n")[0]), reverse=True)
+    # return the name of the best model with the given type:
+    return [model for model in models_results if model_type in model.name][0]
+
+
+def evaluator_main(tree_path: Path = trees_results_path, nn_path: Path = neural_networks_results_path,
+                   other_mod_results_path: Path = other_models_results_path, suppress_print=True) -> None:
+    """
+    Print the results of the best model for each type to the console
+    @param tree_path: Path: the path to the trees' results.
+    @param nn_path: Path: the path to the neural networks' results.
+    @param other_mod_results_path: Path: the path to the other models' results.
+    @param suppress_print: bool: whether to suppress the print to the console.
+    :return: None.
+    """
+    with open(Path(results_path, 'results_summary.txt'), 'a') as f:
+        # get the last folder in the paths:
+        tp = tree_path.parts[-1]
+        np = nn_path.parts[-1]
+        op = other_mod_results_path.parts[-1]
+        # write the paths to the summary file:
+        f.write(f'Trees path: {tp}\n')
+        f.write(f'Neural networks path: {np}\n')
+        f.write(f'Other models path: {op}\n')
+
+    for alg in ['decision', 'random', 'gradient', 'xgboost', 'neural', 'knn', 'logreg', 'naive', 'svc']:
+        if alg in ['decision', 'random', 'gradient', 'xgboost']:
+            path = tree_path
+        elif alg == "neural":
+            path = nn_path
+        else:
+            path = other_mod_results_path
+
+        best_model = get_best_model_by_type(alg, path)
+        best_model_name = best_model.name.split('.')[0].replace('_', ' ').replace("project 2 dataset ", "")\
+            .replace("scaling ", "")
+
+        best_score = best_model.read_text().split(",")[0].split(":")[1].split("\n")[0]
+        if not suppress_print:
+            print(f"The best {best_model_name}, with an f1 score of {round(float(best_score), 3)}")
+
+        # append the results to the results summary file in the results' folder:
+        with open(Path(results_path, "results_summary.txt"), "a") as f:
+            f.write(f"The best {best_model_name}, with an f1 score of {round(float(best_score), 3)}\n")
+
+    # write a new line to the results summary file:
+    with open(Path(results_path, "results_summary.txt"), "a") as f:
+        f.write("\n")
+
+
+if __name__ == '__main__':
+    evaluator_main(trees_balanced_results_path, neural_networks_balanced_results_path,
+                   other_models_balanced_results_path)
