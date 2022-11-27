@@ -102,4 +102,7 @@ def main():
 if __name__ == "__main__":
     main()
 
-
+# parameters: {'n_layers': 3, 'n_units_l0': 508, 'activation': 'relu',
+# 'dropout': 0.1571962679833076, 'n_units_l1': 164, 'n_units_l2': 512,
+# 'optimizer': 'adam', 'epochs': 100, 'batch_size': 126}.
+# Best is trial 20 with value: 0.8183366298675537.
