@@ -2,6 +2,8 @@
 # Libraries:
 import pandas as pd
 import numpy as np
+import random
+import matplotlib.pyplot as plt
 
 # Local Interpretable Model-agnostic Explanations framework
 # import lime
@@ -37,8 +39,8 @@ def lime(df: pd.DataFrame, target: str, model: ..., j: int = 5, random_state: in
 
     # LIME explainer
     explainer = LimeTabularExplainer(training_data=x_train.values,
-                                     feature_names=x_train.columns.values.tolist(),
-                                     class_names=[target],
+                                     feature_names=x_train.columns,
+                                     class_names=['did not default', 'default'],
                                      mode='classification',
                                      random_state=random_state)
 
@@ -48,32 +50,19 @@ def lime(df: pd.DataFrame, target: str, model: ..., j: int = 5, random_state: in
         predict_fn=model.predict_proba
     )
 
-    # Show the predictions
-    exp.show_in_notebook(show_table=True)
+    # Save the predictions
+    exp.save_to_file('lime_report.html')
 
-    # Code for SP-LIME
-    # import warnings
-    # from lime import submodular_pick
-    #
-    # # Remember to convert the dataframe to matrix values
-    # # SP-LIME returns exaplanations on a sample set to provide a non redundant global decision boundary of original model
-    # sp_obj = submodular_pick.SubmodularPick(explainer, df_titanic[model.feature_name()].values, \
-    #                                         prob, num_features=5, num_exps_desired=10)
-    #
-    # [exp.as_pyplot_figure(label=1) for exp in sp_obj.sp_explanations]
+    # Analyze wrong predictions
+    y_pred = model.predict(x_test)
 
-    # Visualize features importance for wrong predictors
-    # preds = lr.predict(X_test)
-    #
-    # false_preds = np.argwhere((preds != Y_test)).flatten()
-    #
-    # idx = random.choice(false_preds)
-    #
-    # print("Prediction : ", breast_cancer.target_names[lr.predict(X_test[idx].reshape(1, -1))[0]])
-    # print("Actual :     ", breast_cancer.target_names[Y_test[idx]])
-    #
-    # explanation = explainer.explain_instance(X_test[idx], lr.predict_proba)
-    #
-    # explanation.show_in_notebook()
+    wrong_pred = np.argwhere((y_pred != y_test.to_numpy())).flatten()
 
+    idx = random.choice(wrong_pred)
 
+    # print("Prediction : ", model.predict(x_test.to_numpy()[idx].reshape(1, -1))[0])
+    # print("Actual :     ", y_test.iloc[idx])
+
+    explanation = explainer.explain_instance(x_test.iloc[idx], model.predict_proba)
+
+    explanation.save_to_file('lime_report_wrong_pred.html')
