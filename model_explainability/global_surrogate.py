@@ -6,11 +6,12 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 # Modelling:
-import keras
+from keras import Model
+from keras.models import load_model
 from sklearn.linear_model import LogisticRegression
 
 # Global variables:
-from config import black_box_model_path, data_path, balanced_datasets_path
+from config import black_box_model_path, balanced_datasets_path
 
 
 # Note this has to match the data used to train the black box model:
@@ -30,20 +31,20 @@ def load_data() -> tuple:
     return x_train, y_train, x_test, y_test
 
 
-def import_black_box_model() -> keras.Model:
+def import_black_box_model() -> Model:
     """
     This function imports the black box model.
     :return: keras.Model: the black box model.
     """
-    return keras.models.load_model(black_box_model_path)
+    return load_model(black_box_model_path)
 
 
-def generate_y_train(x_train: np.array, black_box_model: keras.Model) -> np.array:
+def generate_y_train(x_train: np.array, black_box_model: Model) -> np.array:
     """
     This function generates the target data for the surrogate model.
     @param x_train: np.array: the training data.
     @param black_box_model: keras.Model: the black box model.
-    :return: np.array: the target data.
+    :return: np.array: the target data for the surrogate model.
     """
     y_train = black_box_model.predict(x_train)
     return y_train
@@ -54,14 +55,14 @@ def create_surrogate_model(x_train: np.array, y_train: np.array) -> LogisticRegr
     This function creates a surrogate model.
     @param x_train: np.array: the training data.
     @param y_train: np.array: the target data.
-    :return: LogisticRegression: the surrogate model.
+    :return: LogisticRegression: the trained surrogate model.
     """
     surrogate_model = LogisticRegression()
     surrogate_model.fit(x_train, y_train)
     return surrogate_model
 
 
-def test_surrogate_model(x_test: np.array, y_test: np.array, black_box_model: keras.Model,
+def test_surrogate_model(x_test: np.array, y_test: np.array, black_box_model: Model,
                          surrogate_model: LogisticRegression) -> float:
     """
     This function tests how close the surrogate model is to the black box model using
@@ -80,18 +81,16 @@ def test_surrogate_model(x_test: np.array, y_test: np.array, black_box_model: ke
     y_pred_surrogate = surrogate_model.predict(x_test)
     sse_surrogate = np.sum((y_pred_surrogate - y_test) ** 2)
 
-    # Calculate the R value:
+    # Calculate the r_squared value:
     r_squared = 1 - (sse_surrogate / sse_bb)
     return r_squared
 
 
-def interpret_surrogate_model(surrogate_model: LogisticRegression,
-                              x_test: np.array, y_test: np.array) -> pd.DataFrame:
+def interpret_surrogate_model(surrogate_model: LogisticRegression, x_test: np.array) -> pd.DataFrame:
     """
     This function interprets the surrogate model.
     @param surrogate_model: LogisticRegression: the surrogate model.
     @param x_test: np.array: the test data.
-    @param y_test: np.array: the target data.
     :return: pd.DataFrame: the interpretation of the surrogate model.
     """
     # Get the coefficients:
@@ -104,8 +103,7 @@ def interpret_surrogate_model(surrogate_model: LogisticRegression,
     return df
 
 
-def print_and_save_rsults(r_squared: float, df: pd.DataFrame,
-                          output_path: Path) -> None:
+def print_and_save_results(r_squared: float, df: pd.DataFrame, output_path: Path) -> None:
     """
     This function prints and saves the results of the global surrogate model analysis.
     @param r_squared: float: the r_squared value of the surrogate model.
@@ -136,11 +134,11 @@ def main() -> None:
     r_squared = test_surrogate_model(x_test, y_test, black_box_model, surrogate_model)
 
     # Interpret the surrogate model:
-    df = interpret_surrogate_model(surrogate_model, x_test, y_test)
+    df = interpret_surrogate_model(surrogate_model, x_test)
 
     # Print and save the results:
     output_path = Path('results/global_surrogate_results.csv')
-    print_and_save_rsults(r_squared, df, output_path)
+    print_and_save_results(r_squared, df, output_path)
 
 
 if __name__ == '__main__':
