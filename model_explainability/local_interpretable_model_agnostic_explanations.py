@@ -1,24 +1,21 @@
-
+# Interpret our model locally with LIME:
 # Libraries:
+# Data manipulation:
 import pandas as pd
 import numpy as np
 import random
-import matplotlib.pyplot as plt
-
-# Local Interpretable Model-agnostic Explanations framework
-# import lime
-from lime.lime_tabular import LimeTabularExplainer
-
-
-# Data manipulation:
 from pathlib import Path
-
+# Plotting:
+import matplotlib.pyplot as plt
+# Explaining:
+# Local Interpretable Model-agnostic Explanations framework
+# using the library from https://lime-ml.readthedocs.io/en/latest/
+from lime.lime_tabular import LimeTabularExplainer
 # Splitting the data:
 from modelling.train_test_validation_split import split_data
 
-
 # Global variables:
-data_path = Path("..", "data")
+from config import data_path
 
 
 # Functions:
@@ -51,7 +48,7 @@ def lime(df: pd.DataFrame, target: str, model: ..., j: int = 5, random_state: in
     )
 
     # Save the predictions
-    exp.save_to_file('lime_report.html')
+    exp.save_to_file(Path(data_path, 'lime_report.html'))
 
     # Analyze wrong predictions
     y_pred = model.predict(x_test)
@@ -65,4 +62,4 @@ def lime(df: pd.DataFrame, target: str, model: ..., j: int = 5, random_state: in
 
     explanation = explainer.explain_instance(x_test.iloc[idx], model.predict_proba)
 
-    explanation.save_to_file('lime_report_wrong_pred.html')
+    explanation.save_to_file(Path(data_path, 'lime_report_wrong_pred.html'))
