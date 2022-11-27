@@ -13,7 +13,7 @@ from sklearn.inspection import plot_partial_dependence, PartialDependenceDisplay
 # Plotting:
 import matplotlib.pyplot as plt
 # Global variables:
-from config import  partial_dependence_results_path
+from config import partial_dependence_results_path
 
 
 def plot_dependence(feature_name: list[str], black_box_model: Model, x_train: np.array, y_train: np.array) -> None:
@@ -30,7 +30,7 @@ def plot_dependence(feature_name: list[str], black_box_model: Model, x_train: np
     plt.close()
 
 
-def main() -> None:
+def pdp_main() -> None:
     """
     This function is the main function.
     :return: None

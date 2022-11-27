@@ -116,7 +116,7 @@ def print_and_save_results(r_squared: float, df: pd.DataFrame, output_path: Path
     df.to_csv(output_path)
 
 
-def main() -> None:
+def global_surrogate_main() -> None:
     """
     This function runs the global surrogate model analysis.
     :return: None
@@ -142,4 +142,4 @@ def main() -> None:
 
 
 if __name__ == '__main__':
-    main()
+    global_surrogate_main()

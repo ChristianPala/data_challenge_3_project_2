@@ -19,7 +19,7 @@ from config import data_path
 
 
 # Functions:
-def lime(df: pd.DataFrame, target: str, model: ..., j: int = 5, random_state: int = 42) -> None:
+def lime_main(df: pd.DataFrame, target: str, model: ..., j: int = 5, random_state: int = 42) -> None:
     # TODO: not sure which type of data the function should expect from the model parameter
     """
     This function carry out a Local Model-agnostic Explanation of a pre-trained model.

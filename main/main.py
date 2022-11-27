@@ -1,6 +1,9 @@
 # main file to run the project pipeline:
 # Libraries:
 # Main files for the project:
+from model_explainability.global_surrogate import global_surrogate_main
+from model_explainability.local_interpretable_model_agnostic_explanations import lime_main
+from model_explainability.partial_dependece_plot import pdp_main
 from preprocessing.eda.EDA import eda_main
 from preprocessing.preprocessor import preprocessor_main
 from feature_engineering.create_features import feature_engineering_main
@@ -19,6 +22,7 @@ import pprint
 from auxiliary.method_timer import execution_times
 from config import trees_results_path, neural_networks_results_path, other_models_results_path, \
     trees_balanced_results_path, neural_networks_balanced_results_path, other_models_balanced_results_path
+from tuning.evaluate_tuned_models import tuning_main
 
 
 def main() -> None:
@@ -80,9 +84,12 @@ def main() -> None:
     # tuned neural network:
     # tuned other models:
     # we consider svc for tuning since it achieved the best results in the baseline and balanced models
+    tuning_main()
     # Explaining:
     # ----------------------------------------------
-    # ...
+    global_surrogate_main()
+    lime_main()
+    pdp_main()
     # pretty print the execution times dictionary:
     pprint.pprint(execution_times)
 
