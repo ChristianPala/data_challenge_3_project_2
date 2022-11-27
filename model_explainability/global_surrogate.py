@@ -142,3 +142,6 @@ def main() -> None:
     output_path = Path('results/global_surrogate_results.csv')
     print_and_save_rsults(r_squared, df, output_path)
 
+
+if __name__ == '__main__':
+    main()
