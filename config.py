@@ -20,8 +20,8 @@ missing_values_path = Path(data_path, "missing_values_handled")
 scaled_datasets_path = Path(data_path, "scaled_datasets")
 # balanced datasets path:
 balanced_datasets_path = Path(data_path, "balanced_datasets")
-# plots:
-plot_path: Path = Path(project_root_path, "preprocessing", "plots")
+# results:
+plot_path: Path = Path(project_root_path, "preprocessing", "results")
 # default csv:
 eda_csv_file_path = Path(missing_values_path, 'project_2_dataset_drop_augmented.csv')
 # sub-folders for the baseline results:
