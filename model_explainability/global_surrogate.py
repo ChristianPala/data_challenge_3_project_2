@@ -11,7 +11,7 @@ from keras.models import load_model
 from sklearn.linear_model import LogisticRegression
 
 # Global variables:
-from config import black_box_model_path, balanced_datasets_path
+from config import black_box_model_path, balanced_datasets_path, global_surrogate_results_path
 
 
 # Note this has to match the data used to train the black box model:
@@ -137,7 +137,7 @@ def main() -> None:
     df = interpret_surrogate_model(surrogate_model, x_test)
 
     # Print and save the results:
-    output_path = Path('results/global_surrogate_results.csv')
+    output_path = Path(global_surrogate_results_path, "global_surrogate_model_results.csv")
     print_and_save_results(r_squared, df, output_path)
 
 

@@ -37,4 +37,6 @@ neural_tuned_results_path: Path = Path(results_path, "neural_network_tuned")
 other_models_tuned_results_path: Path = Path(results_path, "other_models_tuned")
 # sub-folders for the model explainability folders:
 black_box_model_path: Path = Path(neural_networks_balanced_results_path, 'neural_network_tuned.h5')
+global_surrogate_results_path: Path = Path(results_path, "global_surrogate_results")
+partial_dependence_results_path: Path = Path(results_path, "partial_dependence_results")
 # ------------------------------------------------------------
