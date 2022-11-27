@@ -75,8 +75,8 @@ def balanced_neural_network_main() -> None:
             model.save(Path(models_path, f"{file_name}.h5"))
             # Save the results:
             save_evaluation_results(evaluation_results=evaluation_results, model_type="neural_network",
-                                    save_path=neural_networks_balanced_results_path,
-                                    dataset_name=sub + "_" + file_name)
+                                    save_path=neural_networks_balanced_results_path / sub / file_name,
+                                    dataset_name=file_name)
 
 
 # Driver:

@@ -277,10 +277,8 @@ def balance_classes_main(suppress_print=True) -> None:
     # TODO: Davide, Fabio, check the assumptions below in your experiments.
     # get all the files in the scaling folder, since it performed better than the non-scaled data:
     csv_files = list(scaled_datasets_path.glob("*.csv"))
-    # remove the "drop" and "most_frequent" strategies since the other missing value strategies performed better:
-    # csv_files = [file for file in csv_files if "drop" not in file.name and "most_frequent" not in file.name]
-    # remove the non-augmented datasets, since the augmented ones performed better:
-    # csv_files = [file for file in csv_files if "augmented" in file.name]
+    # keep only drop as the imputation method, since it performed better than the other methods:
+    csv_files = [f for f in csv_files if "drop" in f.name]
 
     # clean the balanced_training_datasets folder:
     if balanced_datasets_path.exists() and balanced_datasets_path.is_dir():

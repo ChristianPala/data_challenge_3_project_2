@@ -8,7 +8,7 @@ from preprocessing.scaling import scaling_main
 from modelling.trees import trees_main
 from modelling.neural_network import neural_network_main
 from modelling.knn_logreg_naiveb_svc import other_models_main
-from modelling.model_evaluator import sort_all_results_by_f_1_score
+from modelling.model_evaluator import sort_all_results_by_f_1_score, evaluator_main
 from tuning.balance_classes import balance_classes_main
 from tuning.balanced_trees import balanced_trees_main
 from tuning.balanced_neural_network import balanced_neural_network_main
@@ -17,6 +17,8 @@ import pprint
 
 # Global variable to store the execution times during the pipeline:
 from auxiliary.method_timer import execution_times
+from config import trees_results_path, neural_networks_results_path, other_models_results_path, \
+    trees_balanced_results_path, neural_networks_balanced_results_path, other_models_balanced_results_path
 
 
 def main() -> None:
@@ -31,16 +33,27 @@ def main() -> None:
     feature_engineering_main()
     scaling_main()
     eda_main()
-    # Baseline models:
-    # ----------------------------------------------
+    # # Baseline models:
+    # # ----------------------------------------------
     trees_main()
     neural_network_main()
     other_models_main()
-    sort_all_results_by_f_1_score()
+    evaluator_main(trees_results_path, neural_networks_results_path,
+                   other_models_results_path)
     """
-    Augmented datasets are usually better than the original ones.
-    Supervised and unsupervised imputation are usually better than most frequent and drop.
-    Scaled datasets are usually better than the original ones.
+    Augmented and not augmented are comparable, so we leave them both in the pipeline.
+    Drop is almost always the best, so we remove the other options going forward to speed up the pipeline.
+    Scaled datasets are usually better than the original ones, so we remove the original ones going forward.
+    
+    The best decision tree drop, with an f1 score of 0.409
+    The best random forest drop augmented, with an f1 score of 0.483
+    The best gradient boosting drop, with an f1 score of 0.515
+    The best xgboost drop, with an f1 score of 0.477
+    The best neural network normalized robust scaler drop, with an f1 score of 0.527
+    The best knn robust scaler drop, with an f1 score of 0.442
+    The best logreg normalized robust scaler drop augmented, with an f1 score of 0.51
+    The best naive bayes minmax scaler drop augmented, with an f1 score of 0.526
+    The best svc robust scaler drop augmented, with an f1 score of 0.532
     """
     # Tuning:
     # ----------------------------------------------
@@ -49,9 +62,24 @@ def main() -> None:
     balanced_trees_main()
     balanced_neural_network_main()
     balanced_other_models_main()
+    evaluator_main(trees_balanced_results_path, neural_networks_balanced_results_path,
+                   other_models_balanced_results_path)
+    """
+    The best decision tree minmax scaler drop, with an f1 score of 0.455
+    The best random forest minmax scaler drop, with an f1 score of 0.539
+    The best gradient boosting minmax scaler drop, with an f1 score of 0.545
+    The best xgboost minmax scaler drop, with an f1 score of 0.531
+    The best neural network minmax scaler most frequent imputation, with an f1 score of 0.529
+    The best knn minmax scaler drop, with an f1 score of 0.504
+    The best logreg minmax scaler drop, with an f1 score of 0.532
+    The best naive bayes minmax scaler drop, with an f1 score of 0.525
+    The best svc minmax scaler drop, with an f1 score of 0.541
+    """
     # tuned trees:
+    # we consider gradient boosting for tuning since it achieved the best results in the baseline and balanced models
     # tuned neural network:
     # tuned other models:
+    # we consider svc for tuning since it achieved the best results in the baseline and balanced models
     # Explaining:
     # ----------------------------------------------
     # ...
