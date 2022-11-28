@@ -36,7 +36,7 @@ def return_weights(exp):
 
 
 # Functions:
-def lime__explanation(df: pd.DataFrame, target: str, model: ..., j: int = 5,
+def lime_explanation(df: pd.DataFrame, target: str, model: ..., j: int = 5,
                       with_wrong_prediction_analysis: bool = False, random_state: int = 42) -> None:
     # TODO: not sure which type of data the function should expect from the parameter model
     """
@@ -70,6 +70,7 @@ def lime__explanation(df: pd.DataFrame, target: str, model: ..., j: int = 5,
     # Save the predictions
     exp.save_to_file('../model_explainability/results/lime_report.html')
 
+    # TODO: make the weights part work
     # # Compute the weights
     # weights = []
     #
@@ -136,9 +137,7 @@ def lime__explanation(df: pd.DataFrame, target: str, model: ..., j: int = 5,
         explanation = explainer.explain_instance(x_test.iloc[idx], model.predict_proba)
 
         # save the html file
-        explanation.save_to_file('results/lime_report_wrong_pred.html')
-
-
+        explanation.save_to_file('../model_explainability/results/lime_report_wrong_pred.html')
 
 
 def shap_explanation(df: pd.DataFrame, target: str, model: ..., j: int = 5,
@@ -157,3 +156,57 @@ def shap_explanation(df: pd.DataFrame, target: str, model: ..., j: int = 5,
 
     # Splitting the data:
     x_train, x_test, y_train, y_test = split_data(df, target)
+
+    y_pred = model.predict(x_test)
+
+    # initialize the shapley values:
+    explainer = shap.TreeExplainer(model)
+    shap_values = explainer.shap_values(x_test)
+
+    shap.plots.waterfall(shap_values[j], max_display=10)
+
+    shap.initjs()
+    shap.plots.force(shap_values[j])
+
+    # error analysis:
+    shap.summary_plot(shap_values, x_test.values, feature_names=x_test.columns, show=True)
+
+    # save the plot:
+    plt.savefig('../model_explainability/results/shap_summary_plot.png', dpi=300, bbox_inches='tight')
+    plt.close()
+
+    # get the index of the false negatives:
+    f_idx = np.argwhere((y_pred != y_test.to_numpy())).flatten()
+
+    idx = random.choice(f_idx)
+
+    shap.waterfall_plot(shap.Explanation(values=shap_values[idx],
+                                         base_values=explainer.expected_value, data=x_test.iloc[idx],
+                                         feature_names=x_test.columns), show=False)
+
+    # give more space for the y-axis:
+    plt.subplots_adjust(left=0.5, right=0.9, top=0.9, bottom=0.2)
+    # increase the size of the plot:
+    plt.gcf().set_size_inches(10, 5)
+    plt.savefig('../model_explainability/results/false_negative_plot.png')
+    plt.close()
+
+    # get the index of the true positive:
+    t_idx = np.argwhere((y_pred == y_test.to_numpy())).flatten()
+
+    idx = random.choice(t_idx)
+
+    shap.waterfall_plot(shap.Explanation(values=shap_values[idx],
+                                         base_values=explainer.expected_value, data=x_test.iloc[idx],
+                                         feature_names=x_test.columns), show=False)
+
+    # give more space for the y-axis:
+    plt.subplots_adjust(left=0.5, right=0.9, top=0.9, bottom=0.2)
+    # increase the size of the plot:
+    plt.gcf().set_size_inches(10, 5)
+    plt.savefig('../model_explainability/results/false_negative_plot.png')
+    plt.close()
+
+
+
+
