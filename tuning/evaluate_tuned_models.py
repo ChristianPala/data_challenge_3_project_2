@@ -93,8 +93,8 @@ def tuning_main() -> None:
     """
     # load the data:
     # Note the files do not exist yet:
-    training = pd.read_csv(Path(data_path, 'final_training_set.csv'))
-    testing = pd.read_csv(Path(data_path, 'final_testing_set.csv'))
+    training = pd.read_csv(Path(data_path, 'final_training.csv'))
+    testing = pd.read_csv(Path(data_path, 'final_testing.csv'))
 
     # test the tuned models:
     test_tuned_models_on_test_set(training, testing)

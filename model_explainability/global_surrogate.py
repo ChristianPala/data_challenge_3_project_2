@@ -23,10 +23,10 @@ def load_data() -> tuple:
     train = Path(balanced_datasets_path, "undersampled", "minmax_scaler_scaling_most_frequent_imputation", "train.csv")
     test = Path(balanced_datasets_path, "undersampled", "minmax_scaler_scaling_most_frequent_imputation", "test.csv")
 
-    x_train = pd.read_csv(train, index_col=0).drop(columns=['default'])
-    y_train = pd.read_csv(train, index_col=0)['default']
-    x_test = pd.read_csv(test, index_col=0).drop(columns=['default'])
-    y_test = pd.read_csv(test, index_col=0)['default']
+    x_train = pd.read_csv(train).drop(columns=['default'])
+    y_train = pd.read_csv(train)['default']
+    x_test = pd.read_csv(test).drop(columns=['default'])
+    y_test = pd.read_csv(test)['default']
 
     return x_train, y_train, x_test, y_test
 
@@ -47,6 +47,7 @@ def generate_y_train(x_train: np.array, black_box_model: Model) -> np.array:
     :return: np.array: the target data for the surrogate model.
     """
     y_train = black_box_model.predict(x_train)
+    y_train = np.where(y_train > 0.5, 1, 0)
     return y_train
 
 
@@ -75,10 +76,17 @@ def test_surrogate_model(x_test: np.array, y_test: np.array, black_box_model: Mo
 
     # Calculate the sum of squared errors of the black box model:
     y_pred_bb = black_box_model.predict(x_test)
+    y_pred_bb = np.where(y_pred_bb > 0.5, 1, 0)
+    # cast to 1d array:
+    y_pred_bb = y_pred_bb.reshape(-1)
     sse_bb = np.sum((y_pred_bb - y_test) ** 2)
 
     # Calculate the sum of squared errors of the surrogate model:
     y_pred_surrogate = surrogate_model.predict(x_test)
+    print(y_pred_surrogate)
+    y_pred_surrogate = np.where(y_pred_surrogate > 0.5, 1, 0)
+    # cast to 1d array:
+    y_pred_surrogate = y_pred_surrogate.reshape(-1)
     sse_surrogate = np.sum((y_pred_surrogate - y_test) ** 2)
 
     # Calculate the r_squared value:
@@ -113,7 +121,7 @@ def print_and_save_results(r_squared: float, df: pd.DataFrame, output_path: Path
     """
     print(f'The R_squared value is: {r_squared}')
     print(df.transpose())
-    df.to_csv(output_path)
+    df.to_csv(Path(output_path, 'global_surrogate_results.csv'))
 
 
 def global_surrogate_main() -> None:
@@ -137,8 +145,8 @@ def global_surrogate_main() -> None:
     df = interpret_surrogate_model(surrogate_model, x_test)
 
     # Print and save the results:
-    output_path = Path(global_surrogate_results_path, "global_surrogate_model_results.csv")
-    print_and_save_results(r_squared, df, output_path)
+    global_surrogate_results_path.mkdir(parents=True, exist_ok=True)
+    print_and_save_results(r_squared, df, global_surrogate_results_path)
 
 
 if __name__ == '__main__':
