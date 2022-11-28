@@ -21,7 +21,7 @@ from sklearn.model_selection import StratifiedKFold
 from auxiliary.method_timer import measure_time
 
 # Global variables:
-from config import balanced_datasets_path, neural_networks_balanced_results_path
+from config import balanced_datasets_path, neural_tuned_results_path
 from config import scaled_datasets_path
 
 def load_best_dataset(path: Path = Path(balanced_datasets_path, "undersampled",
@@ -154,7 +154,7 @@ def main():
         print("    {}: {}".format(key, value))
 
     # save the results:
-    study.trials_dataframe().to_csv(Path(neural_networks_balanced_results_path, "neural_network_tuner.csv"))
+    study.trials_dataframe().to_csv(Path(neural_tuned_results_path, "neural_network_tuner.csv"))
 
 if __name__ == '__main__':
     main()
