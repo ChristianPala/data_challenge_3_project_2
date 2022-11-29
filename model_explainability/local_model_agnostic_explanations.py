@@ -3,6 +3,7 @@ import pandas as pd
 import numpy as np
 import random
 import matplotlib.pyplot as plt
+from config import *
 
 # Local Interpretable Model-agnostic Explanations frameworks imports
 import lime
@@ -21,18 +22,18 @@ from modelling.train_test_validation_split import split_data
 data_path = Path("..", "data")
 
 
-def return_weights(exp):
-    """
-    Get weights from LIME explanation object
-    Based on this implementation:
-    https://github.com/conorosully/medium-articles/blob/master/src/interpretable%20ml/LIME/lime_tutorial.ipynb
-    """
-
-    exp_list = exp.as_map()[1]
-    exp_list = sorted(exp_list, key=lambda x: x[0])
-    exp_weight = [x[1] for x in exp_list]
-
-    return exp_weight
+# def return_weights(exp):
+#     """
+#     Get weights from LIME explanation object
+#     Based on this implementation:
+#     https://github.com/conorosully/medium-articles/blob/master/src/interpretable%20ml/LIME/lime_tutorial.ipynb
+#     """
+#
+#     exp_list = exp.as_map()[1]
+#     exp_list = sorted(exp_list, key=lambda x: x[0])
+#     exp_weight = [x[1] for x in exp_list]
+#
+#     return exp_weight
 
 
 # Functions:
@@ -70,7 +71,6 @@ def lime_explanation(df: pd.DataFrame, target: str, model: ..., j: int = 5,
     # Save the predictions
     exp.save_to_file('../model_explainability/results/lime_report.html')
 
-    # TODO: make the weights part work
     # # Compute the weights
     # weights = []
     #
@@ -125,19 +125,49 @@ def lime_explanation(df: pd.DataFrame, target: str, model: ..., j: int = 5,
         y_pred = model.predict(x_test)
 
         # wrong prediction indexes
-        wrong_pred = np.argwhere((y_pred != y_test.to_numpy())).flatten()
+        # wrong_pred = np.argwhere((y_pred != y_test.to_numpy())).flatten()
+
+        tp_idxs = np.where((y_test == 1) & (y_pred == 1))[0]
+        tn_idxs = np.where((y_test == 0) & (y_pred == 0))[0]
+        fp_idxs = np.where((y_test == 0) & (y_pred == 1))[0]
+        fn_idxs = np.where((y_test == 1) & (y_pred == 0))[0]
 
         # choose a random index
-        idx = random.choice(wrong_pred)
+        tp_idx = random.choice(tp_idxs)
+        tn_idx = random.choice(tn_idxs)
+        fp_idx = random.choice(fp_idxs)
+        fn_idx = random.choice(fn_idxs)
 
         # print("Prediction : ", model.predict(x_test.to_numpy()[idx].reshape(1, -1))[0])
         # print("Actual :     ", y_test.iloc[idx])
 
         # explain the wrongly predicted instance
-        explanation = explainer.explain_instance(x_test.iloc[idx], model.predict_proba)
+        explanation = explainer.explain_instance(x_test.iloc[tp_idx], model.predict_proba)
 
         # save the html file
-        explanation.save_to_file('../model_explainability/results/lime_report_wrong_pred.html')
+        explanation.save_to_file(Path(project_root_path, 'model_explainability',  'results',
+                                      'lime_report_tp_pred.html'))
+
+        # explain the wrongly predicted instance
+        explanation = explainer.explain_instance(x_test.iloc[tn_idx], model.predict_proba)
+
+        # save the html file
+        explanation.save_to_file(Path(project_root_path, 'model_explainability', 'results',
+                                      'lime_report_tn_pred.html'))
+
+        # explain the wrongly predicted instance
+        explanation = explainer.explain_instance(x_test.iloc[fp_idx], model.predict_proba)
+
+        # save the html file
+        explanation.save_to_file(Path(project_root_path, 'model_explainability', 'results',
+                                      'lime_report_fp_pred.html'))
+
+        # explain the wrongly predicted instance
+        explanation = explainer.explain_instance(x_test.iloc[fn_idx], model.predict_proba)
+
+        # save the html file
+        explanation.save_to_file(Path(project_root_path, 'model_explainability', 'results',
+                                      'lime_report_fn_pred.html'))
 
 
 def shap_explanation(df: pd.DataFrame, target: str, model: ..., j: int = 5,
@@ -172,7 +202,8 @@ def shap_explanation(df: pd.DataFrame, target: str, model: ..., j: int = 5,
     shap.summary_plot(shap_values, x_test.values, feature_names=x_test.columns, show=True)
 
     # save the plot:
-    plt.savefig('../model_explainability/results/shap_summary_plot.png', dpi=300, bbox_inches='tight')
+    plt.savefig(Path(project_root_path, 'model_explainability', 'results', 'shap_summary_plot.png'),
+                dpi=300, bbox_inches='tight')
     plt.close()
 
     # get the index of the false negatives:
@@ -188,7 +219,7 @@ def shap_explanation(df: pd.DataFrame, target: str, model: ..., j: int = 5,
     plt.subplots_adjust(left=0.5, right=0.9, top=0.9, bottom=0.2)
     # increase the size of the plot:
     plt.gcf().set_size_inches(10, 5)
-    plt.savefig('../model_explainability/results/false_negative_plot.png')
+    plt.savefig(Path(project_root_path, 'model_explainability', 'results', 'false_negative_plot.png'))
     plt.close()
 
     # get the index of the true positive:
@@ -204,7 +235,7 @@ def shap_explanation(df: pd.DataFrame, target: str, model: ..., j: int = 5,
     plt.subplots_adjust(left=0.5, right=0.9, top=0.9, bottom=0.2)
     # increase the size of the plot:
     plt.gcf().set_size_inches(10, 5)
-    plt.savefig('../model_explainability/results/false_negative_plot.png')
+    plt.savefig(Path(project_root_path, 'model_explainability', 'results', 'false_negative_plot.png'))
     plt.close()
 
 
