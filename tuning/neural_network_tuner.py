@@ -12,6 +12,7 @@ from optuna.samplers import TPESampler
 from keras.models import Model, Sequential
 from keras.layers import Dense, Layer, Dropout
 from keras.backend import clear_session
+from keras.optimizers import Adam, RMSprop, SGD, Optimizer
 from pathlib import Path
 from modelling.train_test_validation_split import split_data
 from sklearn.model_selection import StratifiedKFold
@@ -41,7 +42,7 @@ def load_best_dataset(path: Path = Path(balanced_datasets_path, "undersampled",
 
     return x_train, y_train, x_val, y_val
 
-def create_model_with_layers(model: Model, layers: list[Layer], dropout: float = 0.1, optimizer: str = "adam", loss: str = 'binary_crossentropy', metrics: list[str] = ['accuracy']) -> Model:
+def create_model_with_layers(model: Model, layers: list[Layer], dropout: float = 0.1, optimizer: Optimizer = Adam(), loss: str = 'binary_crossentropy', metrics: list[str] = ['accuracy'], lr = 0.001) -> Model:
     compiled_model = model
     for i in range(len(layers)):
         compiled_model.add(layers[i])
@@ -51,6 +52,13 @@ def create_model_with_layers(model: Model, layers: list[Layer], dropout: float =
     compiled_model.compile(optimizer=optimizer, loss=loss, metrics=metrics)
 
     return compiled_model
+
+def get_optimizer(choice: str, learning_rate: float = 0.001) -> Optimizer:
+    if choice == "adam":
+        return Adam(learning_rate=learning_rate)
+    elif choice == "rmsprop":
+        return RMSprop(learning_rate=learning_rate)
+    return SGD(learning_rate=learning_rate)
 
 def generate_model(trial: Trial) -> Model:
     """
@@ -63,7 +71,10 @@ def generate_model(trial: Trial) -> Model:
     layers = suggest_layers(trial, layers_count)
 
     # Optuna chooses an optimizer
-    optimizer = trial.suggest_categorical("optimizer", ["adam", "rmsprop", "sgd"])
+    opt_choice = trial.suggest_categorical("optimizer", ["adam", "rmsprop", "sgd"])
+    learning_rate = trial.suggest_float("learning_rate", 0.0001, 0.01)
+    optimizer = get_optimizer(opt_choice, learning_rate)
+
 
     # Define the base model and the input dimension
     # input_dim = trial.suggest_int("input_dim", 20, 50)
@@ -140,7 +151,7 @@ def main():
     # set the study:
     study = optuna.create_study(direction="maximize", sampler=sampler, pruner=pruner)
     # run the study:
-    study.optimize(objective, n_trials=2, n_jobs=-1, show_progress_bar=True)
+    study.optimize(objective, n_trials=2, n_jobs=-1, show_progress_bar=False)
 
     # Take the aggregate results of the studies
     pruned_trials = study.get_trials(deepcopy=False, states=[TrialState.PRUNED])
