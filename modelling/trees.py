@@ -5,6 +5,7 @@ import pandas as pd
 import numpy as np
 from pathlib import Path
 import shutil
+
 # Modelling
 from sklearn.base import BaseEstimator
 from sklearn.tree import DecisionTreeClassifier
@@ -20,6 +21,8 @@ from auxiliary.method_timer import measure_time
 from config import missing_values_path, trees_results_path
 if not trees_results_path.exists():
     trees_results_path.mkdir(parents=True)
+
+from model_explainability.local_model_agnostic_explanations import lime_explanation, shap_explanation
 
 
 def generate_tree_model(model_type: str) -> BaseEstimator:
@@ -106,4 +109,13 @@ def trees_main() -> None:
 
 
 if __name__ == '__main__':
-    trees_main()
+    # trees_main()
+
+    df = pd.read_csv('../data/project_2_dataset_unsupervised_imputation_augmented.csv')
+    x_train, x_val, _, y_train, y_val, _ = split_data(df, 'default', validation=True)
+    # generate the model:
+    model = generate_tree_model(model_type='random_forest')
+    # fit the model:
+    model = fit_model(model=model, x_train=x_train, y_train=y_train)
+    lime_explanation(df, 'default', model, 89, True)
+    shap_explanation(df, 'default', model, 89, True)

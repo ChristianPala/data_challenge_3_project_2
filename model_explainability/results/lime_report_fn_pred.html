@@ -37089,25 +37089,25 @@
 /***/ })
 /******/ ]);
 //# sourceMappingURL=bundle.js.map </script></head><body>
-        <div class="lime top_div" id="top_divJXWNIKKTI81PKNL"></div>
+        <div class="lime top_div" id="top_div4JX6ZTTX22X963U"></div>
         
         <script>
-        var top_div = d3.select('#top_divJXWNIKKTI81PKNL').classed('lime top_div', true);
+        var top_div = d3.select('#top_div4JX6ZTTX22X963U').classed('lime top_div', true);
         
             var pp_div = top_div.append('div')
                                 .classed('lime predict_proba', true);
             var pp_svg = pp_div.append('svg').style('width', '100%');
-            var pp = new lime.PredictProba(pp_svg, ["did not default", "default"], [0.94, 0.06]);
+            var pp = new lime.PredictProba(pp_svg, ["did not default", "default"], [0.63, 0.37]);
             
         
         var exp_div;
             var exp = new lime.Explanation(["did not default", "default"]);
         
                 exp_div = top_div.append('div').classed('lime explanation', true);
-                exp.show([["total_paid_amount <= 6657.50", 0.05448329939488575], ["limit_bal > 240000.00", -0.028698458400135626], ["pay_stat_sep <= -1.00", -0.019766966167874458], ["pay_status_total <= -5.00", -0.019344229220010386], ["total_bill_amount <= 28543.50", 0.018560099544333918], ["pay_amt_sep <= 1000.00", 0.014010054675531349], ["pay_stat_may <= -1.00", -0.00915306779580932], ["pay_stat_jul <= -1.00", -0.008876230834343515], ["pay_amt_jul <= 390.00", 0.008253289225707863], ["pay_amt_aug <= 861.50", 0.007483444054287487]], 1, exp_div);
+                exp.show([["pay_status_total > 0.00", 0.0648118802705525], ["pay_stat_jul > 0.00", 0.030480952795468176], ["-1.00 < pay_stat_sep <= 0.00", -0.030016635824049502], ["126075.00 < total_bill_amount <= 339205.25", -0.017104932337587656], ["pay_stat_may > 0.00", 0.01617970929518612], ["-1.00 < pay_stat_aug <= 0.00", -0.012574364948808347], ["22321.50 < bill_amt_sep <= 66377.00", -0.011740156138682886], ["bill_amt_jun > 53927.75", 0.011662907144778772], ["140000.00 < limit_bal <= 240000.00", -0.0113834242837334], ["pay_stat_jun > 0.00", 0.010448258534975753]], 1, exp_div);
                 
         var raw_div = top_div.append('div');
-            exp.show_raw_tabular([["total_paid_amount", "500.00", 0.05448329939488575], ["limit_bal", "250000.00", -0.028698458400135626], ["pay_stat_sep", "-2.00", -0.019766966167874458], ["pay_status_total", "-12.00", -0.019344229220010386], ["total_bill_amount", "500.00", 0.018560099544333918], ["pay_amt_sep", "0.00", 0.014010054675531349], ["pay_stat_may", "-2.00", -0.00915306779580932], ["pay_stat_jul", "-2.00", -0.008876230834343515], ["pay_amt_jul", "0.00", 0.008253289225707863], ["pay_amt_aug", "500.00", 0.007483444054287487]], 1, raw_div);
+            exp.show_raw_tabular([["pay_status_total", "6.00", 0.0648118802705525], ["pay_stat_jul", "2.00", 0.030480952795468176], ["pay_stat_sep", "0.00", -0.030016635824049502], ["total_bill_amount", "293271.00", -0.017104932337587656], ["pay_stat_may", "2.00", 0.01617970929518612], ["pay_stat_aug", "0.00", -0.012574364948808347], ["bill_amt_sep", "52582.00", -0.011740156138682886], ["bill_amt_jun", "57210.00", 0.011662907144778772], ["limit_bal", "150000.00", -0.0113834242837334], ["pay_stat_jun", "2.00", 0.010448258534975753]], 1, raw_div);
         
         </script>
         </body></html>

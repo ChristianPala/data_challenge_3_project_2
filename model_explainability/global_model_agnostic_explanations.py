@@ -16,3 +16,5 @@ from modelling.train_test_validation_split import split_data
 
 # Global variables:
 data_path = Path("..", "data")
+
+
