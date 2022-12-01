@@ -12,6 +12,7 @@ from keras.models import load_model
 from sklearn.exceptions import ConvergenceWarning
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import mean_squared_error
+# experimental tuning with halvingrandomsearchcv:
 from sklearn.experimental import enable_halving_search_cv  # noqa
 from sklearn.model_selection import HalvingRandomSearchCV
 from sklearn.ensemble import RandomForestClassifier
@@ -243,31 +244,43 @@ def plot_feature_importance(surrogate_models: tuple[LogisticRegression, RandomFo
     """
     surrogate_model_log = surrogate_models[0]
     surrogate_model_rf = surrogate_models[1]
-    if surrogate_model_log:
-        # Get the coefficients:
-        coefficients = surrogate_model_log.coef_
-        # Create the dataframe:
-        df = pd.DataFrame(data=coefficients, columns=x_test.columns)
-        # Plot the feature importance:
-        df.plot.bar()
-        plt.title('Feature importance of the logistic regression surrogate model')
-        plt.xlabel('Feature')
-        plt.ylabel('Coefficient')
-        plt.savefig(Path(global_surrogate_results_path, 'logistic_surrogate_model_feature_importance.png'))
-        plt.show()
 
-    elif surrogate_model_rf:
-        # Get the feature importance:
-        feature_importance = surrogate_model_rf.feature_importances_
-        # Create the dataframe:
-        df = pd.DataFrame(data=feature_importance, index=x_test.columns, columns=['feature_importance'])
-        # Plot the feature importance:
-        df.plot.bar()
-        plt.title('Feature importance of the random forest surrogate model')
-        plt.xlabel('Feature')
-        plt.ylabel('Feature importance')
-        plt.savefig(Path(global_surrogate_results_path, 'random_forest_surrogate_model_feature_importance.png'))
-        plt.show()
+    # Get the coefficients:
+    coefficients = surrogate_model_log.coef_
+    # sort the coefficients:
+    coefficients = np.sort(coefficients)
+    # Create a dictionary of the coefficients and the features:
+    coefficients_dict = dict(zip(x_test.columns, coefficients[0]))
+    # sort the dictionary:
+    coefficients_dict = {k: v for k, v in sorted(coefficients_dict.items(), key=lambda item: item[1])}
+    # get the top 10 features:
+    top_10 = dict(list(coefficients_dict.items())[-10:])
+    # plot the top 10 features:
+    plt.barh(list(top_10.keys()), list(top_10.values()), color='blue')
+    plt.title('Top 10 features of the blackbox model for the logistic regression')
+    # add the name of the features to the x-axis:
+    plt.yticks(list(top_10.keys()))
+    # give the y-axis a label and more space:
+    plt.ylabel('Features')
+    plt.subplots_adjust(left=0.3)
+    # give the x-axis a label:
+    plt.xlabel('Coefficient')
+    plt.savefig(Path(global_surrogate_results_path, 'top_10_features_logistic_regression.png'))
+
+    # Get the feature importance:
+    feature_importance = surrogate_model_rf.feature_importances_
+    # Create the dataframe:
+    df = pd.DataFrame(data=feature_importance, index=x_test.columns, columns=['feature_importance'])
+    # Plot the feature importance:
+    df.plot.bar(color='green', figsize=(20, 10), legend=False)
+    plt.title('Feature importance for the blackbox model according to the random forest surrogate model')
+    plt.xlabel('Features')
+    # add the name of the features to the x-axis:
+    plt.xticks(ticks=np.arange(len(x_test.columns)), labels=x_test.columns, rotation=45)
+    # give more space to the x-axis:
+    plt.subplots_adjust(bottom=0.3)
+    plt.ylabel('Feature importance')
+    plt.savefig(Path(global_surrogate_results_path, 'random_forest_surrogate_model_feature_importance.png'))
 
 
 def global_surrogate_main() -> None:
