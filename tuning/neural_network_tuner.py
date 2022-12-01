@@ -10,10 +10,10 @@ from optuna.samplers import TPESampler
 
 # Modelling:
 from keras.models import Model, Sequential
-from keras.layers import Dense, Layer
+from keras.layers import Dense, Layer, Dropout
 from keras.backend import clear_session
+from keras.optimizers import Adam, RMSprop, SGD, Optimizer
 from pathlib import Path
-from modelling.neural_network import create_model_with_layers
 from modelling.train_test_validation_split import split_data
 from sklearn.model_selection import StratifiedKFold
 
@@ -21,7 +21,7 @@ from sklearn.model_selection import StratifiedKFold
 from auxiliary.method_timer import measure_time
 
 # Global variables:
-from config import balanced_datasets_path, neural_networks_balanced_results_path
+from config import balanced_datasets_path, neural_tuned_results_path
 from config import scaled_datasets_path
 
 def load_best_dataset(path: Path = Path(balanced_datasets_path, "undersampled",
@@ -42,6 +42,24 @@ def load_best_dataset(path: Path = Path(balanced_datasets_path, "undersampled",
 
     return x_train, y_train, x_val, y_val
 
+def create_model_with_layers(model: Model, layers: list[Layer], dropout: float = 0.1, optimizer: Optimizer = Adam(), loss: str = 'binary_crossentropy', metrics: list[str] = ['accuracy'], lr = 0.001) -> Model:
+    compiled_model = model
+    for i in range(len(layers)):
+        compiled_model.add(layers[i])
+        if i < len(layers)-1:
+            compiled_model.add(Dropout(dropout))
+
+    compiled_model.compile(optimizer=optimizer, loss=loss, metrics=metrics)
+
+    return compiled_model
+
+def get_optimizer(choice: str, learning_rate: float = 0.001) -> Optimizer:
+    if choice == "adam":
+        return Adam(learning_rate=learning_rate)
+    elif choice == "rmsprop":
+        return RMSprop(learning_rate=learning_rate)
+    return SGD(learning_rate=learning_rate)
+
 def generate_model(trial: Trial) -> Model:
     """
     Generates a model with a number of levels and an optimizer chosen by Optuna.
@@ -49,11 +67,14 @@ def generate_model(trial: Trial) -> Model:
     """
     
     # Generate layers between 5 to 8 layers according to optuna's trial
-    layers_count = trial.suggest_int("Layers Count", 5, 8)
+    layers_count = trial.suggest_int("Layers Count", 4, 6)
     layers = suggest_layers(trial, layers_count)
 
     # Optuna chooses an optimizer
-    optimizer = trial.suggest_categorical("optimizer", ["adam"])
+    opt_choice = trial.suggest_categorical("optimizer", ["adam", "rmsprop", "sgd"])
+    learning_rate = trial.suggest_float("learning_rate", 0.0001, 0.01)
+    optimizer = get_optimizer(opt_choice, learning_rate)
+
 
     # Define the base model and the input dimension
     # input_dim = trial.suggest_int("input_dim", 20, 50)
@@ -74,10 +95,11 @@ def suggest_layers(trial: Trial, count) -> list[Layer]:
     layers = []
     for i in range(count):
         neurons = trial.suggest_int("layer_{}".format(i), 10, 200)
+        activation = trial.suggest_categorical("activation_layer_{}".format(i), ["relu", "tanh"])
         if i == 0:
-            layers.append(Dense(neurons, activation='relu', input_dim=23))
+            layers.append(Dense(neurons, activation=activation, input_dim=23))
         else:
-            layers.append(Dense(neurons, activation='relu'))
+            layers.append(Dense(neurons, activation=activation))
     layers.append(Dense(1, activation='sigmoid'))
         
     return layers
@@ -129,7 +151,7 @@ def main():
     # set the study:
     study = optuna.create_study(direction="maximize", sampler=sampler, pruner=pruner)
     # run the study:
-    study.optimize(objective, n_trials=10, n_jobs=-1, show_progress_bar=True)
+    study.optimize(objective, n_trials=2, n_jobs=-1, show_progress_bar=False)
 
     # Take the aggregate results of the studies
     pruned_trials = study.get_trials(deepcopy=False, states=[TrialState.PRUNED])
@@ -154,7 +176,7 @@ def main():
         print("    {}: {}".format(key, value))
 
     # save the results:
-    study.trials_dataframe().to_csv(Path(neural_networks_balanced_results_path, "neural_network_tuner.csv"))
+    study.trials_dataframe().to_csv(Path(neural_tuned_results_path, "neural_network_tuner.csv"))
 
 if __name__ == '__main__':
     main()

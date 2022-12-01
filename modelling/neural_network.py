@@ -44,18 +44,6 @@ def create_model(input_dim: int = 23) -> Sequential:
                   metrics=['accuracy'])
     return model
 
-# TODO to debug
-def create_model_with_layers(model: Model, layers: list[Layer], dropout: float = 0.1, optimizer: str = "adam", loss: str = 'binary_crossentropy', metrics: list[str] = ['accuracy']) -> Model:
-    compiled_model = model
-    for i in range(len(layers)):
-        compiled_model.add(layers[i])
-        if i < len(layers)-1:
-            compiled_model.add(Dropout(dropout))
-
-    compiled_model.compile(optimizer=optimizer, loss=loss, metrics=metrics)
-
-    return compiled_model
-
 
 def fit_model(model: Sequential, x_train: np.array, y_train: np.array,  epochs: int = 20) -> Sequential:
     """
