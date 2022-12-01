@@ -38,7 +38,7 @@ data_path = Path("..", "data")
 
 # Functions:
 def lime_explanation(df: pd.DataFrame, target: str, model: ..., j: int = 5,
-                      with_wrong_prediction_analysis: bool = False, random_state: int = 42) -> None:
+                     with_wrong_prediction_analysis: bool = False, random_state: int = 42) -> None:
     # TODO: not sure which type of data the function should expect from the parameter model
     """
     This function carry out a Local Model-agnostic Explanation of a pre-trained model using the lime framework:
@@ -122,7 +122,7 @@ def lime_explanation(df: pd.DataFrame, target: str, model: ..., j: int = 5,
 
 
 def shap_explanation(df: pd.DataFrame, target: str, model: ..., j: int = 5,
-                     with_wrong_prediction_analysis: bool = False, random_state: int = 42) -> None:
+                     with_global_summary_plots: bool = False, random_state: int = 42) -> None:
     """
     This function carry out a Local Model-agnostic Explanation of a pre-trained model using the shap library:
     https://shap.readthedocs.io/en/latest/index.html
@@ -131,14 +131,14 @@ def shap_explanation(df: pd.DataFrame, target: str, model: ..., j: int = 5,
     @param model: ...: our pre-trained black-box model, we will use it to perform a prediction and analyze it
     with our explainer.
     @param j: int: index of the data our model will use for the prediction.
-    @param with_wrong_prediction_analysis: weather or not to create the analysis of a wrongly predicted instance
+    @param with_global_summary_plots: weather or not to create the analysis of a wrongly predicted instance
     @param random_state: int: default = 42: the random state to be used for the split for reproducibility.
     """
 
     # Splitting the data:
     x_train, x_test, y_train, y_test = split_data(df, target)
 
-    y_pred = model.predict(x_test)
+    # y_pred = model.predict(x_test)
 
     # initialize the shapley values:
     explainer = shap.TreeExplainer(model)
@@ -157,8 +157,6 @@ def shap_explanation(df: pd.DataFrame, target: str, model: ..., j: int = 5,
     plt.savefig(Path(project_root_path, 'model_explainability', 'results', 'shap_waterfall.png'))
     plt.close()
 
-    # shap.initjs()
-    # shap.plots.force(shap_values[j])
     shap.force_plot(explainer.expected_value[0], shap_values[0][j], x_test.values[j], feature_names=x_test.columns,
                     matplotlib=True, show=False)
 
@@ -167,23 +165,27 @@ def shap_explanation(df: pd.DataFrame, target: str, model: ..., j: int = 5,
                 dpi=300, bbox_inches='tight')
     plt.close()
 
-    # error analysis:
-    # shap.summary_plot(shap_values, x_test.values, feature_names=x_test.columns, show=True)
-    shap.summary_plot(shap_values, x_test.values, plot_type="bar", class_names=['did not default', 'default'],
-                      feature_names=x_test.columns, show=False)
+    # Test
+    for name in x_test.columns:
+        shap.dependence_plot(name, shap_values[1], x_test, cmap=plt.get_cmap("cool"))
 
-    # save the plot:
-    plt.savefig(Path(project_root_path, 'model_explainability', 'results', 'shap_summary_plot.png'))
-    plt.close()
+    if with_global_summary_plots:
+        # shap.summary_plot(shap_values, x_test.values, feature_names=x_test.columns, show=True)
+        shap.summary_plot(shap_values, x_test.values, plot_type="bar", class_names=['did not default', 'default'],
+                          feature_names=x_test.columns, show=False)
 
-    shap.summary_plot(shap_values[0], x_test.values, feature_names=x_test.columns, show=False)
+        # save the plot:
+        plt.savefig(Path(project_root_path, 'model_explainability', 'results', 'shap_summary_plot.png'))
+        plt.close()
 
-    # save the plot:
-    plt.savefig(Path(project_root_path, 'model_explainability', 'results', 'shap_summary_plot_class_not_default.png'))
-    plt.close()
+        shap.summary_plot(shap_values[0], x_test.values, feature_names=x_test.columns, show=False)
 
-    shap.summary_plot(shap_values[1], x_test.values, feature_names=x_test.columns, show=False)
+        # save the plot:
+        plt.savefig(Path(project_root_path, 'model_explainability', 'results', 'shap_summary_plot_class_not_default.png'))
+        plt.close()
 
-    # save the plot:
-    plt.savefig(Path(project_root_path, 'model_explainability', 'results', 'shap_summary_plot_class_default.png'))
-    plt.close()
+        shap.summary_plot(shap_values[1], x_test.values, feature_names=x_test.columns, show=False)
+
+        # save the plot:
+        plt.savefig(Path(project_root_path, 'model_explainability', 'results', 'shap_summary_plot_class_default.png'))
+        plt.close()
