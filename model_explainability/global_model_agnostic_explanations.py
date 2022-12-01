@@ -24,7 +24,7 @@ data_path = Path("..", "data")
 
 
 # Functions:
-def permutation_feature_importance(df: pd.DataFrame, target: str, model: ..., random_state: int = 42) -> None:
+def permutation_feature_importance(training: pd.DataFrame, testing: pd.DataFrame, target: str, model: ..., random_state: int = 42) -> None:
     """
     This function carry out a Global Model-agnostic Explanation of a pre-trained model using the eli5 framework:
     https://eli5.readthedocs.io/en/latest/overview.html
@@ -41,14 +41,18 @@ def permutation_feature_importance(df: pd.DataFrame, target: str, model: ..., ra
     """
 
     # Splitting the data:
-    x_train, x_test, y_train, y_test = split_data(df, target)
+    # x_train, x_test, y_train, y_test = split_data(df, target)
+    x_train = training.drop("default", axis=1)
+    y_train = training["default"]
+
+    x_test = testing.drop("default", axis=1)
+    y_test = testing["default"]
 
     perm = PermutationImportance(model, random_state=random_state).fit(x_test, y_test)
     html_obj = eli5.show_weights(perm, feature_names=x_test.columns.tolist())
 
     # Write html object to a file (adjust file path; Windows path is used here)
-    with open(Path(project_root_path, 'model_explainability', 'results', 'permutation_feature_importance.html'),
-              'wb') as f:
+    with open(Path(permutation_fi_results_path, 'permutation_feature_importance.html'), 'wb') as f:
         f.write(html_obj.data.encode("UTF-8"))
 
     # # Initialize a list of results
@@ -73,7 +77,7 @@ def permutation_feature_importance(df: pd.DataFrame, target: str, model: ..., ra
     #                                               ascending=False)
 
 
-def partial_dependence_plots(df: pd.DataFrame, target: str, model: ..., random_state: int = 42) -> None:
+def partial_dependence_plots(training: pd.DataFrame, testing: pd.DataFrame, target: str, model: ..., random_state: int = 42) -> None:
     """
     This function carry out a Global Model-agnostic Explanation of a pre-trained model.
     We displays (global) functional relationship between a set of features and the target variable.
@@ -85,7 +89,12 @@ def partial_dependence_plots(df: pd.DataFrame, target: str, model: ..., random_s
     """
 
     # Splitting the data:
-    x_train, x_test, y_train, y_test = split_data(df, target)
+    # x_train, x_test, y_train, y_test = split_data(df, target)
+    x_train = training.drop("default", axis=1)
+    y_train = training["default"]
+
+    x_test = testing.drop("default", axis=1)
+    y_test = testing["default"]
 
     # Similar to previous PDP plot except we use pdp_interact instead of pdp_isolate and pdp_interact_plot instead of pdp_isolate_plot
     # features_to_plot = ['‘Goal Scored’', '‘Distance Covered(Kms)’']
@@ -99,4 +108,7 @@ def partial_dependence_plots(df: pd.DataFrame, target: str, model: ..., random_s
         # shap.dependence_plot(name, shap_values[1], x_test, interaction_index=)
         shap.plots.partial_dependence(name, model.predict, x_test, ice=False, model_expected_value=True,
                                       feature_expected_value=True, show=False)
+        # save the plot:
+        plt.savefig(Path(partial_dependence_results_path, f'shap_pdp_{name}.png'))
+        plt.close()
 

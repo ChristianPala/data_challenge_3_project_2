@@ -37,7 +37,7 @@ data_path = Path("..", "data")
 
 
 # Functions:
-def lime_explanation(df: pd.DataFrame, target: str, model: ..., j: int = 5,
+def lime_explanation(training: pd.DataFrame, testing: pd.DataFrame, target: str, model: ..., j: int = 5,
                      with_wrong_prediction_analysis: bool = False, random_state: int = 42) -> None:
     # TODO: not sure which type of data the function should expect from the parameter model
     """
@@ -53,7 +53,12 @@ def lime_explanation(df: pd.DataFrame, target: str, model: ..., j: int = 5,
     """
 
     # Splitting the data:
-    x_train, x_test, y_train, y_test = split_data(df, target)
+    # x_train, x_test, y_train, y_test = split_data(df, target)
+    x_train = training.drop("default", axis=1)
+    y_train = training["default"]
+
+    x_test = testing.drop("default", axis=1)
+    y_test = testing["default"]
 
     # LIME explainer
     explainer = LimeTabularExplainer(training_data=x_train.values,
@@ -68,8 +73,9 @@ def lime_explanation(df: pd.DataFrame, target: str, model: ..., j: int = 5,
         predict_fn=model.predict_proba
     )
 
-    # Save the predictions
-    exp.save_to_file('../model_explainability/results/lime_report.html')
+    # Save the report
+    # exp.save_to_file('../model_explainability/results/lime_report.html')
+    exp.save_to_file(Path(lime_local_explanation_results_path, 'lime_report.html'))
 
     if with_wrong_prediction_analysis:
         # Analyze wrong predictions
@@ -96,32 +102,36 @@ def lime_explanation(df: pd.DataFrame, target: str, model: ..., j: int = 5,
         explanation = explainer.explain_instance(x_test.iloc[tp_idx], model.predict_proba)
 
         # save the html file
-        explanation.save_to_file(Path(project_root_path, 'model_explainability',  'results',
-                                      'lime_report_tp_pred.html'))
+        # explanation.save_to_file(Path(project_root_path, 'model_explainability',  'results',
+        #                               'lime_report_tp_pred.html'))
+        explanation.save_to_file(Path(lime_local_explanation_results_path, 'lime_report_tp_pred.html'))
 
         # explain the wrongly predicted instance
         explanation = explainer.explain_instance(x_test.iloc[tn_idx], model.predict_proba)
 
         # save the html file
-        explanation.save_to_file(Path(project_root_path, 'model_explainability', 'results',
-                                      'lime_report_tn_pred.html'))
+        # explanation.save_to_file(Path(project_root_path, 'model_explainability', 'results',
+        #                               'lime_report_tn_pred.html'))
+        explanation.save_to_file(Path(lime_local_explanation_results_path, 'lime_report_tn_pred.html'))
 
         # explain the wrongly predicted instance
         explanation = explainer.explain_instance(x_test.iloc[fp_idx], model.predict_proba)
 
         # save the html file
-        explanation.save_to_file(Path(project_root_path, 'model_explainability', 'results',
-                                      'lime_report_fp_pred.html'))
+        # explanation.save_to_file(Path(project_root_path, 'model_explainability', 'results',
+        #                               'lime_report_fp_pred.html'))
+        explanation.save_to_file(Path(lime_local_explanation_results_path, 'lime_report_fp_pred.html'))
 
         # explain the wrongly predicted instance
         explanation = explainer.explain_instance(x_test.iloc[fn_idx], model.predict_proba)
 
         # save the html file
-        explanation.save_to_file(Path(project_root_path, 'model_explainability', 'results',
-                                      'lime_report_fn_pred.html'))
+        # explanation.save_to_file(Path(project_root_path, 'model_explainability', 'results',
+        #                               'lime_report_fn_pred.html'))
+        explanation.save_to_file(Path(lime_local_explanation_results_path, 'lime_report_fn_pred.html'))
 
 
-def shap_explanation(df: pd.DataFrame, target: str, model: ..., j: int = 5,
+def shap_explanation(training: pd.DataFrame, testing: pd.DataFrame, target: str, model: ..., j: int = 5,
                      with_global_summary_plots: bool = False, random_state: int = 42) -> None:
     """
     This function carry out a Local Model-agnostic Explanation of a pre-trained model using the shap library:
@@ -136,7 +146,12 @@ def shap_explanation(df: pd.DataFrame, target: str, model: ..., j: int = 5,
     """
 
     # Splitting the data:
-    x_train, x_test, y_train, y_test = split_data(df, target)
+    # x_train, x_test, y_train, y_test = split_data(df, target)
+    x_train = training.drop("default", axis=1)
+    y_train = training["default"]
+
+    x_test = testing.drop("default", axis=1)
+    y_test = testing["default"]
 
     # y_pred = model.predict(x_test)
 
@@ -154,15 +169,17 @@ def shap_explanation(df: pd.DataFrame, target: str, model: ..., j: int = 5,
     plt.subplots_adjust(left=0.5, right=0.9, top=0.9, bottom=0.2)
     # increase the size of the plot:
     plt.gcf().set_size_inches(10, 5)
-    plt.savefig(Path(project_root_path, 'model_explainability', 'results', 'shap_waterfall.png'))
+    # plt.savefig(Path(project_root_path, 'model_explainability', 'results', 'shap_waterfall.png'))
+    plt.savefig(Path(shap_local_explanation_results_path, 'shap_waterfall.png'))
     plt.close()
 
     shap.force_plot(explainer.expected_value[0], shap_values[0][j], x_test.values[j], feature_names=x_test.columns,
                     matplotlib=True, show=False)
 
     # save the plot:
-    plt.savefig(Path(project_root_path, 'model_explainability', 'results', 'shap_force_plot.png'),
-                dpi=300, bbox_inches='tight')
+    # plt.savefig(Path(project_root_path, 'model_explainability', 'results', 'shap_force_plot.png'),
+    #             dpi=300, bbox_inches='tight')
+    plt.savefig(Path(shap_local_explanation_results_path, 'shap_force_plot.png'), dpi=300, bbox_inches='tight')
     plt.close()
 
     if with_global_summary_plots:
@@ -171,17 +188,21 @@ def shap_explanation(df: pd.DataFrame, target: str, model: ..., j: int = 5,
                           feature_names=x_test.columns, show=False)
 
         # save the plot:
-        plt.savefig(Path(project_root_path, 'model_explainability', 'results', 'shap_summary_plot.png'))
+        # plt.savefig(Path(project_root_path, 'model_explainability', 'results', 'shap_summary_plot.png'))
+        plt.savefig(Path(shap_local_explanation_results_path, 'shap_summary_plot.png'))
         plt.close()
 
         shap.summary_plot(shap_values[0], x_test.values, feature_names=x_test.columns, show=False)
 
         # save the plot:
-        plt.savefig(Path(project_root_path, 'model_explainability', 'results', 'shap_summary_plot_class_not_default.png'))
+        # plt.savefig(Path(project_root_path, 'model_explainability', 'results',
+        #                  'shap_summary_plot_class_not_default.png'))
+        plt.savefig(Path(shap_local_explanation_results_path, 'shap_summary_plot_class_not_default.png'))
         plt.close()
 
         shap.summary_plot(shap_values[1], x_test.values, feature_names=x_test.columns, show=False)
 
         # save the plot:
-        plt.savefig(Path(project_root_path, 'model_explainability', 'results', 'shap_summary_plot_class_default.png'))
+        # plt.savefig(Path(project_root_path, 'model_explainability', 'results', 'shap_summary_plot_class_default.png'))
+        plt.savefig(Path(shap_local_explanation_results_path, 'shap_summary_plot_class_default.png'))
         plt.close()
