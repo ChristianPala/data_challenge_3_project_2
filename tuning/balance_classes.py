@@ -218,9 +218,9 @@ def save_dataframes(train: pd.DataFrame, val: pd.DataFrame, test: pd.DataFrame, 
     path.mkdir(parents=True, exist_ok=True)
 
     # save the dataframes
-    train.to_csv(path / "train.csv", index=False)
-    val.to_csv(path / "val.csv", index=False)
-    test.to_csv(path / "test.csv", index=False)
+    train.to_csv(path / "final_training.csv", index=False)
+    val.to_csv(path / "final_validation.csv", index=False)
+    test.to_csv(path / "final_testing.csv", index=False)
 
 
 def perform_balancing(tr: pd.DataFrame, vl: pd.DataFrame, tst: pd.DataFrame, target: str, method: str,

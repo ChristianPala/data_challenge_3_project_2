@@ -31,8 +31,8 @@ def load_balanced_datasets(folder: Path) -> list[tuple[pd.DataFrame, pd.DataFram
         # If the file is a folder:
         if file.is_dir():
             # Load the data:
-            train = pd.read_csv(Path(file, "train.csv"))
-            validation = pd.read_csv(Path(file, "val.csv"))
+            train = pd.read_csv(Path(file, "final_training.csv"))
+            validation = pd.read_csv(Path(file, "final_validation.csv"))
             # Return the data:
             yield train, validation, file.name
         else:

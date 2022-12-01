@@ -32,8 +32,8 @@ def load_best_dataset(path: Path = Path(balanced_datasets_path, "undersampled",
     :return: pd.DataFrame: the best dataset.
     """
     # load the dataset:
-    train = pd.read_csv(Path(path, "train.csv"))
-    val = pd.read_csv(Path(path, "val.csv"))
+    train = pd.read_csv(Path(path, "final_training.csv"))
+    val = pd.read_csv(Path(path, "final_validation.csv"))
     # split the dataset into features and target:
     x_train = train.drop('default', axis=1)
     y_train = train['default']
