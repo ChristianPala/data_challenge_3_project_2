@@ -9,7 +9,7 @@ from keras import Model
 from keras.models import load_model
 from model_explainability.global_surrogate import load_data, import_black_box_model
 # Interpretability:
-from sklearn.inspection import plot_partial_dependence, PartialDependenceDisplay
+from sklearn.inspection import plot_partial_dependence
 # Plotting:
 import matplotlib.pyplot as plt
 # Global variables:
