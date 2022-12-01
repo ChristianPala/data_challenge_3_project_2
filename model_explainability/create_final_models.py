@@ -66,4 +66,8 @@ def main() -> None:
     gradient_boosting_model(x_train, y_train)
     neural_network_model(x_train, y_train)
     supper_vector_machine_model(x_train, y_train)
-    
+
+
+if __name__ == '__main__':
+    main()
+
