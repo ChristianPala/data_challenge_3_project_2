@@ -3,8 +3,10 @@ import pandas as pd
 import numpy as np
 import random
 import matplotlib.pyplot as plt
+import shap
 import eli5
 from eli5.sklearn import PermutationImportance
+from pdpbox import pdp, get_dataset, info_plots
 
 
 from config import *
@@ -49,4 +51,52 @@ def permutation_feature_importance(df: pd.DataFrame, target: str, model: ..., ra
               'wb') as f:
         f.write(html_obj.data.encode("UTF-8"))
 
+    # # Initialize a list of results
+    # results = []
+    # # Iterate through each predictor
+    # for predictor in X_test:
+    #     # Create a copy of X_test
+    #     X_test_copy = X_test.copy()
+    #
+    #     # Scramble the values of the given predictor
+    #     X_test_copy[predictor] = X_test[predictor].sample(frac=1).values
+    #
+    #     # Calculate the new RMSE
+    #     new_rmse = mean_squared_error(regr.predict(X_test_copy), y_test,
+    #                                   squared=False)
+    #
+    #     # Append the increase in MSE to the list of results
+    #     results.append({'pred': predictor,
+    #                     'score': new_rmse - rmse_full_mod})
+    # # Convert to a pandas dataframe and rank the predictors by score
+    # resultsdf = pd.DataFrame(results).sort_values(by='score',
+    #                                               ascending=False)
+
+
+def partial_dependence_plots(df: pd.DataFrame, target: str, model: ..., random_state: int = 42) -> None:
+    """
+    This function carry out a Global Model-agnostic Explanation of a pre-trained model.
+    We displays (global) functional relationship between a set of features and the target variable.
+    @param df: pd.DataFrame: the dataset to be split.
+    @param target: str: the target column's name.
+    @param model: ...: our pre-trained black-box model, we will use it to perform a prediction and analyze it
+    with our explainer.
+    @param random_state: int: default = 42: the random state to be used for the split for reproducibility.
+    """
+
+    # Splitting the data:
+    x_train, x_test, y_train, y_test = split_data(df, target)
+
+    # Similar to previous PDP plot except we use pdp_interact instead of pdp_isolate and pdp_interact_plot instead of pdp_isolate_plot
+    # features_to_plot = ['‘Goal Scored’', '‘Distance Covered(Kms)’']
+    # inter1 = pdp.pdp_interact(model=tree_model, dataset=val_X, model_features=feature_names, features=features_to_plot)
+    # pdp.pdp_interact_plot(pdp_interact_out=inter1, feature_names=features_to_plot, plot_type=’contour’)
+    # plt.show()
+
+    # Test
+    for name in x_test.columns:
+        # shap.dependence_plot(name, shap_values[1], x_test, cmap=plt.get_cmap("cool"))
+        # shap.dependence_plot(name, shap_values[1], x_test, interaction_index=)
+        shap.plots.partial_dependence(name, model.predict, x_test, ice=False, model_expected_value=True,
+                                      feature_expected_value=True, show=False)
 

@@ -2,7 +2,16 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="4d447eeb-afe4-4c39-a29d-18c581e29792" name="Changes" comment="Setup for global explanations">
+      <change afterPath="$PROJECT_DIR$/model_explainability/results/permutation_feature_importance.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/model_explainability/results/shap_force_plot.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/model_explainability/results/shap_summary_plot.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/model_explainability/results/shap_summary_plot_class_default.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/model_explainability/results/shap_summary_plot_class_not_default.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/model_explainability/results/shap_waterfall.png" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/data_challenge_3_project_2.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/data_challenge_3_project_2.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/model_explainability/global_model_agnostic_explanations.py" beforeDir="false" afterPath="$PROJECT_DIR$/model_explainability/global_model_agnostic_explanations.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/model_explainability/local_model_agnostic_explanations.py" beforeDir="false" afterPath="$PROJECT_DIR$/model_explainability/local_model_agnostic_explanations.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/model_explainability/results/lime_report.html" beforeDir="false" afterPath="$PROJECT_DIR$/model_explainability/results/lime_report.html" afterDir="false" />
@@ -10,8 +19,8 @@
       <change beforePath="$PROJECT_DIR$/model_explainability/results/lime_report_fp_pred.html" beforeDir="false" afterPath="$PROJECT_DIR$/model_explainability/results/lime_report_fp_pred.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/model_explainability/results/lime_report_tn_pred.html" beforeDir="false" afterPath="$PROJECT_DIR$/model_explainability/results/lime_report_tn_pred.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/model_explainability/results/lime_report_tp_pred.html" beforeDir="false" afterPath="$PROJECT_DIR$/model_explainability/results/lime_report_tp_pred.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/model_explainability/xai_placeholder.py" beforeDir="false" afterPath="$PROJECT_DIR$/model_explainability/xai_placeholder.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/modelling/trees.py" beforeDir="false" afterPath="$PROJECT_DIR$/modelling/trees.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/preprocessing/eda/EDA.py" beforeDir="false" afterPath="$PROJECT_DIR$/preprocessing/eda/EDA.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -56,7 +65,7 @@
       <recent name="C:\Users\loddo\Desktop\GitRepo\data_challenge_3_project_2\model_explainability" />
     </key>
   </component>
-  <component name="RunManager">
+  <component name="RunManager" selected="Python.xai_placeholder">
     <configuration name="trees" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="data_challenge_3_project_2" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -79,8 +88,31 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
+    <configuration name="xai_placeholder" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="data_challenge_3_project_2" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/model_explainability" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/model_explainability/xai_placeholder.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Python.xai_placeholder" />
         <item itemvalue="Python.trees" />
       </list>
     </recent_temporary>
@@ -101,7 +133,12 @@
       <workItem from="1669707663429" duration="4954000" />
       <workItem from="1669735110168" duration="9795000" />
       <workItem from="1669798012058" duration="5512000" />
-      <workItem from="1669813536762" duration="7380000" />
+      <workItem from="1669813536762" duration="7450000" />
+      <workItem from="1669834617290" duration="4806000" />
+      <workItem from="1669886474927" duration="17000" />
+      <workItem from="1669894427062" duration="7139000" />
+      <workItem from="1669902001080" duration="612000" />
+      <workItem from="1669924412801" duration="8000" />
     </task>
     <task id="LOCAL-00001" summary="Initial LIME implementation, not working.">
       <created>1669323224424</created>
@@ -131,7 +168,14 @@
       <option name="project" value="LOCAL" />
       <updated>1669735227115</updated>
     </task>
-    <option name="localTasksCounter" value="5" />
+    <task id="LOCAL-00005" summary="Added permutation feature importance.">
+      <created>1669895678438</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1669895678438</updated>
+    </task>
+    <option name="localTasksCounter" value="6" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -153,9 +197,11 @@
     <MESSAGE value="Started implementing shap local explanation" />
     <MESSAGE value="Started implementing lime local explanation" />
     <MESSAGE value="Setup for global explanations" />
-    <option name="LAST_COMMIT_MESSAGE" value="Setup for global explanations" />
+    <MESSAGE value="Added permutation feature importance." />
+    <option name="LAST_COMMIT_MESSAGE" value="Added permutation feature importance." />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/data_challenge_3_project_2$trees.coverage" NAME="trees Coverage Results" MODIFIED="1669820402599" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/modelling" />
+    <SUITE FILE_PATH="coverage/data_challenge_3_project_2$trees.coverage" NAME="trees Coverage Results" MODIFIED="1669896162759" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/modelling" />
+    <SUITE FILE_PATH="coverage/data_challenge_3_project_2$xai_placeholder.coverage" NAME="xai_placeholder Coverage Results" MODIFIED="1669901489833" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/model_explainability" />
   </component>
 </project>

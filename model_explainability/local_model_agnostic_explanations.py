@@ -165,10 +165,6 @@ def shap_explanation(df: pd.DataFrame, target: str, model: ..., j: int = 5,
                 dpi=300, bbox_inches='tight')
     plt.close()
 
-    # Test
-    for name in x_test.columns:
-        shap.dependence_plot(name, shap_values[1], x_test, cmap=plt.get_cmap("cool"))
-
     if with_global_summary_plots:
         # shap.summary_plot(shap_values, x_test.values, feature_names=x_test.columns, show=True)
         shap.summary_plot(shap_values, x_test.values, plot_type="bar", class_names=['did not default', 'default'],
