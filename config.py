@@ -35,6 +35,7 @@ other_models_balanced_results_path: Path = Path(results_path, "other_models_bala
 trees_tuned_results_path: Path = Path(results_path, "trees_tuned")
 neural_tuned_results_path: Path = Path(results_path, "neural_network_tuned")
 other_models_tuned_results_path: Path = Path(results_path, "other_models_tuned")
+undersampled_datasets_path: Path = Path(balanced_datasets_path, "undersampled")
 # sub-folders for the model explainability folders:
 model_explainability: Path = Path(project_root_path, "model_explainability")
 final_models_path: Path = Path(model_explainability, "final_models")

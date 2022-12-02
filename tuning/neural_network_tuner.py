@@ -24,6 +24,7 @@ from auxiliary.method_timer import measure_time
 from config import balanced_datasets_path, neural_tuned_results_path
 from config import scaled_datasets_path, undersampled_datasets_path
 
+
 def load_best_dataset(path: Path = Path(balanced_datasets_path, "undersampled",
                                         "minmax_scaler_scaling_most_frequent_imputation")) \
         -> tuple[pd.DataFrame, pd.Series, pd.DataFrame, pd.Series]:
@@ -42,7 +43,10 @@ def load_best_dataset(path: Path = Path(balanced_datasets_path, "undersampled",
 
     return x_train, y_train, x_val, y_val
 
-def create_model_with_layers(model: Model, layers: list[Layer], dropout: float = 0.1, optimizer: Optimizer = Adam(), loss: str = 'binary_crossentropy', metrics: list[str] = ['accuracy'], lr = 0.001) -> Model:
+
+def create_model_with_layers(model: Model, layers: list[Layer], dropout: float = 0.1,
+                             optimizer: Optimizer = Adam(), loss: str = 'binary_crossentropy',
+                             metrics: list[str] = ['accuracy'], lr=0.001) -> Model:
     compiled_model = model
     for i in range(len(layers)):
         compiled_model.add(layers[i])
@@ -53,6 +57,7 @@ def create_model_with_layers(model: Model, layers: list[Layer], dropout: float =
 
     return compiled_model
 
+
 def get_optimizer(choice: str, learning_rate: float = 0.001) -> Optimizer:
     if choice == "adam":
         return Adam(learning_rate=learning_rate)
@@ -60,13 +65,14 @@ def get_optimizer(choice: str, learning_rate: float = 0.001) -> Optimizer:
         return RMSprop(learning_rate=learning_rate)
     return SGD(learning_rate=learning_rate)
 
+
 def generate_model(trial: Trial) -> Model:
     """
     Generates a model with a number of levels and an optimizer chosen by Optuna.
     :return: The model with the hyperparameters tuned by Optuna
     """
     
-    # Generate layers between 5 to 8 layers according to optuna's trial
+    # Generate layers between 4 to 6 layers according to optuna's trial
     layers_count = trial.suggest_int("Layers Count", 4, 6)
     layers = suggest_layers(trial, layers_count)
 
@@ -75,13 +81,13 @@ def generate_model(trial: Trial) -> Model:
     learning_rate = trial.suggest_float("learning_rate", 0.0001, 0.01)
     optimizer = get_optimizer(opt_choice, learning_rate)
 
-
     # Define the base model and the input dimension
     # input_dim = trial.suggest_int("input_dim", 20, 50)
     m = Sequential()
     model = create_model_with_layers(m, layers=layers, optimizer=optimizer)
 
     return model
+
 
 def suggest_layers(trial: Trial, count) -> list[Layer]:
     """
@@ -104,10 +110,12 @@ def suggest_layers(trial: Trial, count) -> list[Layer]:
         
     return layers
 
+
 def score(model: Sequential, x, y) -> float:
 
     score = model.evaluate(x, y)
     return score[1]
+
 
 def objective(trial: Trial):
     clear_session()
@@ -194,6 +202,7 @@ def main():
 
     # save the results:
     study.trials_dataframe().to_csv(Path(neural_tuned_results_path, "neural_network_tuner.csv"))
+
 
 if __name__ == '__main__':
     main()
