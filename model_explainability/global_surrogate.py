@@ -223,15 +223,32 @@ def save_model_predictions(black_box_model: Model, surrogate_models: tuple[Logis
     """
     # Get the predictions of the black box model:
     y_pred_bb = black_box_model.predict(x_test)
-    y_pred_bb = np.where(y_pred_bb > 0.5, 1, 0)
+    y_pred_bb_cat = np.where(y_pred_bb > 0.5, 1, 0)
     # Get the predictions of the surrogate model:
     y_pred_surrogate_log = surrogate_models[0].predict(x_test)
     y_pred_surrogate_rf = surrogate_models[1].predict(x_test)
     # Create the dataframe:
-    df = pd.DataFrame(data=y_pred_bb, columns=['black_box'])
+    df = pd.DataFrame(data=y_pred_bb_cat, columns=['black_box'])
     df['surrogate_log'] = y_pred_surrogate_log
     df['surrogate_rf'] = y_pred_surrogate_rf
     df.to_csv(Path(global_surrogate_results_path, 'predictions.csv'))
+
+    # get the probabilities for the surrogate models:
+    y_pred_surrogate_log_prob = surrogate_models[0].predict_proba(x_test)
+    y_pred_surrogate_rf_prob = surrogate_models[1].predict_proba(x_test)
+
+    # get the indexes of the difference between the predictions:
+    error_log = y_pred_surrogate_log_prob - y_pred_bb
+    error_rf = y_pred_surrogate_rf_prob - y_pred_bb
+    # get the indexes of the 10 largest differences:
+    error_log = np.argsort(error_log, axis=0)[-10:]
+    error_rf = np.argsort(error_rf, axis=0)[-10:]
+
+    # save the indexes in a csv file:
+    df = pd.DataFrame(data=error_log, columns=['log_mistakes_1', 'log_mistakes_2'])
+    df['rf_mistakes_1'] = error_rf[:, 0]
+    df['rf_mistakes_2'] = error_rf[:, 1]
+    df.to_csv(Path(global_surrogate_results_path, 'mistakes_for_LIME.csv'))
 
 
 def plot_feature_importance(surrogate_models: tuple[LogisticRegression, RandomForestClassifier],
@@ -271,6 +288,8 @@ def plot_feature_importance(surrogate_models: tuple[LogisticRegression, RandomFo
     feature_importance = surrogate_model_rf.feature_importances_
     # Create the dataframe:
     df = pd.DataFrame(data=feature_importance, index=x_test.columns, columns=['feature_importance'])
+    # sort the dataframe by feature importance:
+    df = df.sort_values(by='feature_importance', ascending=False)
     # Plot the feature importance:
     df.plot.bar(color='green', figsize=(20, 10), legend=False)
     plt.title('Feature importance for the blackbox model according to the random forest surrogate model')
