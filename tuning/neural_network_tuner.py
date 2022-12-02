@@ -22,7 +22,7 @@ from auxiliary.method_timer import measure_time
 
 # Global variables:
 from config import balanced_datasets_path, neural_tuned_results_path
-from config import scaled_datasets_path
+from config import scaled_datasets_path, undersampled_datasets_path
 
 def load_best_dataset(path: Path = Path(balanced_datasets_path, "undersampled",
                                         "minmax_scaler_scaling_most_frequent_imputation")) \
@@ -104,6 +104,11 @@ def suggest_layers(trial: Trial, count) -> list[Layer]:
         
     return layers
 
+def score(model: Sequential, x, y) -> float:
+
+    score = model.evaluate(x, y)
+    return score[1]
+
 def objective(trial: Trial):
     clear_session()
     # load the best dataset:
@@ -111,9 +116,13 @@ def objective(trial: Trial):
 
     csv_files: list[Path] = list(scaled_datasets_path.glob('*.csv'))
     df = pd.read_csv(csv_files[0])
+    test_path = Path(undersampled_datasets_path, "minmax_scaler_scaling_drop", "test.csv")
+    test = pd.read_csv(test_path)
 
     # split the data into train and test:
     x_train, x_val, _, y_train, y_val, _ = split_data(df, 'default', validation=True)
+
+    x_test, x_val, _, y_test, y_val, _ = split_data(test, 'default', validation=True)
 
     # define the model:
     model = generate_model(trial=trial)
@@ -129,17 +138,25 @@ def objective(trial: Trial):
         # fit the model:
         model.fit(x_train_cv, y_train_cv, epochs=trial.suggest_int("epochs", 10, 100),
                   batch_size=trial.suggest_int("batch_size", 8, 128), verbose=0)
-
+        
         # evaluate the model:
         score = model.evaluate(x_test_cv, y_test_cv, verbose=0)
 
         # append the score:
         cv_scores.append(score[1])
-    
+        
     trial.report(sum(cv_scores) / len(cv_scores), 1)
 
-    # return the mean of the scores:
-    return sum(cv_scores) / len(cv_scores)
+    val_score = model.evaluate(x_val, y_val)
+    
+    trial.report(val_score[1], 2)
+    y_pred = predict_model(model, x_test)
+    test_score = evaluate_model(y_test, y_pred)
+
+    trial.report(test_score[0], 3)
+
+    # return the score on the validation dataset:
+    return test_score[0]
 
 
 @measure_time
@@ -151,7 +168,7 @@ def main():
     # set the study:
     study = optuna.create_study(direction="maximize", sampler=sampler, pruner=pruner)
     # run the study:
-    study.optimize(objective, n_trials=2, n_jobs=-1, show_progress_bar=False)
+    study.optimize(objective, n_trials=10, n_jobs=-1, show_progress_bar=False)
 
     # Take the aggregate results of the studies
     pruned_trials = study.get_trials(deepcopy=False, states=[TrialState.PRUNED])
