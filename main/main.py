@@ -1,6 +1,7 @@
 # main file to run the project pipeline:
 # Libraries:
 # Main files for the project:
+from model_explainability.create_final_models import create_final_models_main
 from model_explainability.global_surrogate import global_surrogate_main
 from model_explainability.local_interpretable_model_agnostic_explanations import lime_main
 from model_explainability.partial_dependece_plot import pdp_main
@@ -28,7 +29,6 @@ from tuning.evaluate_tuned_models import tuning_main
 def main() -> None:
     """
     This function runs the preprocessing, feature engineering and baseline modelling for trees.
-    # Todo: Expand to all the other pipelines.
     :return: None
     """
     # Preprocessing:
@@ -75,6 +75,10 @@ def main() -> None:
     evaluator_main(trees_balanced_results_path, neural_networks_balanced_results_path,
                    other_models_balanced_results_path)
     """
+    Based on the balancing results we selected:
+    Gradient boosting as the best model for trees
+    SVC as the best model for the other models
+    # Sample output:
     The best decision tree minmax scaler drop, with an f1 score of 0.455
     The best random forest minmax scaler drop, with an f1 score of 0.539
     The best gradient boosting minmax scaler drop, with an f1 score of 0.545
@@ -87,15 +91,22 @@ def main() -> None:
     """
     # tuned trees:
     # we consider gradient boosting for tuning since it achieved the best results in the baseline and balanced models
-    # tuned neural network:
+    # gb_main()
+    # tuned neural network, we consider the convolutional neural network as it was strictly better than the dense one.
     # tuned other models:
-    # we consider svc for tuning since it achieved the best results in the baseline and balanced models
-    # tuning_main()
+    # cv_main()
+    # we consider svc for tuning since it achieved the best results in the baseline and balanced models, naive
+    # bayes was also pretty close.
+    # svc_main()
+    # We keep the tuning off the main pipeline, as it is very time-consuming.
+    # Below we generate the 3 best models we found.
+    create_final_models_main()
     # Explaining:
     # ----------------------------------------------
+    # feature permutation:
+    # dependence plots:
     # global_surrogate_main()
     # lime_main()
-    # pdp_main()
     # pretty print the execution times dictionary:
     pprint.pprint(execution_times)
 

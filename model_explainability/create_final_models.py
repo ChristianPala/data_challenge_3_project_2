@@ -6,7 +6,7 @@ import pandas as pd
 import numpy as np
 # Modelling:
 from sklearn.ensemble import GradientBoostingClassifier
-from modelling.neural_network import fit_model, create_model
+from modelling.neural_network import fit_model, create_convolutional_model
 from sklearn.svm import SVC
 
 # Global variables:
@@ -31,7 +31,7 @@ def neural_network_model(x_train: np.ndarray, y_train: np.ndarray) -> None:
     :return: None
     """
     # create the model:
-    model = create_model(x_train.shape[1])  # Todo add all parameters from the tuning results
+    model = create_convolutional_model(x_train.shape[1])  # Todo add all parameters from the tuning results
     # fit the model:
     model = fit_model(model, x_train, y_train)
     # save the model:
@@ -54,7 +54,7 @@ def supper_vector_machine_model(x_train: np.ndarray, y_train: np.ndarray) -> Non
     pd.to_pickle(svc, Path(final_models_path, "supper_vector_machine_model.pkl"))
 
 
-def main() -> None:
+def create_final_models_main() -> None:
     """
     This function is the main function.
     :return: None
@@ -69,5 +69,5 @@ def main() -> None:
 
 
 if __name__ == '__main__':
-    main()
+    create_final_models_main()
 
