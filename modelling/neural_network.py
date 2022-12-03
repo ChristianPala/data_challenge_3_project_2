@@ -5,12 +5,13 @@ from pathlib import Path
 import numpy as np
 import shutil
 import pandas as pd
+import os
 
 # Modelling:
 import tensorflow as tf
 from tensorflow import keras
 from keras.models import Model, Sequential
-from keras.layers import Dense, Dropout, Layer
+from keras.layers import Dense, Dropout, Layer, Conv1D, MaxPooling1D, Flatten
 from modelling.train_test_validation_split import split_data
 from modelling.model_evaluator import save_evaluation_results, evaluate_model
 #  Timing:
@@ -22,10 +23,11 @@ from config import scaled_datasets_path, neural_networks_results_path
 
 if not neural_networks_results_path.exists():
     neural_networks_results_path.mkdir(parents=True, exist_ok=True)
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
 
 # Functions:
-def create_model(input_dim: int = 23) -> Sequential:
+def create_dense_model(input_dim: int = 23) -> Sequential:
     """
     This function creates a neural network model.
     :return: Sequential: the model.
@@ -39,6 +41,23 @@ def create_model(input_dim: int = 23) -> Sequential:
     model.add(Dropout(0.1))
     model.add(Dense(1, activation='sigmoid'))
 
+    model.compile(optimizer='adam',
+                  loss='binary_crossentropy',
+                  metrics=['accuracy'])
+    return model
+
+
+def create_convolutional_model(input_dim: int = 23) -> Sequential:
+    """
+    This function creates a convolutional neural network model.
+    :return: Convolutional: the model.
+    """
+    model = Sequential()
+    model.add(Conv1D(filters=64, kernel_size=3, activation='relu', input_shape=(input_dim, 1)))
+    model.add(MaxPooling1D(pool_size=2))
+    model.add(Flatten())
+    model.add(Dense(100, activation='relu'))
+    model.add(Dense(1, activation='sigmoid'))
     model.compile(optimizer='adam',
                   loss='binary_crossentropy',
                   metrics=['accuracy'])
@@ -100,27 +119,32 @@ def neural_network_main() -> None:
             input_dim = 23
 
         # create the model:
-        model = create_model(input_dim=input_dim)
+        model_dense = create_dense_model(input_dim=input_dim)
+        model_conv = create_convolutional_model(input_dim=input_dim)
 
         # fit the model:
-        model = fit_model(model, x_train, y_train)
+        model_dense = fit_model(model_dense, x_train, y_train)
+        model_conv = fit_model(model_conv, x_train, y_train)
 
         # predict the target values:
-        y_pred = predict_model(model, x_val)
+        y_pred_dense = predict_model(model_dense, x_val)
+        y_pred_conv = predict_model(model_conv, x_val)
 
         # evaluate the model:
-        evaluation_results = evaluate_model(y_val, y_pred)
+        evaluation_results_dense = evaluate_model(y_val, y_pred_dense)
+        evaluation_results_conv = evaluate_model(y_val, y_pred_conv)
 
         # save the evaluation results:
-        save_evaluation_results(evaluation_results=evaluation_results,
-                                model_type='neural_network', save_path=neural_networks_results_path,
+        save_evaluation_results(evaluation_results=evaluation_results_dense,
+                                model_type='neural_network_dense', save_path=neural_networks_results_path,
+                                dataset_name=csv_file.stem)
+        save_evaluation_results(evaluation_results=evaluation_results_conv,
+                                model_type='neural_network_convoluted', save_path=neural_networks_results_path,
                                 dataset_name=csv_file.stem)
 
-        # save the model:
-        model.save(models_path / f'{csv_file.stem}.h5')
-
-        # save the model:
-        model.save(Path(models_path, f'{csv_file.stem}.h5'))
+        # save the models:
+        model_dense.save(models_path / f'{csv_file.stem}_dense.h5')
+        model_conv.save(models_path / f'{csv_file.stem}_convolutional.h5')
 
 
 if __name__ == '__main__':

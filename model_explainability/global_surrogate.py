@@ -1,11 +1,10 @@
 # Library to explain the results of the black box neural network model with a global surrogate:
-import os
-import warnings
 # Libraries:
 # Data manipulation:
 from pathlib import Path
 import numpy as np
 import pandas as pd
+import os
 # Modelling:
 from keras import Model
 from keras.models import load_model
@@ -13,28 +12,30 @@ from sklearn.exceptions import ConvergenceWarning
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import mean_squared_error
 # experimental tuning with halvingrandomsearchcv:
-from sklearn.experimental import enable_halving_search_cv  # noqa
+from sklearn.experimental import enable_halving_search_cv  # NOQA
 from sklearn.model_selection import HalvingRandomSearchCV
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score
+# Timing
+from auxiliary.method_timer import measure_time
+# Plotting:
+import matplotlib.pyplot as plt
+# Warning:
+import warnings
+# Type hinting:
+from typing import Tuple
 
 # Global variables:
 from config import final_neural_network_path, global_surrogate_results_path, \
     final_training_csv_path, final_validation_csv_path, final_testing_csv_path
-
-# Plotting:
-import matplotlib.pyplot as plt
-
-# Type hints:
-from typing import Tuple
-
-# Tensorflow appropriate compiler flags ignored:
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
-import warnings
+# set warnings:
 warnings.simplefilter("ignore", UserWarning)
 warnings.simplefilter("ignore", ConvergenceWarning)
+# Tensorflow appropriate compiler flags ignored:
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
 
+# Functions:
 def load_data() -> tuple:
     """
     This function loads the data.
@@ -81,21 +82,6 @@ def generate_y_train(x_train: np.array, black_box_model: Model) -> np.array:
     return y_train
 
 
-def create_and_train_surrogate_model(x_train: np.array, y_train: np.array) -> (LogisticRegression,
-                                                                               RandomForestClassifier):
-    """
-    This function creates a surrogate model.
-    @param x_train: np.array: the training data.
-    @param y_train: np.array: the target data.
-    :return: LogisticRegression: the trained surrogate model.
-    """
-    surrogate_model_log = LogisticRegression()
-    surrogate_model_rf = RandomForestClassifier()
-    surrogate_model_log.fit(x_train, y_train)
-    surrogate_model_rf.fit(x_train, y_train)
-    return surrogate_model_log, surrogate_model_rf
-
-
 def tune_surrogate_models_for_black_box_model(black_box_model: Model) \
         -> (LogisticRegression, RandomForestClassifier):
     """
@@ -112,7 +98,8 @@ def tune_surrogate_models_for_black_box_model(black_box_model: Model) \
     y_train = generate_y_train(x_train, black_box_model).ravel()
 
     # create and train the surrogate model:
-    surrogate_model_log, surrogate_model_rf = create_and_train_surrogate_model(x_train, y_train)
+    surrogate_model_log, surrogate_model_rf = LogisticRegression(random_state=42, max_iter=10000), \
+                                              RandomForestClassifier(random_state=42)
     params_log = {'C': [10, 30, 50, 70, 100]}
 
     surrogate_model_log = HalvingRandomSearchCV(surrogate_model_log, params_log, cv=5, n_jobs=4, verbose=0,
@@ -185,21 +172,20 @@ def interpret_surrogate_model(surrogate_models: tuple[LogisticRegression, Random
     """
     surrogate_model_log = surrogate_models[0]
     surrogate_model_rf = surrogate_models[1]
-    if surrogate_model_log:
-        # Get the coefficients:
-        coefficients = surrogate_model_log.coef_
-        intercept = surrogate_model_log.intercept_
-        # Create the dataframe:
-        df = pd.DataFrame(data=coefficients, columns=x_test.columns)
-        df['intercept'] = intercept
-        df.to_csv(Path(global_surrogate_results_path, 'logistic_surrogate_model_interpretation.csv'))
 
-    elif surrogate_model_rf:
-        # Get the feature importance:
-        feature_importance = surrogate_model_rf.feature_importances_
-        # Create the dataframe:
-        df = pd.DataFrame(data=feature_importance, index=x_test.columns, columns=['feature_importance'])
-        df.to_csv(Path(global_surrogate_results_path, 'random_forest_surrogate_model_interpretation.csv'))
+    # Get the coefficients:
+    coefficients = surrogate_model_log.coef_
+    intercept = surrogate_model_log.intercept_
+    # Create the dataframe:
+    df = pd.DataFrame(data=coefficients, columns=x_test.columns)
+    df['intercept'] = intercept
+    df.to_csv(Path(global_surrogate_results_path, 'logistic_surrogate_model_interpretation.csv'))
+
+    # Get the feature importance:
+    feature_importance = surrogate_model_rf.feature_importances_
+    # Create the dataframe:
+    df = pd.DataFrame(data=feature_importance, index=x_test.columns, columns=['feature_importance'])
+    df.to_csv(Path(global_surrogate_results_path, 'random_forest_surrogate_model_interpretation.csv'))
 
 
 def print_results(r_squared: (float, float)) -> None:
@@ -208,11 +194,11 @@ def print_results(r_squared: (float, float)) -> None:
     @param r_squared: (float, float): the r_squared value of the surrogate models.
     :return: None
     """
-    print(f'The R_squared value for the logistic regression is: {r_squared[0]}')
-    print(f'The R_squared value for the random forest is: {r_squared[1]}')
+    print(f'The R squared value for the logistic regression is: {round(r_squared[0], 3)}')
+    print(f'The R squared value for the random forest is: {round(r_squared[1], 3)}')
 
 
-def save_model_predictions(black_box_model: Model, surrogate_models: tuple[LogisticRegression, RandomForestClassifier],
+def save_model_predictions(black_box_model: Model, surrogate_models: Tuple[LogisticRegression, RandomForestClassifier],
                            x_test: np.array) -> None:
     """
     This function saves the predictions of the black box model and the surrogate models.
@@ -233,22 +219,7 @@ def save_model_predictions(black_box_model: Model, surrogate_models: tuple[Logis
     df['surrogate_rf'] = y_pred_surrogate_rf
     df.to_csv(Path(global_surrogate_results_path, 'predictions.csv'))
 
-    # get the probabilities for the surrogate models:
-    y_pred_surrogate_log_prob = surrogate_models[0].predict_proba(x_test)
-    y_pred_surrogate_rf_prob = surrogate_models[1].predict_proba(x_test)
-
-    # get the indexes of the difference between the predictions:
-    error_log = y_pred_surrogate_log_prob - y_pred_bb
-    error_rf = y_pred_surrogate_rf_prob - y_pred_bb
-    # get the indexes of the 10 largest differences:
-    error_log = np.argsort(error_log, axis=0)[-10:]
-    error_rf = np.argsort(error_rf, axis=0)[-10:]
-
-    # save the indexes in a csv file:
-    df = pd.DataFrame(data=error_log, columns=['log_mistakes_1', 'log_mistakes_2'])
-    df['rf_mistakes_1'] = error_rf[:, 0]
-    df['rf_mistakes_2'] = error_rf[:, 1]
-    df.to_csv(Path(global_surrogate_results_path, 'mistakes_for_LIME.csv'))
+    # TODO: get the largest misclassifications for LIME.
 
 
 def plot_feature_importance(surrogate_models: tuple[LogisticRegression, RandomForestClassifier],
@@ -301,7 +272,7 @@ def plot_feature_importance(surrogate_models: tuple[LogisticRegression, RandomFo
     plt.ylabel('Feature importance')
     plt.savefig(Path(global_surrogate_results_path, 'random_forest_surrogate_model_feature_importance.png'))
 
-
+@measure_time
 def global_surrogate_main() -> None:
     """
     This function runs the global surrogate model analysis.
@@ -333,5 +304,6 @@ def global_surrogate_main() -> None:
     plot_feature_importance(surrogate_models, x_test)
 
 
+# Driver:
 if __name__ == '__main__':
     global_surrogate_main()
