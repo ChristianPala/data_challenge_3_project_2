@@ -244,7 +244,8 @@ def skewness_main(filename: str, suppress_print=False) -> pd.DataFrame:
     # get the numerical features names by excluding the categorical features and the id:
     numerical_features: list[str] = df.select_dtypes(exclude="category").columns
 
-    # apply the box-cox transformation to the features:
+    # apply the log transformation to the numerical features:
+    # Note after testing the different transformations, the log transformation is the best one.
     features = log_transform(df, numerical_features)
 
     if not suppress_print:

@@ -24,22 +24,26 @@ from optuna.samplers import TPESampler
 from auxiliary.method_timer import measure_time
 
 # Global variables:
-from config import other_models_tuned_results_path, scaled_datasets_path
+from config import other_models_tuned_results_path, balanced_datasets_path
 
-def generate_model(trial:Trial, model) -> BaseEstimator:
+
+def generate_model(trial: Trial, model) -> BaseEstimator:
     if type(model) == SVC:
         c_value = trial.suggest_float("C", 1.0, 5.0)
         kernel = trial.suggest_categorical("kernel", ["linear", "poly", "rbf", "sigmoid", "precomputed"])
         degree = trial.suggest_int("degree", 2, 5)
-        gamma =  trial.suggest_categorical("gamma", ["scale", "auto"])
+        gamma = trial.suggest_categorical("gamma", ["scale", "auto"])
         return SVC(c_value, kernel, degree, gamma)
+
     elif type(model) == KNeighborsClassifier:
         n_neighbors = trial.suggest_int("n_neighbors", 3, 10)
         return KNeighborsClassifier(n_neighbors)
+
     elif type(model) == LogisticRegression:
-        penalty =  trial.suggest_categorical("penalty", ["l1", "l2", "elasticnet", "none"])
+        penalty = trial.suggest_categorical("penalty", ["l1", "l2", "elasticnet", "none"])
         c_value = trial.suggest_float("C", 1.0, 5.0)
         return LogisticRegression(penalty=penalty, C=c_value)
+
     elif type(model) == GaussianNB:
         var_smoothing = trial.suggest_float("var_smoothing", 1e-10, 1e-8) 
         return GaussianNB(var_smoothing=var_smoothing)
@@ -48,9 +52,9 @@ def generate_model(trial:Trial, model) -> BaseEstimator:
 def objective(trial: Trial):
     clear_session()
     # load the best dataset:
-    #x_train, y_train, x_val, y_val = load_best_dataset()
+    # x_train, y_train, x_val, y_val = load_best_dataset()
 
-    csv_files: list[Path] = list(scaled_datasets_path.glob('*.csv'))
+    csv_files: list[Path] = list(balanced_datasets_path.rglob("*.csv"))
     df = pd.read_csv(csv_files[0])
 
     # split the data into train and test:
@@ -60,9 +64,11 @@ def objective(trial: Trial):
     estimator = KNeighborsClassifier()
     model = generate_model(trial, estimator)
 
-    # use f1 score with cross validation:
-    cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
+    # use cross validation to evaluate the model:
+    cv = StratifiedKFold(n_splits=5, random_state=42)
+
     cv_scores = []
+
     for train_index, test_index in cv.split(x_train, y_train):
         # split the data:
         x_train_cv, x_test_cv = x_train.iloc[train_index], x_train.iloc[test_index]

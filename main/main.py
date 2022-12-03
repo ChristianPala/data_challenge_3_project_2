@@ -33,9 +33,8 @@ def main() -> None:
     """
     # Preprocessing:
     # ----------------------------------------------
-    preprocessor_main(suppress_print=True,
-                      missing_values_dominant_strategies=['drop', 'most_frequent_imputation'])
-    feature_engineering_main()
+    preprocessor_main(suppress_print=True, missing_values_dominant_strategies=['drop', 'most_frequent_imputation'])
+    feature_engineering_main(overwrite_original=True)
     scaling_main(dominant_scaling_strategies=['standard_scaler', 'robust_scaler'])
     eda_main()
     # # Baseline models:
@@ -47,15 +46,13 @@ def main() -> None:
                    other_models_results_path, suppress_print=True)
     """
     Augmented vs non-augmented:
-    Augmented and not augmented are better in some cases, but worse in others, so we keep both.
-    Missing values:
+    Augmented and not augmented are similar, but the best models, which for this task are also the more complex,
+    prefer the augmented data, so we will use only the augmented data.
     Drop is the best for non-neural networks, so we keep it. Most frequent is the best for neural networks, 
     so we keep it. 
     Scaling:
     Standard and Robust, with our skeweness handling, are the best, so we keep them. We keep both normalized and
     non-normalized.
-    Modelling:
-    Convolutions are the best for neural networks, so we removed the dense ones.
     
     # Report summary with all strategies, on which we based the selection above:
     The best decision tree drop, with an f1 score of 0.409
@@ -71,12 +68,12 @@ def main() -> None:
     # Tuning:
     # ----------------------------------------------
     # Under-sampling , over-sampling and SMOTE variants:
-    # balance_classes_main()
-    # balanced_trees_main()
-    # balanced_neural_network_main()
-    # balanced_other_models_main()
-    #main evaluator_main(trees_balanced_results_path, neural_networks_balanced_results_path,
-                   # other_models_balanced_results_path)
+    balance_classes_main(dominant_strategies=['undersampled', 'oversampled', 'smote'])
+    balanced_trees_main(dominant_model='gradient_boosting')
+    balanced_neural_network_main()
+    balanced_other_models_main(dominant_model='svc')
+    evaluator_main(trees_balanced_results_path, neural_networks_balanced_results_path,
+                   other_models_balanced_results_path)
     """
     The best decision tree minmax scaler drop, with an f1 score of 0.455
     The best random forest minmax scaler drop, with an f1 score of 0.539

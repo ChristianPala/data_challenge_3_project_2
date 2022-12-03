@@ -13,6 +13,7 @@ from auxiliary.method_timer import measure_time
 data_path = Path("..", "data")
 missing_values_handled_path = Path(data_path, "missing_values_handled")
 
+
 # Functions:
 def pay_status_cumulative(df: pd.DataFrame) -> pd.DataFrame:
     """
@@ -55,10 +56,11 @@ def total_paid_amount(df: pd.DataFrame) -> pd.DataFrame:
 
 
 @measure_time
-def feature_engineering_main() -> None:
+def feature_engineering_main(overwrite_original: bool = False) -> None:
     """
     This function creates the new features and saves the dataset with the new features on all the csv files in the data
     folder.
+    @param overwrite_original: bool: if True, the original csv files are overwritten with the new features.
     :return: None, saves the new features in the csv files.
     """
 
@@ -75,12 +77,15 @@ def feature_engineering_main() -> None:
         df = total_bill_amount(df)
         df = total_paid_amount(df)
 
+        # save the new features:
         file_name = csv_file.stem + "_augmented.csv"
-
         df.to_csv(Path(missing_values_handled_path, file_name), index=False)
+
+        # delete the original csv file:
+        if overwrite_original:
+            csv_file.unlink()
 
 
 # Driver:
 if __name__ == '__main__':
     feature_engineering_main()
-#  Todo: Davide, Fabio, ideas for other new features?

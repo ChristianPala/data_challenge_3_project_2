@@ -9,7 +9,8 @@ import shutil
 from sklearn.metrics import f1_score, accuracy_score, precision_score, recall_score, roc_auc_score, \
     classification_report, confusion_matrix
 # Global variables:
-from config import trees_results_path, neural_networks_results_path, other_models_results_path, results_path
+from config import trees_results_path, neural_networks_results_path, other_models_results_path, results_path, \
+    neural_networks_balanced_results_path, trees_balanced_results_path, other_models_balanced_results_path
 
 
 # Functions:
@@ -131,8 +132,10 @@ def get_best_model_by_type(model_type: str, path: Path) -> Path:
     # Get all the models' results:
     models_results = list(path.rglob("*.txt"))
     # txt files are ordered by key, value pairs, f1 score is the first value.
+
     # Sort the models' results by their f1 score:
     models_results.sort(key=lambda x: float(x.read_text().split(",")[0].split(":")[1].split("\n")[0]), reverse=True)
+
     # return the name of the best model with the given type:
     return [model for model in models_results if model_type in model.name][0]
 

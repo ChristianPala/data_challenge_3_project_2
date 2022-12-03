@@ -10,7 +10,7 @@ import seaborn as sns
 # Timing:
 from auxiliary.method_timer import measure_time
 # Global variables:
-from config import plot_path, csv_file_path
+from config import plot_path, eda_csv_file_path
 if not plot_path:
     plot_path.mkdir(parents=True, exist_ok=True)
 
@@ -203,10 +203,10 @@ def eda_main() -> None:
     :return: None. Plot the correlation matrix and the distribution of the categorical features.
     """
     # Load the dataset:
-    if not csv_file_path.exists():
-        raise FileNotFoundError(f'Invalid data path: {csv_file_path}')
+    if not eda_csv_file_path.exists():
+        raise FileNotFoundError(f'Invalid data path: {eda_csv_file_path}')
 
-    df = pd.read_csv(csv_file_path)
+    df = pd.read_csv(eda_csv_file_path)
 
     # Name of the categorical features from the dataset information:
     categorical_features: list[str] = ["gender", "education", "marriage", "pay_stat_sep", "pay_stat_aug",

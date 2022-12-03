@@ -1,5 +1,6 @@
 # We have a strong class imbalance in our data. We will use undersampling, oversampling
 # and SMOTE to balance the classes and see if it improves the performance of our baseline models.
+from typing import List
 
 # Libraries:
 # Data manipulation:
@@ -47,19 +48,11 @@ def undersample_transform(train: pd.DataFrame, target: str) -> pd.DataFrame:
     y = df[target]
     x = df.drop([target], axis=1)
 
-    # Check the current balance of the target feature
-    # counter = collections.Counter(y)
-    # print(counter)
-
     # Defining our under-sampler
     under = RandomUnderSampler(sampling_strategy="auto", random_state=42)
 
     # Transform the dataset
     x, y = under.fit_resample(x, y)
-
-    # Check the balance of the target feature after the resample
-    # counter = collections.Counter(y)
-    # print(counter)
 
     # merge the target and the features:
     df = pd.DataFrame(pd.concat([x, y], axis=1))
@@ -81,19 +74,11 @@ def oversample_transform(train: pd.DataFrame, target: str) -> pd.DataFrame:
     y = df[target]
     x = df.drop([target], axis=1)
 
-    # Check the current balance of the target feature
-    # counter = collections.Counter(y)
-    # print(counter)
-
     # Defining our over-sampler
     over = RandomOverSampler(sampling_strategy="auto", random_state=42)
 
     # Transform the dataset
     x, y = over.fit_resample(x, y)
-
-    # Check the balance of the target feature after the resample
-    # counter = collections.Counter(y)
-    # print(counter)
 
     # merge the target and the features:
     df = pd.DataFrame(pd.concat([x, y], axis=1))
@@ -117,19 +102,11 @@ def smote_transform(train: pd.DataFrame, target: str) -> pd.DataFrame:
     y = df[target]
     x = df.drop([target], axis=1)
 
-    # Check the current balance of the target feature
-    # counter = collections.Counter(y)
-    # print(counter)
-
     # Defining our over-sampler and under-sampler
     over = SMOTE(sampling_strategy="auto", random_state=42, n_jobs=-1)
 
     # Transform the dataset
     x, y = over.fit_resample(x, y)
-
-    # Check the balance of the target feature after the resample
-    # counter = collections.Counter(y)
-    # print(counter)
 
     # merge the target feature with the rest of the features
     df = pd.DataFrame(pd.concat([x, y], axis=1))
@@ -151,19 +128,11 @@ def borderline_smote(train: pd.DataFrame, target: str) -> pd.DataFrame:
     y = df[target]
     X = df.drop([target], axis=1)
 
-    # Check the current balance of the target feature
-    # counter = collections.Counter(y)
-    # print(counter)
-
     # Defining our over-sampler
     over = BorderlineSMOTE(sampling_strategy="auto", random_state=42, n_jobs=-1)
 
     # Transform the dataset
     x, y = over.fit_resample(X, y)
-
-    # Check the balance of the target feature after the resample
-    # counter = collections.Counter(y)
-    # print(counter)
 
     # merge the target feature with the rest of the features
     df = pd.DataFrame(pd.concat([x, y], axis=1))
@@ -185,19 +154,11 @@ def smote_tomek(train: pd.DataFrame, target: str) -> pd.DataFrame:
     y = df[target]
     x = df.drop([target], axis=1)
 
-    # Check the current balance of the target feature
-    # counter = collections.Counter(y)
-    # print(counter)
-
     # Defining our over-sampler
     over = SMOTETomek(sampling_strategy="auto", random_state=42, n_jobs=-1)
 
     # Transform the dataset
     x, y = over.fit_resample(x, y)
-
-    # Check the balance of the target feature after the resample
-    # counter = collections.Counter(y)
-    # print(counter)
 
     # merge the target feature with the rest of the features
     df = pd.DataFrame(pd.concat([x, y], axis=1))
@@ -264,21 +225,20 @@ def perform_balancing(tr: pd.DataFrame, vl: pd.DataFrame, tst: pd.DataFrame, tar
 
 
 @measure_time
-def balance_classes_main(suppress_print=True) -> None:
+def balance_classes_main(suppress_print=True, dominant_strategies: List[str] = None) -> None:
     """
     Saves the balanced datasets with over-, under-sampling and SMOTE
     @param suppress_print: bool: whether to suppress the print statements.
+    @param dominant_strategies: List[str]: the dominant balancing strategies to use, if they exist. If None, all the
+    strategies will be used.
     @return: None. Saves the csv files in the balanced_training_datasets folder.
     """
 
     if not scaled_datasets_path.exists() and scaled_datasets_path.is_dir():
         raise FileNotFoundError(f"Could not find the scaled datasets in {scaled_datasets_path}")
 
-    # TODO: Davide, Fabio, check the assumptions below in your experiments.
     # get all the files in the scaling folder, since it performed better than the non-scaled data:
     csv_files = list(scaled_datasets_path.glob("*.csv"))
-    # keep only drop as the imputation method, since it performed better than the other methods:
-    csv_files = [f for f in csv_files if "drop" in f.name]
 
     # clean the balanced_training_datasets folder:
     if balanced_datasets_path.exists() and balanced_datasets_path.is_dir():
@@ -295,11 +255,21 @@ def balance_classes_main(suppress_print=True) -> None:
         test_dataframe = pd.DataFrame(pd.concat([x_test, y_test], axis=1))
 
         # perform the balancing with all the methods:
-        methods = ["undersampled", "oversampled", "smote", "borderline_smote", "smote_tomek_links"]
-        for method in tqdm(methods, total=len(methods), desc="Balancing methods", unit="method"):
-            perform_balancing(training_dataframe, validation_dataframe, test_dataframe, "default", method, file.stem)
-            if not suppress_print:
-                print(f"Finished balancing with {method} for {file.stem}")
+        if not dominant_strategies:
+            methods = ["undersampled", "oversampled", "smote", "borderline_smote", "smote_tomek_links"]
+            for method in tqdm(methods, total=len(methods), desc="Balancing methods", unit="method"):
+                perform_balancing(training_dataframe, validation_dataframe, test_dataframe, "default", method,
+                                  file.stem)
+                if not suppress_print:
+                    print(f"Finished balancing with {method} for {file.stem}")
+
+        else:
+            for method in tqdm(dominant_strategies, total=len(dominant_strategies),
+                               desc="Balancing methods", unit="method"):
+                perform_balancing(training_dataframe, validation_dataframe, test_dataframe, "default", method,
+                                  file.stem)
+                if not suppress_print:
+                    print(f"Finished balancing with {method} for {file.stem}")
 
 
 if __name__ == "__main__":

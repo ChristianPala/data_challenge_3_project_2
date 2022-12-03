@@ -6,7 +6,7 @@ import pandas as pd
 
 # Neural network:
 from modelling.neural_network import predict_model, fit_model, \
-    create_convolutional_model
+    create_convolutional_model, create_dense_model
 # Evaluate the model:
 from modelling.model_evaluator import evaluate_model, save_evaluation_results
 # Timing:
@@ -43,12 +43,14 @@ def load_balanced_datasets(folder: Path) -> list[tuple[pd.DataFrame, pd.DataFram
 
 
 @measure_time
-def balanced_neural_network_main() -> None:
+def balanced_neural_network_main(dominant_model: str = "convolutional") -> None:
     """
     This function runs the neural network with balanced data.
+    @param dominant_model: str: the dominant model if it exists. If None, all models will be run.
     :return: None
     """
-    sub_folder = ["borderline_smote", "oversampled", "smote", "smote_tomek_links", "undersampled"]
+    # get the sub-folders of the balanced datasets' folders dynamically:
+    sub_folder = [x.name for x in balanced_datasets_path.iterdir() if x.is_dir()]
 
     # For each sub-folder in the balanced datasets' folder:
     for sub in tqdm(sub_folder, desc="Balanced neural networks", unit="folder", total=len(sub_folder), colour="green"):
@@ -62,7 +64,12 @@ def balanced_neural_network_main() -> None:
             x_validation = validation.drop("default", axis=1)
             y_validation = validation["default"]
             # Create the model:
-            model = create_convolutional_model(x_train.shape[1])
+            if dominant_model == "convolutional":
+                model = create_convolutional_model(x_train.shape[1])
+            elif dominant_model == "dense":
+                model = create_dense_model(x_train.shape[1])
+            else:
+                model = create_convolutional_model(x_train.shape[1])
             # Fit the model:
             fit_model(model, x_train, y_train)
             # Predict the model:
@@ -74,7 +81,7 @@ def balanced_neural_network_main() -> None:
             models_path.mkdir(parents=True, exist_ok=True)
             model.save(Path(models_path, f"{file_name}.h5"))
             # Save the results:
-            save_evaluation_results(evaluation_results=evaluation_results, model_type="neural_network",
+            save_evaluation_results(evaluation_results=evaluation_results, model_type=dominant_model + "_network",
                                     save_path=neural_networks_balanced_results_path / sub / file_name,
                                     dataset_name=file_name)
 

@@ -22,7 +22,7 @@ balanced_datasets_path = Path(data_path, "balanced_datasets")
 # plots:
 plot_path: Path = Path(project_root_path, "preprocessing", "plots")
 # default csv:
-csv_file_path = Path(missing_values_path, 'project_2_dataset_drop.csv')
+eda_csv_file_path = Path(missing_values_path, 'project_2_dataset_drop_augmented.csv')
 # sub-folders for the baseline results:
 trees_results_path: Path = Path(results_path, "trees_baseline")
 neural_networks_results_path: Path = Path(results_path, "neural_network_baseline")
