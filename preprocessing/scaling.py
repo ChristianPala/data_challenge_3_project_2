@@ -1,4 +1,5 @@
 # Library to scale and normalize the data.
+from typing import List
 
 # Libraries:
 # Data manipulation:
@@ -78,10 +79,11 @@ def normalize_data(training: pd.DataFrame, validation: pd.DataFrame,  testing: p
 
 
 @measure_time
-def scaling_main() -> None:
+def scaling_main(dominant_scaling_strategies: List[str] =  None) -> None:
     """
     Main method to execute the scaling library
-    @param: filename: str: default = project_2_dataset_unsupervised_imputation.csv: the name of the csv file to scale.
+    @param dominant_scaling_strategies: the list of dominant scaling strategies to use. if None, all strategies will be
+    used.
     :return: None: execute the scaling library.
     """
 
@@ -106,35 +108,68 @@ def scaling_main() -> None:
 
         methods = ["standard_scaler", "minmax_scaler", "robust_scaler"]
 
-        for method in methods:
+        if not dominant_scaling_strategies:
+            for method in methods:
 
-            if method in ["standard_scaler", "robust_scaler"]:
-                # in this case we need to transform the data to be approximately normally distributed:
-                dataframe = skewness_main(file, suppress_print=True)
+                if method in ["standard_scaler", "robust_scaler"]:
+                    # in this case we need to transform the data to be approximately normally distributed:
+                    dataframe = skewness_main(file, suppress_print=True)
 
-            x_train, x_val, x_test, y_train, y_val, y_test = split_data(dataframe, "default", validation=True)
+                x_train, x_val, x_test, y_train, y_val, y_test = split_data(dataframe, "default", validation=True)
 
-            dataframe: pd.DataFrame = scale_data(x_train, x_val, x_test, x_train.columns, method=method)
-
-            # add back the target column:
-            dataframe["default"] = pd.concat([y_train, y_val, y_test], axis=0)
-
-            # Save the scaled data in the scaled_datasets folder:
-            dataframe.to_csv(Path(scaled_datasets_path,
-                                  f"project_2_dataset_{method}_scaling_{'_'.join(missing_values_method)}.csv"),
-                             index=False)
-
-            # Normalize the data if the method is Standard or Robust, since min-max scaling is already normalized:
-            if method in ["standard_scaler", "robust_scaler"]:
-                dataframe: pd.DataFrame = normalize_data(x_train, x_val, x_test, x_train.columns)
+                dataframe: pd.DataFrame = scale_data(x_train, x_val, x_test, x_train.columns, method=method)
 
                 # add back the target column:
                 dataframe["default"] = pd.concat([y_train, y_val, y_test], axis=0)
 
-                # Save the normalized data:
+                # Save the scaled data in the scaled_datasets folder:
                 dataframe.to_csv(Path(scaled_datasets_path,
-                                      f"project_2_dataset_normalized_{method}_{'_'.join(missing_values_method)}.csv"),
+                                      f"project_2_dataset_{method}_scaling_{'_'.join(missing_values_method)}.csv"),
                                  index=False)
+
+                # Normalize the data if the method is Standard or Robust, since min-max scaling is already normalized:
+                if method in ["standard_scaler", "robust_scaler"]:
+                    dataframe: pd.DataFrame = normalize_data(x_train, x_val, x_test, x_train.columns)
+
+                    # add back the target column:
+                    dataframe["default"] = pd.concat([y_train, y_val, y_test], axis=0)
+
+                    # Save the normalized data:
+                    dataframe.to_csv(Path(scaled_datasets_path,
+                                          f"project_2_dataset_normalized_{method}_{'_'.join(missing_values_method)}.csv"),
+                                     index=False)
+        else:
+            for method in dominant_scaling_strategies:
+                if method in ["standard_scaler", "robust_scaler"]:
+                    # in this case we need to transform the data to be approximately normally distributed:
+                    dataframe = skewness_main(file, suppress_print=True)
+
+                x_train, x_val, x_test, y_train, y_val, y_test = split_data(dataframe, "default", validation=True)
+
+                dataframe: pd.DataFrame = scale_data(x_train, x_val, x_test, x_train.columns,
+                                                     method=method)
+
+                # add back the target column:
+                dataframe["default"] = pd.concat([y_train, y_val, y_test], axis=0)
+
+                # Save the scaled data in the scaled_datasets folder:
+                dataframe.to_csv(Path(scaled_datasets_path,
+                                      f"project_2_dataset_{method}_scaling_"
+                                      f"{'_'.join(missing_values_method)}.csv"),
+                                 index=False)
+
+                # Normalize the data if the method is Standard or Robust, since min-max scaling is already normalized:
+                if method in ["standard_scaler", "robust_scaler"]:
+                    dataframe: pd.DataFrame = normalize_data(x_train, x_val, x_test, x_train.columns)
+
+                    # add back the target column:
+                    dataframe["default"] = pd.concat([y_train, y_val, y_test], axis=0)
+
+                    # Save the normalized data:
+                    dataframe.to_csv(Path(scaled_datasets_path,
+                                          f"project_2_dataset_normalized_{method}"
+                                          f"_{'_'.join(missing_values_method)}.csv"),
+                                     index=False)
 
 
 # Driver code:

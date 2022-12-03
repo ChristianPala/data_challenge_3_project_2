@@ -24,3 +24,49 @@ The best logreg minmax scaler drop, with an f1 score of 0.532
 The best naive bayes minmax scaler drop, with an f1 score of 0.525
 The best svc minmax scaler drop, with an f1 score of 0.541
 
+Trees path: trees_balanced
+Neural networks path: neural_network_balanced
+Other models path: other_models_balanced
+The best decision tree minmax scaler drop, with an f1 score of 0.455
+The best random forest minmax scaler drop, with an f1 score of 0.539
+The best gradient boosting minmax scaler drop, with an f1 score of 0.545
+The best xgboost minmax scaler drop, with an f1 score of 0.531
+Trees path: neural_network_balanced
+Neural networks path: neural_network_baseline
+Other models path: other_models_baseline
+Trees path: trees_balanced
+Neural networks path: other_models_balanced
+Other models path: other_models_baseline
+The best decision tree minmax scaler drop, with an f1 score of 0.455
+The best random forest minmax scaler drop, with an f1 score of 0.539
+The best gradient boosting minmax scaler drop, with an f1 score of 0.545
+The best xgboost minmax scaler drop, with an f1 score of 0.531
+Trees path: trees_balanced
+Neural networks path: other_models_balanced
+Other models path: other_models_baseline
+Trees path: trees_baseline
+Neural networks path: neural_network_baseline
+Other models path: other_models_baseline
+The best decision tree drop, with an f1 score of 0.409
+The best random forest drop augmented, with an f1 score of 0.483
+The best gradient boosting drop, with an f1 score of 0.515
+The best xgboost drop, with an f1 score of 0.477
+The best neural network convoluted normalized standard scaler most frequent imputation, with an f1 score of 0.538
+The best knn robust scaler drop, with an f1 score of 0.442
+The best logreg normalized robust scaler drop augmented, with an f1 score of 0.51
+The best naive bayes minmax scaler drop augmented, with an f1 score of 0.526
+The best svc robust scaler drop augmented, with an f1 score of 0.532
+
+Trees path: trees_baseline
+Neural networks path: neural_network_baseline
+Other models path: other_models_baseline
+The best decision tree drop, with an f1 score of 0.409
+The best random forest drop augmented, with an f1 score of 0.483
+The best gradient boosting drop, with an f1 score of 0.515
+The best xgboost drop, with an f1 score of 0.477
+The best neural network convoluted normalized standard scaler most frequent imputation augmented, with an f1 score of 0.54
+The best knn robust scaler drop, with an f1 score of 0.442
+The best logreg normalized robust scaler drop augmented, with an f1 score of 0.51
+The best naive bayes normalized robust scaler drop augmented, with an f1 score of 0.517
+The best svc robust scaler drop augmented, with an f1 score of 0.532
+

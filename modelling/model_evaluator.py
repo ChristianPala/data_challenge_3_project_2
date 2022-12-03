@@ -9,8 +9,7 @@ import shutil
 from sklearn.metrics import f1_score, accuracy_score, precision_score, recall_score, roc_auc_score, \
     classification_report, confusion_matrix
 # Global variables:
-from config import trees_results_path, neural_networks_results_path, other_models_results_path, results_path, \
-    trees_balanced_results_path, neural_networks_balanced_results_path, other_models_balanced_results_path
+from config import trees_results_path, neural_networks_results_path, other_models_results_path, results_path
 
 
 # Functions:
@@ -184,5 +183,4 @@ def evaluator_main(tree_path: Path = trees_results_path, nn_path: Path = neural_
 
 
 if __name__ == '__main__':
-    evaluator_main(trees_balanced_results_path, neural_networks_balanced_results_path,
-                   other_models_balanced_results_path)
+    evaluator_main(trees_results_path, neural_networks_results_path, other_models_results_path, suppress_print=False)

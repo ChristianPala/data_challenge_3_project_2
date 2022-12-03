@@ -6,7 +6,7 @@ import pandas as pd
 
 # Neural network:
 from modelling.neural_network import predict_model, fit_model, \
-    create_model
+    create_convolutional_model
 # Evaluate the model:
 from modelling.model_evaluator import evaluate_model, save_evaluation_results
 # Timing:
@@ -62,7 +62,7 @@ def balanced_neural_network_main() -> None:
             x_validation = validation.drop("default", axis=1)
             y_validation = validation["default"]
             # Create the model:
-            model = create_model(input_dim=x_train.shape[1])
+            model = create_convolutional_model(x_train.shape[1])
             # Fit the model:
             fit_model(model, x_train, y_train)
             # Predict the model:

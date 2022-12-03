@@ -10,7 +10,7 @@ from sklearn.impute import KNNImputer
 from sklearn.ensemble import RandomForestClassifier
 
 
-def handle_missing_values(dataframe: pd.DataFrame, method: str = "supervised_imputation",
+def handle_missing_values(dataframe: pd.DataFrame, method: str = "drop",
                           suppress_print: bool = True) -> pd.DataFrame:
     """
     Handle missing values in the dataset, in this instance they are values equal to 0 in the
@@ -19,10 +19,10 @@ def handle_missing_values(dataframe: pd.DataFrame, method: str = "supervised_imp
     @param dataframe: pd.DataFrame: the dataframe containing the dataset.
     @param method: str: default is supervised_imputation. The method to use to handle the missing values.
     Supports the following strategies:
-    - drop,
-    - most_frequent_imputation,
-    - supervised_imputation
-    - unsupervised_imputation.
+    - drop, default: drop the rows with missing values.
+    - most_frequent_imputation, impute the missing values with the most frequent value in the column.
+    - supervised_imputation, uses a random forest classifier to impute the missing values.
+    - unsupervised_imputation. Uses nearest neighbour to impute the missing values.
     :return: pd.DataFrame: the dataframe without missing values.
     """
 
@@ -41,6 +41,7 @@ def handle_missing_values(dataframe: pd.DataFrame, method: str = "supervised_imp
     if not suppress_print:
         print("Missing values in education: ", len(missing_indexes_e))
         print("Missing values in marriage: ", len(missing_indexes_m))
+
     if method == "drop":
         # Drop the missing values, i.e. rows with education or marriage equal to 0:
         dataframe.dropna(inplace=True)
