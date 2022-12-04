@@ -12,18 +12,19 @@ from preprocessing.scaling import scaling_main
 from modelling.trees import trees_main
 from modelling.neural_network import neural_network_main
 from modelling.knn_logreg_naiveb_svc import other_models_main
-from modelling.model_evaluator import sort_all_results_by_f_1_score, evaluator_main
+from modelling.model_evaluator import evaluator_main
 from tuning.balance_classes import balance_classes_main
 from tuning.balanced_trees import balanced_trees_main
 from tuning.balanced_neural_network import balanced_neural_network_main
 from tuning.balanced_knn_logreg_naiveb_svc import balanced_other_models_main
+from tuning.evaluate_tuned_models import tuning_main
+
 import pprint
 
 # Global variable to store the execution times during the pipeline:
 from auxiliary.method_timer import execution_times
 from config import trees_results_path, neural_networks_results_path, other_models_results_path, \
     trees_balanced_results_path, neural_networks_balanced_results_path, other_models_balanced_results_path
-from tuning.evaluate_tuned_models import tuning_main
 
 
 def main() -> None:
@@ -33,9 +34,9 @@ def main() -> None:
     """
     # Preprocessing:
     # ----------------------------------------------
-    preprocessor_main(suppress_print=True, missing_values_dominant_strategies=['drop', 'most_frequent_imputation'])
-    feature_engineering_main(overwrite_original=True)
-    scaling_main(dominant_scaling_strategies=['standard_scaler', 'robust_scaler'])
+    preprocessor_main(suppress_print=True)
+    feature_engineering_main()
+    scaling_main()
     eda_main()
     # # Baseline models:
     # # ----------------------------------------------
@@ -68,15 +69,16 @@ def main() -> None:
     # Tuning:
     # ----------------------------------------------
     # Under-sampling , over-sampling and SMOTE variants:
-    balance_classes_main(dominant_strategies=['undersampled', 'oversampled', 'smote'])
+    balance_classes_main()
     balanced_trees_main(dominant_model='gradient_boosting')
-    balanced_neural_network_main()
+    balanced_neural_network_main(domiant_model='convolutional')
     balanced_other_models_main(dominant_model='svc')
     evaluator_main(trees_balanced_results_path, neural_networks_balanced_results_path,
-                   other_models_balanced_results_path)
+                   other_models_balanced_results_path, suppress_print=False, balanced=True)
     """
     Based on the balancing results we selected:
     Gradient boosting as the best model for trees
+    Convolutional neural network as the best model for neural networks
     SVC as the best model for the other models
     # Sample output:
     The best decision tree minmax scaler drop, with an f1 score of 0.455
@@ -113,4 +115,3 @@ def main() -> None:
 
 if __name__ == '__main__':
     main()
-

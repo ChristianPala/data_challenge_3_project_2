@@ -141,13 +141,15 @@ def get_best_model_by_type(model_type: str, path: Path) -> Path:
 
 
 def evaluator_main(tree_path: Path = trees_results_path, nn_path: Path = neural_networks_results_path,
-                   other_mod_results_path: Path = other_models_results_path, suppress_print=True) -> None:
+                   other_mod_results_path: Path = other_models_results_path, suppress_print=True,
+                   balanced: bool = False) -> None:
     """
     Print the results of the best model for each type to the console
     @param tree_path: Path: the path to the trees' results.
     @param nn_path: Path: the path to the neural networks' results.
     @param other_mod_results_path: Path: the path to the other models' results.
     @param suppress_print: bool: whether to suppress the print to the console.
+    @param balanced: bool: whether to use the balanced datasets.
     :return: None.
     """
     with open(Path(results_path, 'results_summary.txt'), 'a') as f:
@@ -160,30 +162,56 @@ def evaluator_main(tree_path: Path = trees_results_path, nn_path: Path = neural_
         f.write(f'Neural networks path: {np}\n')
         f.write(f'Other models path: {op}\n')
 
-    for alg in ['decision', 'random', 'gradient', 'xgboost', 'neural', 'knn', 'logreg', 'naive', 'svc']:
-        if alg in ['decision', 'random', 'gradient', 'xgboost']:
-            path = tree_path
-        elif alg == "neural":
-            path = nn_path
-        else:
-            path = other_mod_results_path
+    if not balanced:
+        for alg in ['decision', 'random', 'gradient', 'xgboost', 'neural', 'knn', 'logreg', 'naive', 'svc']:
+            if alg in ['decision', 'random', 'gradient', 'xgboost']:
+                path = tree_path
+            elif alg == "neural":
+                path = nn_path
+            else:
+                path = other_mod_results_path
 
-        best_model = get_best_model_by_type(alg, path)
-        best_model_name = best_model.name.split('.')[0].replace('_', ' ').replace("project 2 dataset ", "")\
-            .replace("scaling ", "")
+            best_model = get_best_model_by_type(alg, path)
+            best_model_name = best_model.name.split('.')[0].replace('_', ' ').replace("project 2 dataset ", "")\
+                .replace("scaling ", "")
 
-        best_score = best_model.read_text().split(",")[0].split(":")[1].split("\n")[0]
-        if not suppress_print:
-            print(f"The best {best_model_name}, with an f1 score of {round(float(best_score), 3)}")
+            best_score = best_model.read_text().split(",")[0].split(":")[1].split("\n")[0]
+            if not suppress_print:
+                print(f"The best {best_model_name}, with an f1 score of {round(float(best_score), 3)}")
 
-        # append the results to the results summary file in the results' folder:
+            # append the results to the results summary file in the results' folder:
+            with open(Path(results_path, "results_summary.txt"), "a") as f:
+                f.write(f"The best {best_model_name}, with an f1 score of {round(float(best_score), 3)}\n")
+
+        # write a new line to the results summary file:
         with open(Path(results_path, "results_summary.txt"), "a") as f:
-            f.write(f"The best {best_model_name}, with an f1 score of {round(float(best_score), 3)}\n")
+            f.write("\n")
 
-    # write a new line to the results summary file:
-    with open(Path(results_path, "results_summary.txt"), "a") as f:
-        f.write("\n")
+    else:  # balanced considers only gradient, convolutional, and support vector machine.
+        for alg in ['gradient', 'convolutional', 'svc']:
+            if alg == 'gradient':
+                path = tree_path
+            elif alg == 'convolutional':
+                path = nn_path
+            elif alg == 'svc':
+                path = other_mod_results_path
+            else:
+                raise ValueError("The algorithm is not supported.")
+
+            best_model = get_best_model_by_type(alg, path)
+            best_model_name = best_model.name.split('.')[0].replace('_', ' ').replace("project 2 dataset ", "")\
+                .replace("scaling ", "")
+
+            best_score = best_model.read_text().split(",")[0].split(":")[1].split("\n")[0]
+            if not suppress_print:
+                print(f"The best {best_model_name}, with an f1 score of {round(float(best_score), 3)}")
+
+            # append the results to the results summary file in the results' folder:
+            with open(Path(results_path, "results_summary.txt"), "a") as f:
+                f.write(f"The best {best_model_name}, with an f1 score of {round(float(best_score), 3)}\n")
 
 
 if __name__ == '__main__':
-    evaluator_main(trees_results_path, neural_networks_results_path, other_models_results_path, suppress_print=False)
+    # evaluator_main(trees_results_path, neural_networks_results_path, other_models_results_path, suppress_print=False)
+    evaluator_main(trees_balanced_results_path, neural_networks_balanced_results_path,
+                   other_models_balanced_results_path, suppress_print=False, balanced=True)

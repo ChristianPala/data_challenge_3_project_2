@@ -5,17 +5,56 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 from scipy.stats import boxcox
-from sklearn.ensemble import IsolationForest
+from sklearn.compose import ColumnTransformer
+from sklearn.preprocessing import PowerTransformer
 from auxiliary.method_timer import measure_time
 
 # Global variables:
 from config import logs_path
+from modelling.train_test_validation_split import split_data
 
 if not logs_path.exists():
     logs_path.mkdir(parents=True)
 
 
 # Functions:
+def power_transformer(df: pd.DataFrame, columns: list[str]) -> pd.DataFrame:
+    """
+    Power transform the columns in the dataframe, following the SciKit Learn implementation:
+    https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.PowerTransformer.html with
+    the help of ColumnTransformer:
+    https://scikit-learn.org/stable/modules/generated/sklearn.compose.ColumnTransformer.html
+    :param df: the dataframe to be analyzed
+    :param columns: the columns to be analyzed
+    :return: pd.DataFrame: the power transformed columns specified.
+    """
+
+    df = df.copy()
+
+    # get the other columns:
+    other_columns = [col for col in df.columns if col not in columns and col != "default"]
+    total_columns = columns.extend(other_columns)
+
+    # split the dataset with the centralized function:
+    x_train, x_val, x_test, y_train, y_val, y_test = split_data(df, "default", validation=True)
+
+    # fit the power transformer on the training set:
+    pt = ColumnTransformer(transformers=[('power', PowerTransformer(), columns)], remainder='passthrough')
+    pt.fit(x_train)
+
+    # transform the training, validation and test set:
+    x_train = pd.DataFrame(pt.transform(x_train), columns=total_columns)
+    x_val = pd.DataFrame(pt.transform(x_val), columns=total_columns)
+    x_test = pd.DataFrame(pt.transform(x_test), columns=total_columns)
+
+    # merge the training and test data:
+    dataframe: pd.DataFrame = pd.concat([x_train, x_val, x_test], axis=0)
+    label = pd.concat([y_train, y_val, y_test], axis=0)
+    dataframe["default"] = label
+
+    return dataframe
+
+
 def boxcox_transform(df: pd.DataFrame, columns: list[str]) -> pd.DataFrame:
     """
     Boxcox transform the columns in the dataframe, following the SciPy implementation:
@@ -225,8 +264,7 @@ def skewness_main(filename: str, suppress_print=False) -> pd.DataFrame:
 
     # assign the categorical features:
     categorical_features: list[str] = ["gender", "education", "marriage", "pay_stat_sep", "pay_stat_aug",
-                                       "pay_stat_jul",
-                                       "pay_stat_jun", "pay_stat_may", "pay_stat_apr", "default"]
+                                       "pay_stat_jul", "pay_stat_jun", "pay_stat_may", "pay_stat_apr", "default"]
 
     df = df.astype({feature: "category" for feature in categorical_features})
 
@@ -234,29 +272,23 @@ def skewness_main(filename: str, suppress_print=False) -> pd.DataFrame:
     if "id" in df.columns:
         df.set_index("id", inplace=True)
 
-    # shift the negative values to positive values with min + 1:
-    df = shift_negative_values(df)
-
     # estimate the skewness of the features:
     if not suppress_print:
         print(estimate_skewness(df, "all"))
 
     # get the numerical features names by excluding the categorical features and the id:
-    numerical_features: list[str] = df.select_dtypes(exclude="category").columns
+    numerical_features: list[str] = [feature for feature in df.columns if df[feature].dtype !=
+                                     "category" and feature != "id"]
 
-    # apply the log transformation to the numerical features:
-    # Note after testing the different transformations, the log transformation is the best one.
-    features = log_transform(df, numerical_features)
+    # apply the power transformation to the numerical features:
+    df = power_transformer(df, numerical_features)
 
     if not suppress_print:
         print(estimate_skewness(df, "all"))
-
-    # substitute the numerical features with the transformed features:
-    df[numerical_features] = features[numerical_features]
 
     return df
 
 
 # Driver
 if __name__ == '__main__':
-    skewness_main()
+    skewness_main(Path("..", "data", "missing_values_handled", "project_2_dataset_drop_augmented.csv"))

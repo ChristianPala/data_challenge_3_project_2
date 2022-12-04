@@ -106,7 +106,8 @@ def evaluate_models(tuned_models: List[GradientBoostingClassifier], validation_c
     # create the dataframe:
     results = pd.DataFrame(results, columns=['model', 'score'])
     # save the results:
-    results.to_csv(trees_balanced_results_path, index=False)
+    results.to_csv(Path(trees_balanced_results_path, "gradient_booster_successive_halving_tuner_results.csv"),
+                        index=False)
     # select the best model:
     best_model = results.loc[results['score'].idxmax(), 'model']
     # print the best model parameters:
