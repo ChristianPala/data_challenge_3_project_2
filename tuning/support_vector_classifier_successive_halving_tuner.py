@@ -90,6 +90,8 @@ def evaluate_models(tuned_models: List[SVC], validation_csv_list: List[Path]) ->
     # evaluate the tuned models on each dataset:
     for tuned_model, csv in tqdm(zip(tuned_models, validation_csv_list), total=len(validation_csv_list),
                                  desc='Evaluating models', unit='model', colour='green'):
+        # get the balancing method, one folder up from the file name:
+        balancing_method = csv.parents[1].name
         # read the data:
         validation = pd.read_csv(csv)
         # split the data:
@@ -100,9 +102,9 @@ def evaluate_models(tuned_models: List[SVC], validation_csv_list: List[Path]) ->
         # calculate the f1 score:
         f1 = f1_score(y, y_pred)
         # save the results:
-        results.append([tuned_model, f1])
+        results.append([tuned_model, f1, balancing_method])
     # create the dataframe:
-    results = pd.DataFrame(results, columns=['model', 'f1 score'])
+    results = pd.DataFrame(results, columns=['model', 'f1 score', 'balancing method'])
 
     # save the results:
     results.to_csv(other_models_tuned_results_path, index=False)

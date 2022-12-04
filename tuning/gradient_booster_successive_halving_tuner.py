@@ -28,19 +28,22 @@ def create_model() -> GradientBoostingClassifier:
     :return: model: the model to be tuned.
     """
     # Create the model:
-    model = GradientBoostingClassifier(random_state=42, max_features=1.0)
+    model = GradientBoostingClassifier(random_state=42)
 
     return model
 
 
-def create_csv_list() -> Tuple[list[Path], list[Path]]:
+def create_csv_list(added_path: Path = None) -> Tuple[list[Path], list[Path]]:
     """
     This function creates a list of paths to the csv files in the balanced folder.
     :return: list[Path]: a list of paths to the csv files in the balanced folder.
     """
+    # if a subfolder is specified:
+    path = balanced_datasets_path if added_path is None else balanced_datasets_path / added_path
+
     # create the list of paths:
-    training_csv_list = list(Path(balanced_datasets_path).rglob("final_training.csv"))
-    validation_csv_list = list(Path(balanced_datasets_path).rglob("final_validation.csv"))
+    training_csv_list = list(Path(path).rglob("final_training.csv"))
+    validation_csv_list = list(Path(path).rglob("final_validation.csv"))
 
     return training_csv_list, validation_csv_list
 
@@ -58,7 +61,6 @@ def tune_model(training_csv_list: List[Path]) -> list[GradientBoostingClassifier
         'max_depth': [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
         'min_samples_split': [2, 3, 4, 5, 6, 7, 8, 9, 10],
         'min_samples_leaf': [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
-        'criterion': ['friedman_mse', 'squared_error']
     }
 
     # create the model:
@@ -66,7 +68,7 @@ def tune_model(training_csv_list: List[Path]) -> list[GradientBoostingClassifier
     # create the cross validation object:
     cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
     # create the tuning object:
-    tuning = HalvingRandomSearchCV(model, param_space, cv=cv, n_jobs=-1, random_state=42, verbose=0,
+    tuning = HalvingRandomSearchCV(model, param_space, cv=cv, n_jobs=-1, random_state=42, verbose=1,
                                    aggressive_elimination=True, factor=3)
     # create the list of tuned models:
     tuned_models = []
@@ -126,7 +128,7 @@ def gb_main() -> None:
     :return: None
     """
     # create the list of paths to the csv files in the balanced folder:
-    training_csv_list, validation_csv_list = create_csv_list()
+    training_csv_list, validation_csv_list = create_csv_list(added_path=Path('smote_tomek_links'))
     # tune the model:
     tuned_models = tune_model(training_csv_list)
     # evaluate the tuned models:

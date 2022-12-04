@@ -39,9 +39,19 @@ undersampled_datasets_path: Path = Path(balanced_datasets_path, "undersampled")
 # sub-folders for the model explainability folders:
 model_explainability: Path = Path(project_root_path, "model_explainability")
 final_models_path: Path = Path(model_explainability, "final_models")
-final_training_csv_path: Path = Path(data_path, "final_training.csv")
-final_validation_csv_path: Path = Path(data_path, "final_validation.csv")
-final_testing_csv_path: Path = Path(data_path, "final_testing.csv")
+
+final_training_undersampled_csv_path: Path = Path(balanced_datasets_path, "undersampled", "robust_scaler_scaling_drop", "final_training.csv")
+final_validation_undersampled_csv_path: Path = Path(balanced_datasets_path, "undersampled", "robust_scaler_scaling_drop", "final_validation.csv")
+final_test_undersampled_csv_path: Path = Path(balanced_datasets_path, "undersampled", "robust_scaler_scaling_drop", "final_test.csv")
+
+final_training_oversampled_csv_path: Path = Path(balanced_datasets_path, "oversampled", "robust_scaler_scaling_drop", "final_training.csv")
+final_validation_oversampled_csv_path: Path = Path(balanced_datasets_path, "oversampled", "robust_scaler_scaling_drop", "final_validation.csv")
+final_test_oversampled_csv_path: Path = Path(balanced_datasets_path, "oversampled", "robust_scaler_scaling_drop", "final_test.csv")
+
+final_test_tomek_csv_path: Path = Path(balanced_datasets_path, "smote_tomek_links", "robust_scaler_scaling_drop", "final_testing.csv")
+final_train_tomek_csv_path: Path = Path(balanced_datasets_path, "smote_tomek_links", "robust_scaler_scaling_drop", "final_training.csv")
+final_val_tomek_csv_path: Path = Path(balanced_datasets_path, "smote_tomek_links", "robust_scaler_scaling_drop", "final_validation.csv")
+
 final_neural_network_path: Path = Path(final_models_path, "neural_network_model.h5")
 global_surrogate_results_path: Path = Path(results_path, "global_surrogate_results")
 partial_dependence_results_path: Path = Path(results_path, "partial_dependence_results")
