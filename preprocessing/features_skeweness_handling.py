@@ -4,10 +4,8 @@ from pathlib import Path
 # Libraries:
 import numpy as np
 import pandas as pd
-from scipy.stats import boxcox
-from sklearn.compose import ColumnTransformer
-from sklearn.preprocessing import PowerTransformer
 from auxiliary.method_timer import measure_time
+from sklearn.preprocessing import PowerTransformer
 
 # Global variables:
 from config import logs_path
@@ -18,53 +16,29 @@ if not logs_path.exists():
 
 
 # Functions:
-def power_transformer(df: pd.DataFrame, columns: list[str]) -> pd.DataFrame:
+def power_transform(train: pd.DataFrame, validate: pd.DataFrame, test: pd.DataFrame, columns: list[str],
+                    method: str) -> pd.DataFrame:
     """
-    Power transform the columns in the dataframe, following the SciKit Learn implementation:
-    https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.PowerTransformer.html with
-    the help of ColumnTransformer:
-    https://scikit-learn.org/stable/modules/generated/sklearn.compose.ColumnTransformer.html
-    :param df: the dataframe to be analyzed
-    :param columns: the columns to be analyzed
-    :return: pd.DataFrame: the power transformed columns specified.
+    Power transform the columns in the dataframe, following the Scikit-learn implementation:
+    https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.PowerTransformer.html
+    @param df: the dataframe to be analyzed
+    @param columns: the columns to be analyzed
+    @param method: the method to be used, either "yeo-johnson" or "box-cox"
+    :return: the power transformed columns specified.
     """
-
-    df = df.copy()
-
-    # get the other columns:
-    other_columns = [col for col in df.columns if col not in columns and col != "default"]
-    total_columns = columns.extend(other_columns)
-
-    # split the dataset with the centralized function:
-    x_train, x_val, x_test, y_train, y_val, y_test = split_data(df, "default", validation=True)
-
-    # fit the power transformer on the training set:
-    pt = ColumnTransformer(transformers=[('power', PowerTransformer(), columns)], remainder='passthrough')
-    pt.fit(x_train)
-
-    # transform the training, validation and test set:
-    x_train = pd.DataFrame(pt.transform(x_train), columns=total_columns)
-    x_val = pd.DataFrame(pt.transform(x_val), columns=total_columns)
-    x_test = pd.DataFrame(pt.transform(x_test), columns=total_columns)
-
-    # merge the training and test data:
-    dataframe: pd.DataFrame = pd.concat([x_train, x_val, x_test], axis=0)
-    label = pd.concat([y_train, y_val, y_test], axis=0)
-    dataframe["default"] = label
-
-    return dataframe
-
-
-def boxcox_transform(df: pd.DataFrame, columns: list[str]) -> pd.DataFrame:
-    """
-    Boxcox transform the columns in the dataframe, following the SciPy implementation:
-    https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.boxcox.html
-    :param df: the dataframe to be analyzed
-    :param columns: the columns to be analyzed
-    :return: pd.DataFrame: the boxcox transformed columns specified.
-    """
-    df = df.copy()
-    df[columns] = df[columns].apply(lambda x: pd.Series(boxcox(x + 1)[0]))
+    train = train.copy()
+    validate = validate.copy()
+    test = test.copy()
+    # create the transformer:
+    pt = PowerTransformer(method=method)
+    # fit the transformer:
+    pt.fit(train[columns])
+    # transform the columns:
+    train[columns] = pt.transform(train[columns])
+    validate[columns] = pt.transform(validate[columns])
+    test[columns] = pt.transform(test[columns])
+    # merge the dataframes:
+    df = pd.concat([train, validate, test])
     return df
 
 
@@ -264,7 +238,8 @@ def skewness_main(filename: str, suppress_print=False) -> pd.DataFrame:
 
     # assign the categorical features:
     categorical_features: list[str] = ["gender", "education", "marriage", "pay_stat_sep", "pay_stat_aug",
-                                       "pay_stat_jul", "pay_stat_jun", "pay_stat_may", "pay_stat_apr", "default"]
+                                       "pay_stat_jul",
+                                       "pay_stat_jun", "pay_stat_may", "pay_stat_apr", "default"]
 
     df = df.astype({feature: "category" for feature in categorical_features})
 
@@ -277,18 +252,26 @@ def skewness_main(filename: str, suppress_print=False) -> pd.DataFrame:
         print(estimate_skewness(df, "all"))
 
     # get the numerical features names by excluding the categorical features and the id:
-    numerical_features: list[str] = [feature for feature in df.columns if df[feature].dtype !=
-                                     "category" and feature != "id"]
+    numerical_features: list[str] = df.select_dtypes(exclude="category").columns
 
-    # apply the power transformation to the numerical features:
-    df = power_transformer(df, numerical_features)
+    # apply the yeo-johnson transformation, we selected it as the best transformation since it handles negative values
+    # and it's the most robust transformation.
+    # See I.K. Yeo and R.A. Johnson, “A new family of power transformations to improve normality or symmetry.”
+    # Biometrika, 87(4), pp.954-959, (2000).
+    # Split the data in training, validation and test sets, no data leakage:
+    x_train, x_val, x_test, y_train, y_val, y_test = split_data(df, "default", validation=True)
+    training = pd.concat([x_train, y_train], axis=1)
+    validation = pd.concat([x_val, y_val], axis=1)
+    testing = pd.concat([x_test, y_test], axis=1)
+
+    # apply the yeo-johnson transformation:
+    features = power_transform(training, validation, testing, numerical_features, "yeo-johnson")
 
     if not suppress_print:
         print(estimate_skewness(df, "all"))
 
+    # substitute the numerical features with the transformed features:
+    df[numerical_features] = features[numerical_features]
+
     return df
 
-
-# Driver
-if __name__ == '__main__':
-    skewness_main(Path("..", "data", "missing_values_handled", "project_2_dataset_drop_augmented.csv"))

@@ -34,9 +34,9 @@ def main() -> None:
     """
     # Preprocessing:
     # ----------------------------------------------
-    preprocessor_main(suppress_print=True)
-    feature_engineering_main()
-    scaling_main()
+    preprocessor_main(suppress_print=True, missing_values_dominant_strategies=["drop"])
+    feature_engineering_main(overwrite_original=True)
+    scaling_main(dominant_scaling_strategies=['robust_scaler'])
     eda_main()
     # # Baseline models:
     # # ----------------------------------------------
@@ -69,12 +69,14 @@ def main() -> None:
     # Tuning:
     # ----------------------------------------------
     # Under-sampling , over-sampling and SMOTE variants:
-    balance_classes_main()
+    # oversampled is the best for the neural network, undersampled for the svc and
+    # smote tomek for gradient boosting.
+    balance_classes_main(dominate_strategy=['undersampled', 'oversampled', 'smote_tomek'])
     balanced_trees_main(dominant_model='gradient_boosting')
-    balanced_neural_network_main(domiant_model='convolutional')
+    balanced_neural_network_main(dominant_model='convolutional')
     balanced_other_models_main(dominant_model='svc')
     evaluator_main(trees_balanced_results_path, neural_networks_balanced_results_path,
-                   other_models_balanced_results_path, suppress_print=False, balanced=True)
+                   other_models_balanced_results_path, suppress_print=True, balanced=True)
     """
     Based on the balancing results we selected:
     Gradient boosting as the best model for trees

@@ -5,6 +5,7 @@ from pathlib import Path
 from typing import List
 import pandas as pd
 from tuning.gradient_booster_successive_halving_tuner import create_csv_list
+from sklearn.metrics import f1_score
 
 # Hyperparameter tuning:
 from sklearn.svm import SVC
@@ -38,8 +39,8 @@ def tune_model(training_csv_list: List[Path]) -> list[SVC]:
     """
     # define the parameter space:
     param_space = {
-        'C': [0.1, 1, 10, 100, 1000],
-        'gamma': [1, 0.1, 0.01, 0.001, 0.0001],
+        'C': [4800, 4900, 5000, 5100, 5200, 5300, 5400],
+        'gamma': [10 ** -5, 10 ** -6, 10 ** -7, 10 ** -8, 10 ** -9, 10 ** -10, 10 ** -11],
         'kernel': ['rbf', 'poly', 'sigmoid']
     }
 
@@ -52,8 +53,8 @@ def tune_model(training_csv_list: List[Path]) -> list[SVC]:
         # read the data:
         data = pd.read_csv(csv_path)
         # create the X and y:
-        X = data.drop(columns=['label'])
-        y = data['label']
+        X = data.drop(columns=['default'])
+        y = data['default']
 
         # create the cv:
         cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
@@ -95,17 +96,16 @@ def evaluate_models(tuned_models: List[SVC], validation_csv_list: List[Path]) ->
         x = validation.drop('default', axis=1)
         y = validation['default']
         # evaluate the tuned model:
-        score = tuned_model.score(x, y)
+        y_pred = tuned_model.predict(x)
+        # calculate the f1 score:
+        f1 = f1_score(y, y_pred)
         # save the results:
-        results.append([tuned_model, score])
+        results.append([tuned_model, f1])
     # create the dataframe:
-    results = pd.DataFrame(results, columns=['model', 'score'])
+    results = pd.DataFrame(results, columns=['model', 'f1 score'])
+
     # save the results:
     results.to_csv(other_models_tuned_results_path, index=False)
-    # select the best model:
-    best_model = results.loc[results['score'].idxmax(), 'model']
-    # print the best model parameters:
-    print(best_model.get_params())
 
 
 @measure_time

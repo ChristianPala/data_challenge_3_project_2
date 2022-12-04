@@ -3,8 +3,6 @@
 # Data manipulation:
 from pathlib import Path
 import shutil
-from typing import List
-
 import numpy as np
 import pandas as pd
 # Timing
@@ -106,12 +104,12 @@ def remap_education_and_marriage(dataframe: pd.DataFrame) -> pd.DataFrame:
 
 
 @measure_time
-def preprocessor_main(suppress_print=False, missing_values_dominant_strategies: List[str] = None) -> None:
+def preprocessor_main(suppress_print=False, missing_values_dominant_strategies: str = None) -> None:
     """
     Main function. Load the dataset, preprocess it and save it.
     @param suppress_print: bool: if True, suppress the prints to the console.
-    @param missing_values_dominant_strategies: List[str]: the dominant strategies to use for the missing values,
-    if they exists. If None, all the strategies will be used.
+    @param missing_values_dominant_strategies: List[str]: the dominant strategy to use for the missing values, if
+    it exists. If None, all the strategies will be used.
     :return: Save the preprocessed dataset as a csv and pickle file.
     """
     # Load the dataset:
@@ -182,20 +180,19 @@ def preprocessor_main(suppress_print=False, missing_values_dominant_strategies: 
                 print("-" * 100)
 
     else:
-        for strategy in missing_values_dominant_strategies:
+        for method in missing_values_dominant_strategies:
             # preprocess the training dataset:
-            training_dataframe = handle_missing_values(training_dataframe, strategy)
+            training_dataframe = handle_missing_values(training_dataframe, method)
             # preprocess the validation dataset:
-            validation_dataframe = handle_missing_values(validation_dataframe, strategy)
+            validation_dataframe = handle_missing_values(validation_dataframe, method)
             # preprocess the testing dataset:
-            testing_dataframe = handle_missing_values(testing_dataframe, strategy)
+            testing_dataframe = handle_missing_values(testing_dataframe, method)
 
             # merge the training, validation and testing datasets:
             dataframe = pd.DataFrame(pd.concat([training_dataframe, validation_dataframe, testing_dataframe],
                                                axis=0))
             # save the preprocessed dataset in the missing_values_path:
-            dataframe.to_csv(Path(missing_values_path, f"project_2_dataset_{strategy}.csv"),
-                             index=False)
+            dataframe.to_csv(Path(missing_values_path, f"project_2_dataset_{method}.csv"), index=False)
 
             if not suppress_print:
                 print("Preprocessing completed.")

@@ -10,12 +10,16 @@ import pandas as pd
 from sklearn.ensemble import GradientBoostingClassifier
 # experimental tuning with halving random search cv:
 from sklearn.experimental import enable_halving_search_cv  # NOQA
+from sklearn.metrics import f1_score
 from sklearn.model_selection import HalvingRandomSearchCV, StratifiedKFold  # NOQA
 from tqdm import tqdm
 # Time:
 from auxiliary.method_timer import measure_time
 # Global variables:
 from config import balanced_datasets_path, trees_balanced_results_path
+
+# ensure the trees_balanced_results_path exists:
+Path(trees_balanced_results_path).mkdir(parents=True, exist_ok=True)
 
 
 def create_model() -> GradientBoostingClassifier:
@@ -62,7 +66,7 @@ def tune_model(training_csv_list: List[Path]) -> list[GradientBoostingClassifier
     # create the cross validation object:
     cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
     # create the tuning object:
-    tuning = HalvingRandomSearchCV(model, param_space, cv=cv, n_jobs=-1, random_state=42, verbose=1,
+    tuning = HalvingRandomSearchCV(model, param_space, cv=cv, n_jobs=-1, random_state=42, verbose=0,
                                    aggressive_elimination=True, factor=3)
     # create the list of tuned models:
     tuned_models = []
@@ -100,9 +104,10 @@ def evaluate_models(tuned_models: List[GradientBoostingClassifier], validation_c
         x = validation.drop('default', axis=1)
         y = validation['default']
         # evaluate the tuned model:
-        score = tuned_model.score(x, y)
-        # save the results:
-        results.append([tuned_model, score])
+        y_pred = tuned_model.predict(x)
+        # calculate f1 score:
+        f1 = f1_score(y, y_pred)
+        results.append([tuned_model, f1])
     # create the dataframe:
     results = pd.DataFrame(results, columns=['model', 'score'])
     # save the results:
