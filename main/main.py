@@ -71,7 +71,7 @@ def main() -> None:
     # Under-sampling , over-sampling and SMOTE variants:
     # oversampled is the best for the neural network, undersampled for the svc and
     # smote tomek for gradient boosting.
-    balance_classes_main(dominate_strategy=['undersampled', 'oversampled', 'smote_tomek'])
+    balance_classes_main(dominant_strategy=['undersampled', 'oversampled', 'smote_tomek'])
     balanced_trees_main(dominant_model='gradient_boosting')
     balanced_neural_network_main(dominant_model='convolutional')
     balanced_other_models_main(dominant_model='svc')
