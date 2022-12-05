@@ -72,8 +72,8 @@ def create_final_models_main() -> None:
     training = pd.concat([training, validation], axis=0)
 
     # create the final models:
-    x_train = training.drop("default", axis=1).values
-    y_train = training["default"].values
+    x_train = training.drop("default", axis=1)
+    y_train = training["default"]
 
     # create and save the models:
     gradient_boosting_model(x_train, y_train)

@@ -12,6 +12,9 @@ from sklearn.svm import SVC
 
 # Global variables:
 from config import neural_networks_balanced_results_path, data_path
+# tensorflow log level:
+import os
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
 
 def build_trained_tuned_gradient_booster() -> GradientBoostingClassifier:
