@@ -56,7 +56,7 @@ def tuner(x_train: pd.DataFrame, y_train: pd.DataFrame,
           x_test: pd.DataFrame, y_test: pd.DataFrame, max_evaluations: int = 100,
           cross_validation: int = 5, fast: bool = False) -> dict:
     """
-    Tune the xgboost model.
+    Tune the support vector classifier hyperparameters.
     @param x_train: the training data
     @param y_train: the training labels
     @param x_test: the test data
