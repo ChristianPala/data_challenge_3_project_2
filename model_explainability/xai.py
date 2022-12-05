@@ -1,5 +1,7 @@
 # Libraries
 # Data manipulation
+import pickle
+
 import pandas as pd
 import numpy as np
 from pathlib import Path
@@ -26,19 +28,16 @@ if not trees_results_path.exists():
 from modelling.trees import *
 from local_model_agnostic_explanations import *
 from global_model_agnostic_explanations import *
+from global_surrogate import *
+from partial_dependece_plot import *
 
 from keras.models import load_model
 
 
 def xai_main():
-    model = load_model(Path(final_models_path, 'neural_network_model.h5'))
+    # Testing functions
+    nn = load_model(Path(final_models_path, 'neural_network_model.h5'))
 
-    # df = pd.read_csv('../data/project_2_dataset_unsupervised_imputation_augmented.csv')
-    # x_train, x_val, _, y_train, y_val, _ = split_data(df, 'default', validation=True)
-    # # generate the model:
-    # model = generate_tree_model(model_type='random_forest')
-    # # fit the model:
-    # model = fit_model(model=model, x_train=x_train, y_train=y_train)
     training = pd.read_csv(final_training_csv_path)
     x_train = training.drop("default", axis=1)
     y_train = training["default"]
@@ -47,10 +46,32 @@ def xai_main():
     x_test = testing.drop("default", axis=1)
     y_test = testing["default"]
 
-    lime_explanation(training, testing, 'default', model, 89, True)
-    shap_explanation(training, testing, 'default', model, 89, True)
-    permutation_feature_importance(training, testing, 'default', model)
-    partial_dependence_plots(training, testing, 'default', model)
+    # generate the model:
+    model = generate_tree_model(model_type='random_forest')
+    # fit the model:
+    model = fit_model(model=model, x_train=x_train, y_train=y_train)
+
+    gb = pickle.load(open(Path(final_models_path, 'gradient_boosting_model.pkl'), 'rb'))
+
+    # global_surrogate_main()
+    # pdp_main()
+    # bho = model.predict_proba(x_test)
+    #
+    # prob = nn.predict(x_test)
+    # my_list = map(lambda x: x[0], prob)
+    # prob = pd.Series(my_list)
+    # nprob = prob.apply(lambda x: 1-x)
+    #
+    # feature_matrix = np.column_stack((prob, nprob))
+
+    lime_explanation(training, testing, 'default', nn, 375, False, True)
+    # lime_explanation(training, testing, 'default', model, 0, True)
+    # shap_explanation(training, testing, 'default', model, "tree", 450, True)
+    testing = pd.read_csv(final_training_csv_path)[:500]
+
+    shap_explanation(training, testing, 'default', nn, "kernel", "nn", 375, True)
+    # permutation_feature_importance(training, testing, 'default', nn)
+    partial_dependence_plots(training, testing, 'default', nn)
 
 
 if __name__ == '__main__':

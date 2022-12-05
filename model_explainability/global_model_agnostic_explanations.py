@@ -48,7 +48,7 @@ def permutation_feature_importance(training: pd.DataFrame, testing: pd.DataFrame
     x_test = testing.drop("default", axis=1)
     y_test = testing["default"]
 
-    perm = PermutationImportance(model, random_state=random_state).fit(x_test, y_test)
+    perm = PermutationImportance(model, random_state=random_state, scoring='f1').fit(x_test, y_test)
     html_obj = eli5.show_weights(perm, feature_names=x_test.columns.tolist())
 
     # Write html object to a file (adjust file path; Windows path is used here)
@@ -77,7 +77,9 @@ def permutation_feature_importance(training: pd.DataFrame, testing: pd.DataFrame
     #                                               ascending=False)
 
 
-def partial_dependence_plots(training: pd.DataFrame, testing: pd.DataFrame, target: str, model: ..., random_state: int = 42) -> None:
+def partial_dependence_plots(training: pd.DataFrame, testing: pd.DataFrame, target: str, model: ...,
+                             predict_proba_available: bool = True,
+                             random_state: int = 42) -> None:
     """
     This function carry out a Global Model-agnostic Explanation of a pre-trained model.
     We displays (global) functional relationship between a set of features and the target variable.
@@ -88,13 +90,21 @@ def partial_dependence_plots(training: pd.DataFrame, testing: pd.DataFrame, targ
     @param random_state: int: default = 42: the random state to be used for the split for reproducibility.
     """
 
+    def predict_use_keras(x):
+        prob = model.predict(x)
+        prob = pd.Series(map(lambda x: x[0], prob))
+
+        n_prob = prob.apply(lambda x: 1 - x)
+        probs = np.column_stack((n_prob, prob))
+        return probs
+
     # Splitting the data:
     # x_train, x_test, y_train, y_test = split_data(df, target)
-    x_train = training.drop("default", axis=1)
-    y_train = training["default"]
+    x_train = training.drop(target, axis=1)
+    y_train = training[target]
 
-    x_test = testing.drop("default", axis=1)
-    y_test = testing["default"]
+    x_test = testing.drop(target, axis=1)
+    y_test = testing[target]
 
     # Similar to previous PDP plot except we use pdp_interact instead of pdp_isolate and pdp_interact_plot instead of pdp_isolate_plot
     # features_to_plot = ['‘Goal Scored’', '‘Distance Covered(Kms)’']
@@ -102,13 +112,19 @@ def partial_dependence_plots(training: pd.DataFrame, testing: pd.DataFrame, targ
     # pdp.pdp_interact_plot(pdp_interact_out=inter1, feature_names=features_to_plot, plot_type=’contour’)
     # plt.show()
 
-    # Test
-    for name in x_test.columns:
-        # shap.dependence_plot(name, shap_values[1], x_test, cmap=plt.get_cmap("cool"))
-        # shap.dependence_plot(name, shap_values[1], x_test, interaction_index=)
-        shap.plots.partial_dependence(name, model.predict, x_test, ice=False, model_expected_value=True,
-                                      feature_expected_value=True, show=False)
-        # save the plot:
-        plt.savefig(Path(partial_dependence_results_path, f'shap_pdp_{name}.png'))
-        plt.close()
+    if predict_proba_available:
+        for name in x_test.columns:
+            shap.plots.partial_dependence(name, model.predict, x_test, ice=False, model_expected_value=True,
+                                          feature_expected_value=True, show=False)
+            # save the plot:
+            plt.savefig(Path(partial_dependence_results_path, f'shap_pdp_{name}.png'))
+            plt.close()
+    else:
+        for name in x_test.columns:
+            shap.plots.partial_dependence(name, predict_use_keras, x_test, ice=False, model_expected_value=True,
+                                          feature_expected_value=True, show=False)
+            # save the plot:
+            plt.savefig(Path(partial_dependence_results_path, f'shap_pdp_{name}.png'))
+            plt.close()
+
 
