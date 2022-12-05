@@ -13,6 +13,7 @@ from sklearn.svm import SVC
 
 # Global variables:
 from config import final_train_csv_path, final_val_csv_path, final_models_path
+
 final_models_path.mkdir(parents=True, exist_ok=True)
 
 
@@ -21,13 +22,15 @@ def gradient_boosting_model(x_train: np.ndarray, y_train: np.ndarray) -> None:
     This function creates a gradient boosting model.
     :return: None
     """
-    gradient_booster = GradientBoostingClassifier(random_state=42, n_estimators=500,
-                                                  max_depth=4, learning_rate=0.1, min_samples_leaf=1,
-                                                  min_samples_split=6)
+    gb = GradientBoostingClassifier(learning_rate=0.22271924404121154, loss='exponential', max_depth=7,
+                                    max_leaf_nodes=4, min_impurity_decrease=0.35176743416487977,
+                                    min_samples_leaf=1, min_samples_split=5,
+                                    min_weight_fraction_leaf=0.000723912587745684, n_estimators=593,
+                                    subsample=0.7424194687719635, random_state=42)
 
-    gradient_booster.fit(x_train, y_train)
+    gb.fit(x_train, y_train)
     # save the model:
-    pd.to_pickle(gradient_booster, Path(final_models_path, "gradient_boosting_model.pkl"))
+    pd.to_pickle(gb, Path(final_models_path, "gradient_boosting_model.pkl"))
 
 
 def neural_network_model(x_train: np.ndarray, y_train: np.ndarray) -> None:
@@ -83,4 +86,3 @@ def create_final_models_main() -> None:
 
 if __name__ == '__main__':
     create_final_models_main()
-
