@@ -1,4 +1,4 @@
-# Auxiliary library to tune the xgboost model, from project 1 by Christian Berchtold and Christian Pala.
+# Auxiliary library to tune the gradient booster model.
 # Libraries:
 # Data manipulation:
 from __future__ import annotations
