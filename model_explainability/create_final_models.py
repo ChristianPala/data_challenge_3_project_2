@@ -7,16 +7,12 @@ import numpy as np
 from keras import Model
 # Modelling:
 from sklearn.ensemble import GradientBoostingClassifier
-from sklearn.metrics import f1_score
 
 from modelling.neural_network import fit_model, create_convolutional_model
 from sklearn.svm import SVC
 
 # Global variables:
-from config import final_training_oversampled_csv_path, final_validation_oversampled_csv_path, \
-    final_training_undersampled_csv_path, final_validation_undersampled_csv_path, \
-    final_train_tomek_csv_path, final_val_tomek_csv_path, \
-    final_models_path
+from config import final_train_csv_path, final_val_csv_path, final_models_path
 final_models_path.mkdir(parents=True, exist_ok=True)
 
 
@@ -68,27 +64,21 @@ def create_final_models_main() -> None:
     This function is the main function.
     :return: None
     """
-    training_o = pd.read_csv(final_training_oversampled_csv_path)
-    validation_o = pd.read_csv(final_validation_oversampled_csv_path)
-    training_u = pd.read_csv(final_training_undersampled_csv_path)
-    validation_u = pd.read_csv(final_validation_undersampled_csv_path)
-    training_t = pd.read_csv(final_train_tomek_csv_path)
-    validation_t = pd.read_csv(final_val_tomek_csv_path)
-    # merge the training and validation data:
-    training_o = pd.concat([training_o, validation_o], ignore_index=True)
-    training_u = pd.concat([training_u, validation_u], ignore_index=True)
-    training_t = pd.concat([training_t, validation_t], ignore_index=True)
-    # split the data:
-    x_train_o = training_o.drop("default", axis=1)
-    y_train_o = training_o["default"]
-    x_train_u = training_u.drop("default", axis=1)
-    y_train_u = training_u["default"]
-    x_train_t = training_t.drop("default", axis=1)
-    y_train_t = training_t["default"]
+    # load the data:
+    training = pd.read_csv(final_train_csv_path)
+    validation = pd.read_csv(final_val_csv_path)
+
+    # concatenate training and validation:
+    training = pd.concat([training, validation], axis=0)
+
+    # create the final models:
+    x_train = training.drop("default", axis=1).values
+    y_train = training["default"].values
+
     # create and save the models:
-    gradient_boosting_model(x_train_t, y_train_t)
-    neural_network_model(x_train_u, y_train_u)
-    supper_vector_machine_model(x_train_o, y_train_o)
+    gradient_boosting_model(x_train, y_train)
+    neural_network_model(x_train, y_train)
+    supper_vector_machine_model(x_train, y_train)
 
 
 if __name__ == '__main__':

@@ -28,7 +28,7 @@ from typing import Tuple
 
 # Global variables:
 from config import final_neural_network_path, global_surrogate_results_path, \
-    final_training_oversampled_csv_path, final_validation_oversampled_csv_path, final_testing_oversampled_csv_path, \
+    final_train_csv_path, final_val_csv_path, final_test_csv_path, \
     global_surrogate_models_path
 
 global_surrogate_models_path.mkdir(parents=True, exist_ok=True)
@@ -46,9 +46,9 @@ def load_data() -> tuple:
     This function loads the data.
     :return: tuple: x_train, y_train, x_test, y_test
     """
-    training = pd.read_csv(final_training_oversampled_csv_path)
-    validation = pd.read_csv(final_validation_oversampled_csv_path)
-    testing = pd.read_csv(final_testing_oversampled_csv_path)
+    training = pd.read_csv(final_train_csv_path)
+    validation = pd.read_csv(final_val_csv_path)
+    testing = pd.read_csv(final_test_csv_path)
     x_train = training.drop(columns=['default'])
     y_train = training['default']
     x_val = validation.drop(columns=['default'])
