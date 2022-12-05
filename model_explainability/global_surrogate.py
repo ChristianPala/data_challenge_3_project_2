@@ -1,6 +1,7 @@
 # Library to explain the results of the black box neural network model with a global surrogate:
 # Libraries:
 # Data manipulation:
+import pickle
 from pathlib import Path
 import numpy as np
 import pandas as pd
@@ -27,7 +28,11 @@ from typing import Tuple
 
 # Global variables:
 from config import final_neural_network_path, global_surrogate_results_path, \
-    final_training_csv_path, final_validation_csv_path, final_testing_csv_path
+    final_training_oversampled_csv_path, final_validation_oversampled_csv_path, final_testing_oversampled_csv_path, \
+    global_surrogate_models_path
+
+global_surrogate_models_path.mkdir(parents=True, exist_ok=True)
+
 # set warnings:
 warnings.simplefilter("ignore", UserWarning)
 warnings.simplefilter("ignore", ConvergenceWarning)
@@ -41,9 +46,9 @@ def load_data() -> tuple:
     This function loads the data.
     :return: tuple: x_train, y_train, x_test, y_test
     """
-    training = pd.read_csv(final_training_csv_path)
-    validation = pd.read_csv(final_validation_csv_path)
-    testing = pd.read_csv(final_testing_csv_path)
+    training = pd.read_csv(final_training_oversampled_csv_path)
+    validation = pd.read_csv(final_validation_oversampled_csv_path)
+    testing = pd.read_csv(final_testing_oversampled_csv_path)
     x_train = training.drop(columns=['default'])
     y_train = training['default']
     x_val = validation.drop(columns=['default'])
@@ -215,11 +220,23 @@ def save_model_predictions(black_box_model: Model, surrogate_models: Tuple[Logis
     y_pred_surrogate_rf = surrogate_models[1].predict(x_test)
     # Create the dataframe:
     df = pd.DataFrame(data=y_pred_bb_cat, columns=['black_box'])
+    # save the largest probability as the prediction:
+    df['black_box_prob'] = np.max(y_pred_bb, axis=1)
     df['surrogate_log'] = y_pred_surrogate_log
     df['surrogate_rf'] = y_pred_surrogate_rf
-    df.to_csv(Path(global_surrogate_results_path, 'predictions.csv'))
+    # save the largest probability as the prediction for logistic regression and random forest:
+    df['surrogate_log_prob'] = np.max(surrogate_models[0].predict_proba(x_test), axis=1)
+    df['surrogate_rf_prob'] = np.max(surrogate_models[1].predict_proba(x_test), axis=1)
 
-    # TODO: get the largest misclassifications for LIME.
+    # get the difference between the black box and the surrogate models:
+    df['difference_log'] = df['black_box_prob'] - df['surrogate_log_prob']
+    df['difference_rf'] = df['black_box_prob'] - df['surrogate_rf_prob']
+    # get the 10 indexes with the biggest difference:
+    df = df.sort_values(by='difference_log', ascending=False)
+    # save the 10 indexes with the biggest difference:
+    df.iloc[:10].to_csv(Path(global_surrogate_results_path, 'predictions_with_biggest_logreg_difference.csv'))
+    df = df.sort_values(by='difference_rf', ascending=False)
+    df.iloc[:10].to_csv(Path(global_surrogate_results_path, 'predictions_with_biggest_rf_difference.csv'))
 
 
 def plot_feature_importance(surrogate_models: tuple[LogisticRegression, RandomForestClassifier],
@@ -272,6 +289,23 @@ def plot_feature_importance(surrogate_models: tuple[LogisticRegression, RandomFo
     plt.ylabel('Feature importance')
     plt.savefig(Path(global_surrogate_results_path, 'random_forest_surrogate_model_feature_importance.png'))
 
+
+def save_models(global_surrogate_models: tuple[LogisticRegression, RandomForestClassifier],
+                black_box_model: Model) -> None:
+    """
+    This function saves the surrogate models.
+    :return: None
+    """
+    # Save the logistic regression model to a pickle file:
+    with open(Path(global_surrogate_models_path, 'logistic_regression_surrogate_model.pkl'), 'wb') as file:
+        pickle.dump(global_surrogate_models[0], file)
+    # Save the random forest model to a pickle file:
+    with open(Path(global_surrogate_models_path, 'random_forest_surrogate_model.pkl'), 'wb') as file:
+        pickle.dump(global_surrogate_models[1], file)
+    # Save the black box model to a h5 file:
+    black_box_model.save(Path(global_surrogate_models_path, 'black_box_model.h5'))
+
+
 @measure_time
 def global_surrogate_main() -> None:
     """
@@ -302,6 +336,9 @@ def global_surrogate_main() -> None:
 
     # Plot the feature importance:
     plot_feature_importance(surrogate_models, x_test)
+
+    # Save the models:
+    save_models(surrogate_models, black_box_model)
 
 
 # Driver:
