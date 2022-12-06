@@ -5,8 +5,8 @@ The best decision tree drop augmented, with an f1 score of 0.393
 The best random forest drop augmented, with an f1 score of 0.483
 The best gradient boosting drop augmented, with an f1 score of 0.498
 The best xgboost drop augmented, with an f1 score of 0.473
-The best neural network dense robust scaler drop augmented, with an f1 score of 0.473
-The best knn robust scaler drop augmented, with an f1 score of 0.453
+The best neural network convoluted robust scaler drop augmented, with an f1 score of 0.509
+The best knn robust scaler drop augmented, with an f1 score of 0.454
 The best logreg robust scaler drop augmented, with an f1 score of 0.431
 The best naive bayes robust scaler drop augmented, with an f1 score of 0.51
 The best svc robust scaler drop augmented, with an f1 score of 0.515
@@ -14,6 +14,6 @@ The best svc robust scaler drop augmented, with an f1 score of 0.515
 Trees path: trees_balanced
 Neural networks path: neural_network_balanced
 Other models path: other_models_balanced
-The best gradient boosting robust scaler drop, with an f1 score of 0.532
-The best convolutional network robust scaler drop, with an f1 score of 0.538
-The best svc robust scaler drop, with an f1 score of 0.539
+The best gradient boosting robust scaler drop, with an f1 score of 0.526
+The best convolutional network robust scaler drop, with an f1 score of 0.492
+The best svc robust scaler drop, with an f1 score of 0.528

@@ -3,7 +3,7 @@
 # Main files for the project:
 from model_explainability.create_final_models import create_final_models_main
 from model_explainability.global_surrogate import global_surrogate_main
-from model_explainability.local_interpretable_model_agnostic_explanations import lime_main
+# from model_explainability.local_interpretable_model_agnostic_explanations import lime_main
 from model_explainability.partial_dependece_plot import pdp_main
 from model_explainability.permutation_importance import permutation_importance_main
 from preprocessing.eda.EDA import eda_main

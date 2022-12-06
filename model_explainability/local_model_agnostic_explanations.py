@@ -26,7 +26,8 @@ data_path = Path("..", "data")
 
 
 # Functions:
-def lime_explanation(training: pd.DataFrame, testing: pd.DataFrame, target: str, model: ..., j: int = 5,
+def lime_explanation(training: pd.DataFrame, testing: pd.DataFrame, target: str, model: ...,
+                     name: str, j: int = 5,
                      predict_proba_available: bool = True,
                      with_wrong_prediction_analysis: bool = False, random_state: int = 42) -> None:
     # TODO: not sure which type of data the function should expect from the parameter model
@@ -72,7 +73,7 @@ def lime_explanation(training: pd.DataFrame, testing: pd.DataFrame, target: str,
             predict_fn=model.predict_proba)
 
         # Save the report
-        exp.save_to_file(Path(lime_local_explanation_results_path, f'lime_report_obs_{j}.html'))
+        exp.save_to_file(Path(lime_local_explanation_results_path, f'lime_report_obs_{j}_{name}.html'))
 
         if with_wrong_prediction_analysis:
             # Analyze wrong predictions
@@ -128,7 +129,7 @@ def lime_explanation(training: pd.DataFrame, testing: pd.DataFrame, target: str,
         )
 
         # Save the report
-        exp.save_to_file(Path(lime_local_explanation_results_path, f'lime_report_obs_{j}.html'))
+        exp.save_to_file(Path(lime_local_explanation_results_path, f'lime_report_obs_{j}_{name}.html'))
 
         if with_wrong_prediction_analysis:
             # Analyze wrong predictions
