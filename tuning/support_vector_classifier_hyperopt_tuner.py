@@ -104,11 +104,15 @@ def main() -> None:
     y_test = validation['default']
 
     # tune the model:
-    best = tuner(x_train, y_train, x_test, y_test, max_evaluations=100, cross_validation=5, fast=False)
-    print(best)
+    # best = tuner(x_train, y_train, x_test, y_test, max_evaluations=100, cross_validation=5, fast=False)
+    # print(best)
+
+    """
+        {'C': 28.357438855797135, 'degree': 1, 'kernel': rbf}
+        """
 
     # train the model with the best parameters:
-    model = SVC(**best, random_state=42)
+    model = SVC(random_state=42, C=4900, gamma=10 ** -5)
     model.fit(x_train, y_train)
 
     # train the model:

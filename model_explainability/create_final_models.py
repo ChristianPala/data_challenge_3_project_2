@@ -56,7 +56,7 @@ def supper_vector_machine_model(x_train: np.ndarray, y_train: np.ndarray) -> Non
     This function creates a support vector machine model.
     :return: None
     """
-    svc = SVC(random_state=42, C=4900, gamma=10 ** -5)
+    svc = SVC(random_state=42, C=4900, gamma=10 ** -5, probability=True)
     svc.fit(x_train, y_train)
     # save the model:
     pd.to_pickle(svc, Path(final_models_path, "supper_vector_machine_model.pkl"))

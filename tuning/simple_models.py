@@ -81,7 +81,7 @@ def tuner(x_train: pd.DataFrame, y_train: pd.DataFrame) -> List[Tuple[str, objec
     # define the parameters to be tuned:
     decision_tree_params = {'max_depth': [3, 5, 7, 9, 11],
                             'min_samples_leaf': [1, 2, 3, 4, 5],
-                            'min_samples_split': [2, 3, 4, 5],
+                            'min_samples_split': [1, 2, 3, 4, 5],
                             'criterion': ['gini', 'entropy']}
 
     knn_params = {'n_neighbors': [3, 5, 7, 9, 11, 13],
@@ -89,7 +89,7 @@ def tuner(x_train: pd.DataFrame, y_train: pd.DataFrame) -> List[Tuple[str, objec
                   'algorithm': ['auto', 'ball_tree', 'kd_tree', 'brute']}
 
     logistic_regression_params = {'penalty': ['l1', 'l2'],
-                                  'C': [0.001, 0.01, 0.1, 1, 10, 100, 1000],
+                                  'C': [3, 4, 5, 6, 7],
                                   'solver': ['liblinear', 'saga'],
                                   }
 
@@ -103,6 +103,8 @@ def tuner(x_train: pd.DataFrame, y_train: pd.DataFrame) -> List[Tuple[str, objec
         grid_search = GridSearchCV(models[i][1], parameter_grids[i], scoring='f1', cv=5, n_jobs=-1)
         # fit the grid search:
         grid_search.fit(x_train, y_train)
+        # print the best parameters:
+        print(f'Best parameters for {models[i][0]}: {grid_search.best_params_}')
         # append the tuned model to the list:
         tuned_models.append((models[i][0], grid_search.best_estimator_))
 
