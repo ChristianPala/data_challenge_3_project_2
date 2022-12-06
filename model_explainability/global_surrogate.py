@@ -69,9 +69,7 @@ def import_black_box_model(x_train: np.ndarray, y_train: np.ndarray) -> Model:
     @param y_train: np.ndarray: the target data.
     :return: keras.Model: the black box model.
     """
-    black_box_model = load_model(final_neural_network_path)
-    # reduced the number of epochs to 5 to keep to give the surrogate models a chance to learn:
-    black_box_model.fit(x_train, y_train, epochs=5, verbose=0)
+    black_box_model = pd.read_pickle(final_neural_network_path)
     return black_box_model
 
 

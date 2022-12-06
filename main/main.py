@@ -5,6 +5,7 @@ from model_explainability.create_final_models import create_final_models_main
 from model_explainability.global_surrogate import global_surrogate_main
 from model_explainability.local_interpretable_model_agnostic_explanations import lime_main
 from model_explainability.partial_dependece_plot import pdp_main
+from model_explainability.permutation_importance import permutation_importance_main
 from preprocessing.eda.EDA import eda_main
 from preprocessing.preprocessor import preprocessor_main
 from feature_engineering.create_features import feature_engineering_main
@@ -25,6 +26,7 @@ import pprint
 from auxiliary.method_timer import execution_times
 from config import trees_results_path, neural_networks_results_path, other_models_results_path, \
     trees_balanced_results_path, neural_networks_balanced_results_path, other_models_balanced_results_path
+from tuning.tune_simple_models import simple_models_main
 
 
 def main() -> None:
@@ -103,16 +105,26 @@ def main() -> None:
     # bayes was also pretty close.
     # svc_main()
     # We keep the tuning off the main pipeline, as it is very time-consuming.
-    # Below we generate the 3 best models we found.
+    # Below the tuning of the simple models:
+    simple_models_main()
+    # Below we generate the 3 best models we found during the tuning phase.
     create_final_models_main()
     # Explaining:
     # ----------------------------------------------
     # feature permutation:
+    permutation_importance_main()
     # dependence plots:
-    # global_surrogate_main()
+    pdp_main()
+    # global surrogate:
+    global_surrogate_main()
+    # Lime:
     # lime_main()
+    # Shap:
+    # shap_main()
     # pretty print the execution times dictionary:
     pprint.pprint(execution_times)
+    # Done:
+    # ------------------------------------------------
 
 
 if __name__ == '__main__':

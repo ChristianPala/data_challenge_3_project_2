@@ -10,10 +10,12 @@ from keras.models import Model, load_model
 from sklearn.inspection import PartialDependenceDisplay
 # Plotting:
 import matplotlib.pyplot as plt
+# Timing:
+from auxiliary.method_timer import measure_time
 # Global variables:
 from config import final_train_csv_path, final_val_csv_path, partial_dependence_results_path, final_neural_network_path, \
     final_models_path
-
+# Ensure the folders are created:
 partial_dependence_results_path.mkdir(parents=True, exist_ok=True)
 
 
@@ -23,19 +25,24 @@ def plot_dependence(feature_name: list[str], black_box_model: Model, x_train: np
     @param feature_name: str: the name of the feature.
     @param black_box_model: keras.Model: the black box model.
     @param x_train: np.array: the training data.
-    @param y_train: np.array: the target data.
     :return: None
     """
+    # create a folder based on the model name:
+    model_name = black_box_model.__class__.__name__
+    save_path = Path(partial_dependence_results_path, model_name)
+    save_path.mkdir(parents=True, exist_ok=True)
+
     # create the partial dependence plot:
     pdp = PartialDependenceDisplay.from_estimator(black_box_model, x_train, [feature_name])
     # plot the partial dependence plot:
     pdp.plot()
     # save the plot:
-    plt.savefig(Path(partial_dependence_results_path, f"{feature_name}.png"))
+    plt.savefig(Path(save_path, f"{feature_name}.png"))
     # close the plot:
     plt.close()
 
 
+@measure_time
 def pdp_main() -> None:
     """
     This function is the main function.
@@ -48,18 +55,23 @@ def pdp_main() -> None:
     training = pd.concat([training, validation], axis=0)
     x_train = training.drop(columns=["default"])
 
-    # import the gradient boosting model:
+    # import the models:
     gradient_boosting_model = pd.read_pickle(Path(final_models_path, "gradient_boosting_model.pkl"))
+    support_vector_machine_model = pd.read_pickle(Path(final_models_path, "support_vector_machine_model.pkl"))
 
     # plot the partial dependence of all features:
     for feature_name in x_train.columns:
         plot_dependence(feature_name, gradient_boosting_model, x_train)
+        plot_dependence(feature_name, support_vector_machine_model, x_train)
         plt.close()
 
     # examine limit_bal and pay_status_total combined:
+    # Todo: check interesting features to plot the partial dependence of.
     plot_dependence(['limit_bal', 'pay_status_total'], gradient_boosting_model, x_train)
+    plot_dependence(['limit_bal', 'pay_status_total'], support_vector_machine_model, x_train)
     plt.close()
 
 
 if __name__ == '__main__':
     pdp_main()
+

@@ -15,6 +15,7 @@ from sklearn.tree import DecisionTreeClassifier
 # Timing:
 from tqdm import tqdm
 
+from auxiliary.method_timer import measure_time
 # Global variables:
 from config import final_train_csv_path, final_val_csv_path, other_models_tuned_results_path
 
@@ -143,7 +144,8 @@ def evaluate_models(x_train: pd.DataFrame, y_train: pd.Series, x_val: pd.DataFra
     results_df.to_csv(Path(other_models_tuned_results_path, "simple_models.csv"), index=False)
 
 
-def main() -> None:
+@measure_time
+def simple_models_main() -> None:
     """
     This function is the main function of the script.
     :return: None
@@ -160,5 +162,5 @@ def main() -> None:
 
 # Driver:
 if __name__ == '__main__':
-    main()
+    simple_models_main()
 
