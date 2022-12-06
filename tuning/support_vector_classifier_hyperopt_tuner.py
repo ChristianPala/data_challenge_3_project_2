@@ -69,7 +69,7 @@ def tuner(x_train: pd.DataFrame, y_train: pd.DataFrame,
 
     # define the search space, choose the parameters to tune:
     space = {
-        'C': hp.uniform('C', 0.001, 100000),
+        'C': hp.uniform('C', 10, 1000),
         'kernel': hp.choice('kernel', ['linear', 'rbf', 'sigmoid', 'poly']),
         'degree': hp.choice('degree', [2, 3, 4, 5, 6]),
     }
