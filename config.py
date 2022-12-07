@@ -58,3 +58,7 @@ global_surrogate_models_path: Path = Path(global_surrogate_results_path, "models
 partial_dependence_results_path: Path = Path(results_path, "partial_dependence_results")
 # ---------------------------------------------------------------------------------------------------
 feature_permutation_results_path: Path = Path(results_path, "feature_permutation_results")
+# ---------------------------------------------------------------------------------------------------
+shap_results_path: Path = Path(results_path, "shap_results")
+# ---------------------------------------------------------------------------------------------------
+lime_results_path: Path = Path(results_path, "lime_results")
