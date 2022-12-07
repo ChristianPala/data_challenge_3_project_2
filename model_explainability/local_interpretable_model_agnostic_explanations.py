@@ -352,6 +352,7 @@ def lime_and_shap_main() -> None:
     models = [cnn_model, gb_model, svc_model]
 
     # train the model:
+    # Todo: not sure about the model types you want to use here.
     for model in models:
         lime_explanation(training=training, testing=testing, target="default",
                          model=model, model_name=model.__class__.__name__.lower())
