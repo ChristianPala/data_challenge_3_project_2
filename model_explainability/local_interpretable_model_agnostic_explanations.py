@@ -16,13 +16,13 @@ import shap
 from shap import maskers
 # Type hinting:
 from typing import Literal
-
+# Timing:
 from auxiliary.method_timer import measure_time
+
 # Global variables:
 from config import final_models_path, final_test_csv_path, final_train_csv_path, final_val_csv_path, \
     shap_results_path, lime_results_path
-
-# Create the results folders:
+# Ensure the folders exist:
 shap_results_path.mkdir(parents=True, exist_ok=True)
 lime_results_path.mkdir(parents=True, exist_ok=True)
 
