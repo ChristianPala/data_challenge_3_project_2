@@ -184,7 +184,7 @@ def lime_explanation(training: pd.DataFrame, testing: pd.DataFrame, target: str,
 
 
 def shap_explanation(training: pd.DataFrame, testing: pd.DataFrame, target: str, model: ...,
-                     model_type: Literal["tree", "kernel"], model_name: str, j: int = 5,
+                     explainer_type: Literal["tree", "kernel_cnn", "kernel_svc"], model_name: str, j: int = 5,
                      with_global_summary_plots: bool = False, random_state: int = 42) -> None:
     """
     This function carry out a Local Model-agnostic Explanation of a pre-trained model using the shap library:
@@ -194,7 +194,7 @@ def shap_explanation(training: pd.DataFrame, testing: pd.DataFrame, target: str,
     @param target: str: the target column's name.
     @param model: ...: our pre-trained black-box model, we will use it to perform a prediction and analyze it
     with our explainer.
-    @param model_type: str: a string containing which type of algorithm our model is.
+    @param explainer_type: str: a string containing which type of algorithm our model is.
     @param model_name: ...: the name of out model, to save appropriately the results.
     @param j: int: index of the data our model will use for the prediction.
     @param with_global_summary_plots: weather or not to create the global summary plots.
@@ -208,7 +208,7 @@ def shap_explanation(training: pd.DataFrame, testing: pd.DataFrame, target: str,
     x_test = testing.drop(target, axis=1)
     y_test = testing[target]
 
-    if model_type == "tree":
+    if explainer_type == "tree":
         # data to train both explainers on
         background = maskers.Independent(x_train)
 
@@ -233,7 +233,7 @@ def shap_explanation(training: pd.DataFrame, testing: pd.DataFrame, target: str,
         plt.subplots_adjust(left=0.5, right=0.9, top=0.9, bottom=0.2)
         # increase the size of the plot:
         plt.gcf().set_size_inches(10, 5)
-        plt.savefig(Path(shap_results_path, f'shap_waterfall_{model_name}_obs_{j}.png'))
+        plt.savefig(Path(shap_results_path, f'shap_waterfall_obs_{j}_{model_name}.png'))
         plt.close()
 
         # shap.force_plot(explainer.expected_value[1],
@@ -247,8 +247,8 @@ def shap_explanation(training: pd.DataFrame, testing: pd.DataFrame, target: str,
                         x_test.values[j, :],
                         feature_names=x_test.columns,
                         matplotlib=True, show=False)
-        plt.gcf().set_size_inches(25, 5)
-        plt.savefig(Path(shap_results_path, f'shap_force_plot_{model_name}_obs_{j}.png'), dpi=300,
+        plt.gcf().set_size_inches(30, 5)
+        plt.savefig(Path(shap_results_path, f'shap_force_plot_obs_{j}_{model_name}.png'), dpi=300,
                     bbox_inches='tight')
         plt.close()
 
@@ -258,7 +258,7 @@ def shap_explanation(training: pd.DataFrame, testing: pd.DataFrame, target: str,
                               feature_names=x_test.columns, show=False)
 
             # save the plot:
-            plt.savefig(Path(shap_results_path, f'shap_summary_plot_{model_type}.png'))
+            plt.savefig(Path(shap_results_path, f'shap_summary_plot_{model_name}.png'))
             plt.close()
 
             # Plot to show the weights of the positive class
@@ -266,7 +266,7 @@ def shap_explanation(training: pd.DataFrame, testing: pd.DataFrame, target: str,
                               plot_type="violin", show=False)
 
             # save the plot:
-            plt.savefig(Path(shap_results_path, f'shap_summary_plot_class_not_default_{model_type}.png'))
+            plt.savefig(Path(shap_results_path, f'shap_summary_plot_class_not_default_{model_name}.png'))
             plt.close()
 
             # Plot to show the weights of the negative class
@@ -274,10 +274,10 @@ def shap_explanation(training: pd.DataFrame, testing: pd.DataFrame, target: str,
                               plot_type="violin", show=False)
 
             # save the plot:
-            plt.savefig(Path(shap_results_path, f'shap_summary_plot_class_default_{model_type}.png'))
+            plt.savefig(Path(shap_results_path, f'shap_summary_plot_class_default_{model_name}.png'))
             plt.close()
 
-    elif model_type == "kernel":
+    elif explainer_type == "kernel_cnn":
         # initialize the shapley values:
         # explainer = shap.DeepExplainer((model.layers[0].input, model.layers[-1].output), background)
         explainer = shap.KernelExplainer(model, x_train.iloc[:50, :])
@@ -286,15 +286,16 @@ def shap_explanation(training: pd.DataFrame, testing: pd.DataFrame, target: str,
         shap.force_plot(explainer.expected_value[0], shap_values[0][j], features=x_test.columns,
                         matplotlib=True, show=False)
 
-        plt.savefig(Path(shap_results_path, f'shap_force_plot_{model_name}_obs_{j}.png'), dpi=300,
+        plt.savefig(Path(shap_results_path, f'shap_force_plot_obs_{j}_{model_name}.png'), dpi=300,
                     bbox_inches='tight')
         plt.close()
 
         shap.decision_plot(explainer.expected_value[0], shap_values[0][j], features=x_test.iloc[0, :],
                            feature_names=x_test.columns.tolist(), show=False)
+
         # increase the size of the plot:
         plt.gcf().set_size_inches(10, 15)
-        plt.savefig(Path(shap_results_path, f'shap_decision_plot_{model_name}_obs_{j}.png'), dpi=300,
+        plt.savefig(Path(shap_results_path, f'shap_decision_plot_obs_{j}_{model_name}.png'), dpi=300,
                     bbox_inches='tight')
         plt.close()
 
@@ -302,7 +303,7 @@ def shap_explanation(training: pd.DataFrame, testing: pd.DataFrame, target: str,
                                                feature_names=x_test.columns, show=False)
         # increase the size of the plot:
         plt.gcf().set_size_inches(10, 5)
-        plt.savefig(Path(shap_results_path, f'shap_waterfall_plot_{model_name}_obs_{j}.png'), dpi=300,
+        plt.savefig(Path(shap_results_path, f'shap_waterfall_plot_obs_{j}_{model_name}.png'), dpi=300,
                     bbox_inches='tight')
         plt.close()
 
@@ -319,49 +320,54 @@ def shap_explanation(training: pd.DataFrame, testing: pd.DataFrame, target: str,
                               plot_type="violin", show=False)
 
             # save the plot:
-            plt.savefig(Path(shap_results_path, f'shap_summary_plot_class_default_{model_type}.png'))
+            plt.savefig(Path(shap_results_path, f'shap_summary_plot_class_default_{model_name}.png'))
             plt.close()
 
-    # elif model_type == "deep":
-    #
-    #     # y_pred = (model.predict(x_test) > 0.5).astype(int)
-    #
-    #     # DeepExplainer to explain predictions of the model
-    #     explainer = shap.DeepExplainer((model.layers[0].input, model.layers[-1].input), x_train)
-    #     # compute shap values
-    #     shap_values = explainer.shap_values(x_test.values)
-    #
-    #     shap.force_plot(explainer.expected_value[0], shap_values[0][j], features=x_test.columns,
-    #                     matplotlib=True, show=False)
-    #
-    #     plt.savefig(Path(shap_results_path, f'shap_force_plot_{model_name}_obs_{j}.png'), dpi=300,
-    #                 bbox_inches='tight')
-    #     plt.close()
-    #
-    #     shap.decision_plot(explainer.expected_value[0], shap_values[0][j], features=x_test.iloc[0, :],
-    #                        feature_names=x_test.columns.tolist(), show=False)
-    #     # increase the size of the plot:
-    #     plt.gcf().set_size_inches(10, 15)
-    #     plt.savefig(Path(shap_results_path, f'shap_decision_plot_{model_name}_obs_{j}.png'), dpi=300,
-    #                 bbox_inches='tight')
-    #     plt.close()
-    #
-    #     shap.plots._waterfall.waterfall_legacy(explainer.expected_value[0], shap_values[0][j],
-    #                                            feature_names=x_test.columns, show=False)
-    #     # increase the size of the plot:
-    #     plt.gcf().set_size_inches(10, 5)
-    #     plt.savefig(Path(shap_results_path, f'shap_waterfall_plot_{model_name}_obs_{j}.png'), dpi=300,
-    #                 bbox_inches='tight')
-    #     plt.close()
-    #
-    #     if with_global_summary_plots:
-    #         # shap.summary_plot(shap_values, x_test.values, feature_names=x_test.columns, show=True)
-    #         shap.summary_plot(shap_values, x_test.values, plot_type="bar", class_names=['default'],
-    #                           feature_names=x_test.columns, show=False)
-    #
-    #         # save the plot:
-    #         plt.savefig(Path(shap_results_path, f'shap_summary_plot_{model_name}.png'))
-    #         plt.close()
+    elif explainer_type == "kernel_svc":
+        # initialize the shapley values:
+        explainer = shap.KernelExplainer(model, x_train.iloc[:50, :], link="logit")
+        shap_values = explainer.shap_values(x_test)
+
+        shap.force_plot(explainer.expected_value[1], shap_values[1][j, :], x_test.iloc[j, :], features=x_test.columns,
+                        link="logit", matplotlib=True, show=False)
+
+        plt.savefig(Path(shap_results_path, f'shap_force_plot_obs_{j}_{model_name}.png'), dpi=300,
+                    bbox_inches='tight')
+        plt.close()
+
+        shap.decision_plot(explainer.expected_value[1], shap_values[1][j, :], features=x_test.iloc[j, :],
+                           feature_names=x_test.columns.tolist(), show=False)
+
+        # increase the size of the plot:
+        plt.gcf().set_size_inches(10, 15)
+        plt.savefig(Path(shap_results_path, f'shap_decision_plot_obs_{j}_{model_name}.png'), dpi=300,
+                    bbox_inches='tight')
+        plt.close()
+
+        shap.plots._waterfall.waterfall_legacy(explainer.expected_value[1], shap_values[1][j],
+                                               feature_names=x_test.columns, show=False)
+
+        # increase the size of the plot:
+        plt.gcf().set_size_inches(10, 5)
+        plt.savefig(Path(shap_results_path, f'shap_waterfall_plot_obs_{j}_{model_name}.png'), dpi=300,
+                    bbox_inches='tight')
+        plt.close()
+
+        if with_global_summary_plots:
+            shap.summary_plot(shap_values, x_test.values, plot_type="bar", class_names=['default'],
+                              feature_names=x_test.columns, show=False)
+
+            # save the plot:
+            plt.savefig(Path(shap_results_path, f'shap_summary_plot_{model_name}.png'))
+            plt.close()
+
+            # Plot to show the weights of the positive class
+            shap.summary_plot(shap_values, x_test.values, feature_names=x_test.columns,
+                              plot_type="violin", show=False)
+
+            # save the plot:
+            plt.savefig(Path(shap_results_path, f'shap_summary_plot_class_default_{model_name}.png'))
+            plt.close()
 
 
 @measure_time
@@ -402,8 +408,7 @@ def lime_and_shap_main() -> None:
     gb_model = pd.read_pickle(Path(final_models_path, 'gradient_boosting_model.pkl'))
     svc_model = pd.read_pickle(Path(final_models_path, 'support_vector_machine_model.pkl'))
 
-    # models = [cnn_model, gb_model, svc_model]
-    models = [gb_model]
+    models = [cnn_model, gb_model, svc_model]
 
     # train the model:
     for model in models:
@@ -411,15 +416,16 @@ def lime_and_shap_main() -> None:
                          model=model, model_name=model.__class__.__name__.lower())
         if model == cnn_model:
             shap_explanation(training=training, testing=testing, target="default",
-                             model=model, model_name=model.__class__.__name__.lower(), model_type="kernel")
+                             model=model, model_name=model.__class__.__name__.lower(), explainer_type="kernel_cnn")
 
         elif model == gb_model:
             shap_explanation(training=training, testing=testing, target="default",
-                             model=model, model_name=model.__class__.__name__.lower(), model_type="tree")
+                             model=model, model_name=model.__class__.__name__.lower(), explainer_type="tree")
 
         elif model == svc_model:
             shap_explanation(training=training, testing=testing, target="default",
-                             model=model.predict, model_name=model.__class__.__name__.lower(), model_type="kernel")
+                             model=model.predict_proba, model_name=model.__class__.__name__.lower(),
+                             explainer_type="kernel_svc")
 
         else:
             raise ValueError("Model type not supported, please check the model type.")
