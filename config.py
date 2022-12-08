@@ -2,6 +2,7 @@
 # Path: config.py
 # Libraries:
 from pathlib import Path
+
 # Global variables:
 # ------------------------------------------------------------
 project_root_path: Path = Path(__file__).parent
@@ -19,8 +20,8 @@ missing_values_path = Path(data_path, "missing_values_handled")
 scaled_datasets_path = Path(data_path, "scaled_datasets")
 # balanced datasets path:
 balanced_datasets_path = Path(data_path, "balanced_datasets")
-# results:
-plot_path: Path = Path(project_root_path, "preprocessing", "results")
+# plots:
+plot_path: Path = Path(project_root_path, "preprocessing", "plots")
 # default csv:
 eda_csv_file_path = Path(missing_values_path, 'project_2_dataset_drop_augmented.csv')
 # sub-folders for the baseline results:
@@ -40,32 +41,24 @@ undersampled_datasets_path: Path = Path(balanced_datasets_path, "undersampled")
 model_explainability: Path = Path(project_root_path, "model_explainability")
 final_models_path: Path = Path(model_explainability, "final_models")
 
-final_training_undersampled_csv_path: Path = Path(balanced_datasets_path, "undersampled", "robust_scaler_scaling_drop",
-                                                  "final_training.csv")
-final_validation_undersampled_csv_path: Path = Path(balanced_datasets_path, "undersampled", "robust_scaler_scaling_drop",
-                                                    "final_validation.csv")
-final_test_undersampled_csv_path: Path = Path(balanced_datasets_path, "undersampled", "robust_scaler_scaling_drop",
-                                              "final_testing.csv")
-
-final_training_oversampled_csv_path: Path = Path(balanced_datasets_path, "oversampled", "robust_scaler_scaling_drop",
-                                                 "final_training.csv")
-final_validation_oversampled_csv_path: Path = Path(balanced_datasets_path, "oversampled", "robust_scaler_scaling_drop",
-                                                   "final_validation.csv")
-final_testing_oversampled_csv_path: Path = Path(balanced_datasets_path, "oversampled",
-                                                "robust_scaler_scaling_drop", "final_testing.csv")
-
-final_test_tomek_csv_path: Path = Path(balanced_datasets_path, "smote_tomek_links", "robust_scaler_scaling_drop",
-                                       "final_testing.csv")
-final_train_tomek_csv_path: Path = Path(balanced_datasets_path, "smote_tomek_links", "robust_scaler_scaling_drop",
-                                        "final_training.csv")
-final_val_tomek_csv_path: Path = Path(balanced_datasets_path, "smote_tomek_links", "robust_scaler_scaling_drop",
-                                      "final_validation.csv")
-
-final_neural_network_path: Path = Path(final_models_path, "neural_network_model.h5")
+# final dataset:
+# ---------------------------------------------------------------------------------------------------
+final_test_csv_path: Path = Path(balanced_datasets_path, "smote_enn", "robust_scaler_scaling_drop",
+                                 "final_testing.csv")
+final_train_csv_path: Path = Path(balanced_datasets_path, "smote_enn", "robust_scaler_scaling_drop",
+                                  "final_training.csv")
+final_val_csv_path: Path = Path(balanced_datasets_path, "smote_enn", "robust_scaler_scaling_drop",
+                                "final_validation.csv")
+# ---------------------------------------------------------------------------------------------------
+final_neural_network_path: Path = Path(final_models_path, "cnn_model.pickle")
+# ---------------------------------------------------------------------------------------------------
 global_surrogate_results_path: Path = Path(results_path, "global_surrogate_results")
 global_surrogate_models_path: Path = Path(global_surrogate_results_path, "models")
+# ---------------------------------------------------------------------------------------------------
 partial_dependence_results_path: Path = Path(results_path, "partial_dependence_results")
-lime_local_explanation_results_path: Path = Path(results_path, "lime_local_explanation_results")
-shap_local_explanation_results_path: Path = Path(results_path, "shap_local_explanation_results")
-permutation_fi_results_path: Path = Path(results_path, "permutation_feature_importance_results")
-# ------------------------------------------------------------
+# ---------------------------------------------------------------------------------------------------
+feature_permutation_results_path: Path = Path(results_path, "feature_permutation_results")
+# ---------------------------------------------------------------------------------------------------
+shap_results_path: Path = Path(results_path, "shap_results")
+# ---------------------------------------------------------------------------------------------------
+lime_results_path: Path = Path(results_path, "lime_results")

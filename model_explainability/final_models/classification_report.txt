@@ -2,22 +2,22 @@ Gradient Boosting Model:
               precision    recall  f1-score   support
 
            0       0.85      0.94      0.89      3734
-           1       0.65      0.40      0.50      1055
+           1       0.64      0.40      0.50      1055
 
     accuracy                           0.82      4789
-   macro avg       0.75      0.67      0.69      4789
+   macro avg       0.74      0.67      0.69      4789
 weighted avg       0.80      0.82      0.80      4789
 
 
 Neural Network Model:
               precision    recall  f1-score   support
 
-           0       0.85      0.92      0.88      3734
-           1       0.61      0.42      0.50      1055
+           0       0.84      0.93      0.89      3734
+           1       0.62      0.38      0.47      1055
 
     accuracy                           0.81      4789
-   macro avg       0.73      0.67      0.69      4789
-weighted avg       0.80      0.81      0.80      4789
+   macro avg       0.73      0.66      0.68      4789
+weighted avg       0.79      0.81      0.79      4789
 
 
 Support Vector Machine Model:

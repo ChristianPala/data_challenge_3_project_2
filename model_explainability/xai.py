@@ -72,38 +72,43 @@ def xai_main():
     # permutation_feature_importance(training, testing, 'default', nn)
     # partial_dependence_plots(training, testing, 'default', nn)
 
-    training = pd.read_csv(final_training_oversampled_csv_path)
-    validation = pd.read_csv(final_validation_oversampled_csv_path)
-    testing = pd.read_csv(final_testing_oversampled_csv_path)
-    training = pd.concat([training, validation])
-
-    # Explaining surrogate model worst predictions
-    bb = load_model(Path(global_surrogate_models_path, 'black_box_model.h5'))
-    bb = load_model(Path(final_neural_network_path))
-    lr = pickle.load(open(Path(global_surrogate_models_path, 'logistic_regression_surrogate_model.pkl'), 'rb'))
-    rf = pickle.load(open(Path(global_surrogate_models_path, 'random_forest_surrogate_model.pkl'), 'rb'))
-
-    worst_surrogate_obs = [984, 306, 531, 4336, 4058, 851]
-
+    # training = pd.read_csv(final_training_oversampled_csv_path)
+    # validation = pd.read_csv(final_validation_oversampled_csv_path)
+    # testing = pd.read_csv(final_testing_oversampled_csv_path)
+    # training = pd.concat([training, validation])
+    #
+    # # Explaining surrogate model worst predictions
+    # bb = load_model(Path(global_surrogate_models_path, 'black_box_model.h5'))
+    # bb = load_model(Path(final_neural_network_path))
+    # lr = pickle.load(open(Path(global_surrogate_models_path, 'logistic_regression_surrogate_model.pkl'), 'rb'))
+    # rf = pickle.load(open(Path(global_surrogate_models_path, 'random_forest_surrogate_model.pkl'), 'rb'))
+    #
+    # worst_surrogate_obs = [984, 306, 531, 4336, 4058, 851]
+    #
     # for o in worst_surrogate_obs:
     #     lime_explanation(training, testing, 'default', bb, 'black_box', o, False, False)
     #     lime_explanation(training, testing, 'default', lr, 'log_reg', o, True, False)
     #     lime_explanation(training, testing, 'default', rf, 'random_f', o, True, False)
-
-    # Local explanations of our best final models
+    #
+    # # Local explanations of our best final models
     # nn = load_model(Path(final_neural_network_path))
     # gb = pickle.load(open(Path(final_models_path, 'gradient_boosting_model.pkl'), 'rb'))
-    svc = pickle.load(open(Path(final_models_path, 'supper_vector_machine_model.pkl'), 'rb'))
-
-    j = 2009
-
+    # svc = pickle.load(open(Path(final_models_path, 'supper_vector_machine_model.pkl'), 'rb'))
+    #
+    # j = 2009
+    #
     # lime_explanation(training, testing, 'default', nn, 'black_box', j, False, False)
     # lime_explanation(training, testing, 'default', gb, 'log_reg', j, True, False)
-    lime_explanation(training, testing, 'default', svc, 'random_f', j, True, False)
-
+    # lime_explanation(training, testing, 'default', svc, 'random_f', j, True, False)
+    #
     # shap_explanation(training, testing, 'default', nn, "kernel", "nn", j, False)
     # shap_explanation(training, testing, 'default', gb, "kernel", "nn", j, False)
-    shap_explanation(training, testing, 'default', svc, "kernel", "svc", j, False)
+    # shap_explanation(training, testing, 'default', svc, "kernel", "svc", j, False)
+
+    surr_pred = pd.read_csv(Path(global_surrogate_results_path, "predictions_with_biggest_logreg_difference.csv"))
+    surr_pred1 = pd.read_csv(Path(global_surrogate_results_path, "predictions_with_biggest_rf_difference.csv"))
+    worst_surrogate_obs_rf = [i for i in surr_pred1.iloc[:3, 0]]
+    print(worst_surrogate_obs_rf)
 
 
 if __name__ == '__main__':

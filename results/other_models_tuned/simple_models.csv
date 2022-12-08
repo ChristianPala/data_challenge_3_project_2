@@ -1,0 +1,4 @@
+model,f1_score
+decision_tree,0.4860759493670886
+knn,0.4727272727272727
+logistic_regression,0.47282608695652173
