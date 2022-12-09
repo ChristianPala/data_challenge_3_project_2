@@ -25,8 +25,7 @@ from config import balanced_datasets_path, neural_tuned_results_path
 from config import scaled_datasets_path, undersampled_datasets_path
 
 
-def load_best_dataset(path: Path = Path(balanced_datasets_path, "undersampled",
-                                        "minmax_scaler_scaling_most_frequent_imputation")) \
+def load_best_dataset(path: Path = Path(balanced_datasets_path, "smote_enn", "robust_scaler_scaling_drop",)) \
         -> tuple[pd.DataFrame, pd.Series, pd.DataFrame, pd.Series]:
     """
     This function loads the best dataset from the balanced folder.
@@ -46,7 +45,9 @@ def load_best_dataset(path: Path = Path(balanced_datasets_path, "undersampled",
 
 def create_model_with_layers(model: Model, layers: list[Layer], dropout: float = 0.1,
                              optimizer: Optimizer = Adam(), loss: str = 'binary_crossentropy',
-                             metrics: list[str] = ['accuracy'], lr=0.001) -> Model:
+                             metrics: list[str] = ['accuracy']) -> Model:
+    if metrics is None:
+        metrics = ['accuracy']
     compiled_model = model
     for i in range(len(layers)):
         compiled_model.add(layers[i])
@@ -72,13 +73,13 @@ def generate_model(trial: Trial) -> Model:
     :return: The model with the hyperparameters tuned by Optuna
     """
     
-    # Generate layers between 4 to 6 layers according to optuna's trial
-    layers_count = trial.suggest_int("Layers Count", 4, 6)
+    # Generate layers between 1 and 6 layers according to Optuna's trial
+    layers_count = trial.suggest_int("Layers Count", 1, 6)
     layers = suggest_layers(trial, layers_count)
 
     # Optuna chooses an optimizer
     opt_choice = trial.suggest_categorical("optimizer", ["adam", "rmsprop", "sgd"])
-    learning_rate = trial.suggest_float("learning_rate", 0.0001, 0.01)
+    learning_rate = trial.suggest_float("learning_rate", 0.00001, 0.1)
     optimizer = get_optimizer(opt_choice, learning_rate)
 
     # Define the base model and the input dimension
@@ -100,7 +101,7 @@ def suggest_layers(trial: Trial, count) -> list[Layer]:
     """
     layers = []
     for i in range(count):
-        neurons = trial.suggest_int("layer_{}".format(i), 10, 200)
+        neurons = trial.suggest_int("layer_{}".format(i), 10, 300)
         activation = trial.suggest_categorical("activation_layer_{}".format(i), ["relu", "tanh"])
         if i == 0:
             layers.append(Dense(neurons, activation=activation, input_dim=23))
@@ -135,7 +136,7 @@ def objective(trial: Trial):
     # define the model:
     model = generate_model(trial=trial)
 
-    # use f1 score with cross validation:
+    # use cross validation:
     cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
     cv_scores = []
     for train_index, test_index in cv.split(x_train, y_train):

@@ -11,7 +11,7 @@ import shap
 import matplotlib.pyplot as plt
 # Ignore deprecated warnings:
 import warnings
-
+# Modelling:
 from keras import Model
 from sklearn.ensemble import GradientBoostingClassifier
 from sklearn.svm import SVC
@@ -20,13 +20,13 @@ from sklearn.svm import SVC
 from config import final_models_path, final_test_csv_path, shap_results_path, final_train_csv_path, final_val_csv_path
 
 # Number of samples the kernel explainer will use to train and explain the model:
-NR_SAMPLES = 100
+NR_SAMPLES = 10
 # Tensorflow logging:
 warnings.filterwarnings('ignore')
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
 
-def load_data() -> (pd.DataFrame, pd.DataFrame):
+def load_data() -> (pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame):
     """
     Function to load the data for the explainability analysis with the SHAP library.
     """
@@ -36,10 +36,13 @@ def load_data() -> (pd.DataFrame, pd.DataFrame):
     # concatenate the training and validation data:
     train_df = pd.concat([train_df, val_df], axis=0)
     x_train = train_df.drop("default", axis=1)
+    y_train = train_df["default"]
     # Load the test data:
     test_df = pd.read_csv(final_test_csv_path)
     x_test = test_df.drop("default", axis=1)
-    return x_train, x_test
+    y_test = test_df["default"]
+
+    return x_train, x_test, y_train, y_test
 
 
 def load_models() -> (GradientBoostingClassifier, Model, SVC):
@@ -54,21 +57,18 @@ def load_models() -> (GradientBoostingClassifier, Model, SVC):
     return gb_model, cnn_model, svm_model
 
 
-def create_explainers(x_train: pd.DataFrame,
+def create_explainers(x_train: pd.DataFrame, x_train_sample: pd.DataFrame,
                       gb_model: GradientBoostingClassifier, cnn_model: Model, svc_model: SVC) \
         -> (shap.KernelExplainer, shap.KernelExplainer, shap.KernelExplainer):
     """
     Function to create the SHAP explainer objects for the three models.
     @param x_train: the training data
+    @param x_train_sample: a sample of the training data
     @param gb_model: the gradient boosting model
     @param cnn_model: the convoluted neural network model
     @param svc_model: the support vector machine model
     :return: the explainer objects
     """
-
-    # sample a portion of the training data to train the kernel explainer, for time efficiency:
-    x_train_sample = shap.sample(x_train, nsamples=NR_SAMPLES, random_state=42)
-
     # Create the explainers:
     gb_explainer = shap.TreeExplainer(gb_model)
     cnn_explainer = shap.KernelExplainer(cnn_model.predict, x_train_sample)
@@ -84,6 +84,8 @@ def save_shap_feature_importance(model: str, shap_values: list, x_test: pd.DataF
     @param x_test: the test data
     """
     shap.summary_plot(shap_values, x_test, plot_type="bar", feature_names=x_test.columns, show=False)
+    # remove the legend:
+    plt.legend().remove()
     plt.title(f"{model} Feature Importance")
     # give the title a bit more space:
     plt.subplots_adjust(top=0.9)
@@ -97,7 +99,7 @@ def save_summary_plot(model: str, shap_values: list, x_test: pd.DataFrame) -> No
     @param shap_values: the shap values for the model
     @param x_test: the test data
     """
-    shap.summary_plot(shap_values, x_test, show=False)
+    shap.summary_plot(shap_values, x_test, feature_names=x_test.columns, show=False, )
     plt.title(f"{model} Summary Plot")
     # give the title a bit more space:
     plt.subplots_adjust(top=0.9)
@@ -109,22 +111,33 @@ def global_shap_main() -> None:
     Function to globally explain the final models with the SHAP library.
     """
     # Load the data:
-    x_train, x_test = load_data()
+    x_train, x_test, y_train, y_test = load_data()
     # Load the models:
     gb_model, cnn_model, svm_model = load_models()
+    # For time efficiency train and test the cnn and svm models on a subset of the data:
+    x_train_sample = x_train.sample(NR_SAMPLES)
+    x_test_sample = x_test.sample(NR_SAMPLES)
+    # Retrain the models on the sampled data:
+    cnn_model.fit(x_train, y_train, epochs=10, verbose=0)
+    svm_model.fit(x_train, y_train)
+
     # Create the explainers:
-    gb_explainer, cnn_explainer, svm_explainer = create_explainers(x_train, gb_model, cnn_model, svm_model)
-    # Sample a portion of the test data to explain the models, for time efficiency:
-    x_test_sample = shap.sample(x_test, nsamples=NR_SAMPLES, random_state=42)
+    gb_explainer, cnn_explainer, svm_explainer = create_explainers(x_train, x_train_sample, gb_model, cnn_model,
+                                                                   svm_model)
     # Explain the models:
     gb_shap_values = gb_explainer.shap_values(x_test)
-    cnn_shap_values = cnn_explainer.shap_values(x_test_sample.values)
-    svm_shap_values = svm_explainer.shap_values(x_test_sample.values)
+    cnn_shap_values = cnn_explainer.shap_values(x_test_sample)
+    svm_shap_values = svm_explainer.shap_values(x_test_sample)
 
     # save the plots:
     save_shap_feature_importance("Gradient Boosting", gb_shap_values, x_test)
     save_shap_feature_importance("Convoluted Neural Network", cnn_shap_values, x_test_sample)
     save_shap_feature_importance("Support Vector Machine", svm_shap_values, x_test_sample)
+
+    # save the summary plots:
+    save_summary_plot("Gradient Boosting", gb_shap_values, x_test)
+    save_summary_plot("Convoluted Neural Network", cnn_shap_values, x_test_sample)
+    save_summary_plot("Support Vector Machine", svm_shap_values, x_test_sample)
 
 
 # Driver Code:
