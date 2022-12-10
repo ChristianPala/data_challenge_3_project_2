@@ -12,7 +12,8 @@ from keras.models import load_model
 from sklearn.exceptions import ConvergenceWarning
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import mean_squared_error
-# experimental tuning with halvingrandomsearchcv:
+# experimental tuning with halvingrandomsearchcv: see
+# https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.HalvingRandomSearchCV.html
 from sklearn.experimental import enable_halving_search_cv  # NOQA
 from sklearn.model_selection import HalvingRandomSearchCV
 from sklearn.ensemble import RandomForestClassifier
@@ -62,13 +63,13 @@ def load_data() -> tuple:
     return x_train, y_train, x_test, y_test
 
 
-def import_black_box_model(x_train: np.ndarray, y_train: np.ndarray) -> Model:
+def import_black_box_model() -> Model:
     """
-    This function imports the black box model and trains it.
-    @param x_train: np.ndarray: the training data.
-    @param y_train: np.ndarray: the target data.
+    This function imports the black box model from the final_neural_network_path.
     :return: keras.Model: the black box model.
     """
+    # The analysis will be done on the final neural network model, change this if you want to
+    # use a different model, like gradient boosting or svm:
     black_box_model = pd.read_pickle(final_neural_network_path)
     return black_box_model
 
@@ -103,6 +104,8 @@ def tune_surrogate_models_for_black_box_model(black_box_model: Model) \
     # create and train the surrogate model:
     surrogate_model_log, surrogate_model_rf = LogisticRegression(random_state=42, max_iter=10000), \
                                               RandomForestClassifier(random_state=42)
+
+    # We perform a quick tuning of the hyperparameters of the surrogate models:
     params_log = {'C': [10, 30, 50, 70, 100]}
 
     surrogate_model_log = HalvingRandomSearchCV(surrogate_model_log, params_log, cv=5, n_jobs=4, verbose=0,
@@ -314,7 +317,7 @@ def global_surrogate_main() -> None:
     x_train, y_train, x_test, y_test = load_data()
 
     # Import the black box model:
-    black_box_model = import_black_box_model(np.array(x_train), np.array(y_train))
+    black_box_model = import_black_box_model()
 
     # Create and train the surrogate model:
     surrogate_models = tune_surrogate_models_for_black_box_model(black_box_model)

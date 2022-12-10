@@ -50,7 +50,7 @@ final_train_csv_path: Path = Path(balanced_datasets_path, "smote_enn", "robust_s
 final_val_csv_path: Path = Path(balanced_datasets_path, "smote_enn", "robust_scaler_scaling_drop",
                                 "final_validation.csv")
 # ---------------------------------------------------------------------------------------------------
-final_neural_network_path: Path = Path(final_models_path, "cnn_model.pickle")
+final_neural_network_path: Path = Path(final_models_path, "cnn_model.pkl")
 # ---------------------------------------------------------------------------------------------------
 global_surrogate_results_path: Path = Path(results_path, "global_surrogate_results")
 global_surrogate_models_path: Path = Path(global_surrogate_results_path, "models")
