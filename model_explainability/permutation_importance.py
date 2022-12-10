@@ -146,7 +146,7 @@ def permutation_importance_main() -> None:
     testing = pd.read_csv(final_test_csv_path)
 
     # load the convoluted neural network model:
-    cnn_model = pd.read_pickle(Path(final_models_path, 'cnn_model.pkl'), )
+    cnn_model = pd.read_pickle(Path(final_models_path, 'cnn_model_untuned.pkl'), )
 
     # load the gradient boosting model:
     gb_model = pd.read_pickle(Path(final_models_path, 'gradient_boosting_model.pkl'))

@@ -52,7 +52,7 @@ def load_models() -> (GradientBoostingClassifier, Model, SVC):
     """
     # Load the trained models:
     gb_model = pd.read_pickle(Path(final_models_path, "gradient_boosting_model.pkl"))
-    cnn_model = pd.read_pickle(Path(final_models_path, "cnn_model.pkl"))
+    cnn_model = pd.read_pickle(Path(final_models_path, "cnn_model_untuned.pkl"))
     svm_model = pd.read_pickle(Path(final_models_path, "support_vector_machine_model.pkl"))
     return gb_model, cnn_model, svm_model
 

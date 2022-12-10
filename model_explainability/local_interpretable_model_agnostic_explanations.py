@@ -359,7 +359,7 @@ def lime_and_shap_main() -> None:
         lime_explanation(training, testing, 'default', rf, 'surrogate_random_f', o)
 
     # load the pickled models:
-    cnn_model = pd.read_pickle(Path(final_models_path, 'cnn_model.pkl'))
+    cnn_model = pd.read_pickle(Path(final_models_path, 'cnn_model_untuned.pkl'))
     gb_model = pd.read_pickle(Path(final_models_path, 'gradient_boosting_model.pkl'))
     svc_model = pd.read_pickle(Path(final_models_path, 'support_vector_machine_model.pkl'))
 

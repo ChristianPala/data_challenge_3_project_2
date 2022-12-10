@@ -197,42 +197,28 @@ def evaluate_best_model() -> None:
     """
     """
     Best params with 30 trials:
-    Layers Count': 6, 
-    layer_0': 152, 'activation_layer_0': 'relu', 'filters_layer_0': 168, 'kernel_size_layer_0': 10, 'pool_size_layer_0': 9, '
-    layer_1': 149, 'activation_layer_1': 'relu', 
-    layer_2': 72, 'activation_layer_2': 'tanh',  
-    layer_3': 121, 'activation_layer_3': 'tanh',
-    layer_4': 164, 'activation_layer_4': 'relu', 
-    'layer_5': 24, 'activation_layer_5': 'tanh',
-    'optimizer': 'sgd', 'learning_rate': 0.009833786177866802, 
-    'epochs': 52, 'batch_size': 128
+    Layers Count': 2, 
+    layer_0': 10, 'activation_layer_0': 'tanh', 'filters_layer_0': 114, 
+    kernel_size_layer_0': 8, 'pool_size_layer_0': 6, '
+    layer_1': 52, 'activation_layer_1': 'tanh'
+    'optimizer': 'rmsprop', 'learning_rate': 0.0030372259351153204, 'epochs': 54, 'batch_size': 55
+    Best is trial 14 with value: 0.9685908675193786.
+    
 
     """
     # load the best dataset:
     x_train, y_train, x_val, y_val = load_best_dataset()
     # create the model with the best parameters:
     model = Sequential()
-    model = create_model_with_layers(model, layers=[Conv1D(filters=168, kernel_size=10,
-                                                           activation='relu', input_shape=(26, 1)),
-                                                    MaxPooling1D(pool_size=9),
-                                                    Flatten(),
-                                                    Dropout(0.1),
-                                                    Dense(152, activation='relu'),
-                                                    Dropout(0.1),
-                                                    Dense(149, activation='relu'),
-                                                    Dropout(0.1),
-                                                    Dense(72, activation='tanh'),
-                                                    Dropout(0.1),
-                                                    Dense(121, activation='tanh'),
-                                                    Dropout(0.1),
-                                                    Dense(164, activation='relu'),
-                                                    Dropout(0.1),
-                                                    Dense(24, activation='tanh'),
-                                                    Dropout(0.1),
-                                                    Dense(1, activation='sigmoid')],
-                                     optimizer=SGD(learning_rate=0.009833786177866802))
+    model = create_model_with_layers(model, layers=[
+                                            Conv1D(filters=114, kernel_size=8, activation='tanh', input_shape=(26, 1)),
+                                            MaxPooling1D(pool_size=6),
+                                            Flatten(),
+                                            Dense(52, activation='tanh'),
+                                            Dense(1, activation='sigmoid')
+                                        ], optimizer=RMSprop(learning_rate=0.0030372259351153204))
     # fit the model:
-    model.fit(x_train, y_train, epochs=52, batch_size=128, verbose=0)
+    model.fit(x_train, y_train, epochs=54, batch_size=55, verbose=0)
     # evaluate the model on the f1 score:
     y_pred = model.predict(x_val)
     y_pred = (y_pred > 0.5)
@@ -283,5 +269,5 @@ def main() -> None:
 
 
 if __name__ == '__main__':
-    main()
-    # evaluate_best_model()
+    # main()
+    evaluate_best_model()

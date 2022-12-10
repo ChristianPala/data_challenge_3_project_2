@@ -6,16 +6,20 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
-from keras import Model
+from keras import Model, Sequential
+from keras.layers import Conv1D, MaxPooling1D, Flatten, Dense
+from keras.optimizers import RMSprop
 # Modelling:
 from sklearn.ensemble import GradientBoostingClassifier
 from sklearn.metrics import f1_score, confusion_matrix, ConfusionMatrixDisplay
-from modelling.neural_network import fit_model, create_convolutional_model
+from tuning.convolutional_neural_network_tuner_Optuna import create_model_with_layers
+
 from sklearn.svm import SVC
 from sklearn.metrics import classification_report
 
 # Global variables:
 from config import final_train_csv_path, final_val_csv_path, final_models_path, final_test_csv_path
+from tuning.convolutional_neural_network_tuner_Optuna import create_model_with_layers
 
 final_models_path.mkdir(parents=True, exist_ok=True)
 
@@ -42,12 +46,22 @@ def neural_network_model(x_train: np.ndarray, y_train: np.ndarray) -> Model:
     This function creates a neural network model.
     :return: Model: the model.
     """
-    # create the model:
-    model = create_convolutional_model(x_train.shape[1])  # Todo add all parameters from the tuning results
+    # create the tuned model:
+    model = Sequential()
+    model = create_model_with_layers(model, layers=[
+                                            Conv1D(filters=114, kernel_size=8, activation='tanh', input_shape=(26, 1)),
+                                            MaxPooling1D(pool_size=6),
+                                            Flatten(),
+                                            Dense(52, activation='tanh'),
+                                            Dense(1, activation='sigmoid')
+                                        ], optimizer=RMSprop(learning_rate=0.0030372259351153204))
     # fit the model:
-    model = fit_model(model, x_train, y_train)
-    # save the pickle of the model:
+    model.fit(x_train, y_train, epochs=54, batch_size=55, verbose=0)
+
+    # save the model as a .h5 file and as a pickle file:
+    model.save(Path(final_models_path, "cnn_model.h5"))
     pd.to_pickle(model, Path(final_models_path, "cnn_model.pkl"))
+
     return model
 
 
