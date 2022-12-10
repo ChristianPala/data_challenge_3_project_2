@@ -328,7 +328,7 @@ def shap_explanation(training: pd.DataFrame, testing: pd.DataFrame, target: str,
         explainer = shap.KernelExplainer(model, x_train.iloc[:50, :], link="logit")
         shap_values = explainer.shap_values(x_test)
 
-        shap.force_plot(explainer.expected_value[1], shap_values[1][j, :], x_test.iloc[j, :], features=x_test.columns,
+        shap.force_plot(explainer.expected_value[1], shap_values[1][j, :], x_test.iloc[j, :],
                         link="logit", matplotlib=True, show=False)
 
         plt.savefig(Path(shap_results_path, f'shap_force_plot_obs_{j}_{model_name}.png'), dpi=300,
@@ -366,7 +366,7 @@ def shap_explanation(training: pd.DataFrame, testing: pd.DataFrame, target: str,
                               plot_type="violin", show=False)
 
             # save the plot:
-            plt.savefig(Path(shap_results_path, f'shap_summary_plot_class_default_{model_name}.png'))
+            plt.savefig(Path(shap_results_path, f'shap_summary_plot_violin_{model_name}.png'))
             plt.close()
 
 

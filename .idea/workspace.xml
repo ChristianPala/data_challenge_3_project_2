@@ -4,47 +4,14 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="4d447eeb-afe4-4c39-a29d-18c581e29792" name="Changes" comment="Added permutation feature importance.">
+    <list default="true" id="4d447eeb-afe4-4c39-a29d-18c581e29792" name="Changes" comment="Explanation results.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/config.py" beforeDir="false" afterPath="$PROJECT_DIR$/config.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/model_explainability/final_models/classification_report.txt" beforeDir="false" afterPath="$PROJECT_DIR$/model_explainability/final_models/classification_report.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/model_explainability/final_models/cnn_model.pkl" beforeDir="false" afterPath="$PROJECT_DIR$/model_explainability/final_models/cnn_model.pkl" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/model_explainability/final_models/gb_confusion_matrix.png" beforeDir="false" afterPath="$PROJECT_DIR$/model_explainability/final_models/gb_confusion_matrix.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/model_explainability/final_models/gradient_boosting_model.pkl" beforeDir="false" afterPath="$PROJECT_DIR$/model_explainability/final_models/gradient_boosting_model.pkl" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/model_explainability/final_models/nn_confusion_matrix.png" beforeDir="false" afterPath="$PROJECT_DIR$/model_explainability/final_models/nn_confusion_matrix.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/model_explainability/final_models/support_vector_machine_model.pkl" beforeDir="false" afterPath="$PROJECT_DIR$/model_explainability/final_models/support_vector_machine_model.pkl" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/model_explainability/final_models/svc_confusion_matrix.png" beforeDir="false" afterPath="$PROJECT_DIR$/model_explainability/final_models/svc_confusion_matrix.png" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/model_explainability/local_interpretable_model_agnostic_explanations.py" beforeDir="false" afterPath="$PROJECT_DIR$/model_explainability/local_interpretable_model_agnostic_explanations.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/model_explainability/xai.py" beforeDir="false" afterPath="$PROJECT_DIR$/model_explainability/xai.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/results/neural_network_balanced/models/robust_scaler_scaling_drop.h5" beforeDir="false" afterPath="$PROJECT_DIR$/results/neural_network_balanced/models/robust_scaler_scaling_drop.h5" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/results/neural_network_baseline/models/project_2_dataset_robust_scaler_scaling_drop_augmented_convolutional.h5" beforeDir="false" afterPath="$PROJECT_DIR$/results/neural_network_baseline/models/project_2_dataset_robust_scaler_scaling_drop_augmented_convolutional.h5" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/results/neural_network_baseline/models/project_2_dataset_robust_scaler_scaling_drop_augmented_dense.h5" beforeDir="false" afterPath="$PROJECT_DIR$/results/neural_network_baseline/models/project_2_dataset_robust_scaler_scaling_drop_augmented_dense.h5" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/results/neural_network_baseline/neural_network_convoluted_project_2_dataset_robust_scaler_scaling_drop_augmented.txt" beforeDir="false" afterPath="$PROJECT_DIR$/results/neural_network_baseline/neural_network_convoluted_project_2_dataset_robust_scaler_scaling_drop_augmented.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/results/neural_network_baseline/neural_network_dense_project_2_dataset_robust_scaler_scaling_drop_augmented.txt" beforeDir="false" afterPath="$PROJECT_DIR$/results/neural_network_baseline/neural_network_dense_project_2_dataset_robust_scaler_scaling_drop_augmented.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/results/partial_dependence_results/GradientBoostingClassifier/age.png" beforeDir="false" afterPath="$PROJECT_DIR$/results/partial_dependence_results/GradientBoostingClassifier/age.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/results/partial_dependence_results/GradientBoostingClassifier/bill_amt_sep.png" beforeDir="false" afterPath="$PROJECT_DIR$/results/partial_dependence_results/GradientBoostingClassifier/bill_amt_sep.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/results/partial_dependence_results/GradientBoostingClassifier/education.png" beforeDir="false" afterPath="$PROJECT_DIR$/results/partial_dependence_results/GradientBoostingClassifier/education.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/results/partial_dependence_results/GradientBoostingClassifier/gender.png" beforeDir="false" afterPath="$PROJECT_DIR$/results/partial_dependence_results/GradientBoostingClassifier/gender.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/results/partial_dependence_results/GradientBoostingClassifier/limit_bal.png" beforeDir="false" afterPath="$PROJECT_DIR$/results/partial_dependence_results/GradientBoostingClassifier/limit_bal.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/results/partial_dependence_results/GradientBoostingClassifier/marriage.png" beforeDir="false" afterPath="$PROJECT_DIR$/results/partial_dependence_results/GradientBoostingClassifier/marriage.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/results/partial_dependence_results/GradientBoostingClassifier/pay_stat_apr.png" beforeDir="false" afterPath="$PROJECT_DIR$/results/partial_dependence_results/GradientBoostingClassifier/pay_stat_apr.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/results/partial_dependence_results/GradientBoostingClassifier/pay_stat_aug.png" beforeDir="false" afterPath="$PROJECT_DIR$/results/partial_dependence_results/GradientBoostingClassifier/pay_stat_aug.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/results/partial_dependence_results/GradientBoostingClassifier/pay_stat_jul.png" beforeDir="false" afterPath="$PROJECT_DIR$/results/partial_dependence_results/GradientBoostingClassifier/pay_stat_jul.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/results/partial_dependence_results/GradientBoostingClassifier/pay_stat_jun.png" beforeDir="false" afterPath="$PROJECT_DIR$/results/partial_dependence_results/GradientBoostingClassifier/pay_stat_jun.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/results/partial_dependence_results/GradientBoostingClassifier/pay_stat_may.png" beforeDir="false" afterPath="$PROJECT_DIR$/results/partial_dependence_results/GradientBoostingClassifier/pay_stat_may.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/results/partial_dependence_results/GradientBoostingClassifier/pay_stat_sep.png" beforeDir="false" afterPath="$PROJECT_DIR$/results/partial_dependence_results/GradientBoostingClassifier/pay_stat_sep.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/results/partial_dependence_results/SVC/age.png" beforeDir="false" afterPath="$PROJECT_DIR$/results/partial_dependence_results/SVC/age.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/results/partial_dependence_results/SVC/education.png" beforeDir="false" afterPath="$PROJECT_DIR$/results/partial_dependence_results/SVC/education.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/results/partial_dependence_results/SVC/gender.png" beforeDir="false" afterPath="$PROJECT_DIR$/results/partial_dependence_results/SVC/gender.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/results/partial_dependence_results/SVC/limit_bal.png" beforeDir="false" afterPath="$PROJECT_DIR$/results/partial_dependence_results/SVC/limit_bal.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/results/partial_dependence_results/SVC/marriage.png" beforeDir="false" afterPath="$PROJECT_DIR$/results/partial_dependence_results/SVC/marriage.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/results/partial_dependence_results/SVC/pay_stat_apr.png" beforeDir="false" afterPath="$PROJECT_DIR$/results/partial_dependence_results/SVC/pay_stat_apr.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/results/partial_dependence_results/SVC/pay_stat_aug.png" beforeDir="false" afterPath="$PROJECT_DIR$/results/partial_dependence_results/SVC/pay_stat_aug.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/results/partial_dependence_results/SVC/pay_stat_jul.png" beforeDir="false" afterPath="$PROJECT_DIR$/results/partial_dependence_results/SVC/pay_stat_jul.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/results/partial_dependence_results/SVC/pay_stat_jun.png" beforeDir="false" afterPath="$PROJECT_DIR$/results/partial_dependence_results/SVC/pay_stat_jun.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/results/partial_dependence_results/SVC/pay_stat_may.png" beforeDir="false" afterPath="$PROJECT_DIR$/results/partial_dependence_results/SVC/pay_stat_may.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/results/partial_dependence_results/SVC/pay_stat_sep.png" beforeDir="false" afterPath="$PROJECT_DIR$/results/partial_dependence_results/SVC/pay_stat_sep.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/results/results_summary.txt" beforeDir="false" afterPath="$PROJECT_DIR$/results/results_summary.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/results/lime_results/lime_report_obs_5_gradientboostingclassifier.html" beforeDir="false" afterPath="$PROJECT_DIR$/results/lime_results/lime_report_obs_5_gradientboostingclassifier.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/results/lime_results/lime_report_obs_5_svc.html" beforeDir="false" afterPath="$PROJECT_DIR$/results/lime_results/lime_report_obs_5_svc.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/results/shap_results/shap_decision_plot_obs_5_sequential.png" beforeDir="false" afterPath="$PROJECT_DIR$/results/shap_results/shap_decision_plot_obs_5_sequential.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/results/shap_results/shap_force_plot_obs_5_sequential.png" beforeDir="false" afterPath="$PROJECT_DIR$/results/shap_results/shap_force_plot_obs_5_sequential.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/results/shap_results/shap_waterfall_plot_obs_5_sequential.png" beforeDir="false" afterPath="$PROJECT_DIR$/results/shap_results/shap_waterfall_plot_obs_5_sequential.png" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -94,7 +61,7 @@
       <recent name="C:\Users\loddo\Desktop\GitRepo\data_challenge_3_project_2\model_explainability" />
     </key>
   </component>
-  <component name="RunManager" selected="Python.xai">
+  <component name="RunManager" selected="Python.local_interpretable_model_agnostic_explanations">
     <configuration name="create_final_models" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="data_challenge_3_project_2" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -207,8 +174,8 @@
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="Python.xai" />
         <item itemvalue="Python.local_interpretable_model_agnostic_explanations" />
+        <item itemvalue="Python.xai" />
         <item itemvalue="Python.main" />
         <item itemvalue="Python.create_final_models" />
         <item itemvalue="Python.xai_placeholder" />
@@ -247,7 +214,7 @@
       <workItem from="1670247407275" duration="446000" />
       <workItem from="1670255950584" duration="7530000" />
       <workItem from="1670318893431" duration="6610000" />
-      <workItem from="1670401143295" duration="19844000" />
+      <workItem from="1670401143295" duration="35169000" />
     </task>
     <task id="LOCAL-00001" summary="Initial LIME implementation, not working.">
       <created>1669323224424</created>
@@ -284,7 +251,14 @@
       <option name="project" value="LOCAL" />
       <updated>1669895678438</updated>
     </task>
-    <option name="localTasksCounter" value="6" />
+    <task id="LOCAL-00006" summary="Explanation results.">
+      <created>1670531390340</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1670531390340</updated>
+    </task>
+    <option name="localTasksCounter" value="7" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -307,7 +281,8 @@
     <MESSAGE value="Started implementing lime local explanation" />
     <MESSAGE value="Setup for global explanations" />
     <MESSAGE value="Added permutation feature importance." />
-    <option name="LAST_COMMIT_MESSAGE" value="Added permutation feature importance." />
+    <MESSAGE value="Explanation results." />
+    <option name="LAST_COMMIT_MESSAGE" value="Explanation results." />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/data_challenge_3_project_2$xai.coverage" NAME="xai Coverage Results" MODIFIED="1670446846651" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/model_explainability" />
@@ -316,7 +291,7 @@
     <SUITE FILE_PATH="coverage/data_challenge_3_project_2$create_final_models.coverage" NAME="create_final_models Coverage Results" MODIFIED="1670321646639" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/model_explainability" />
     <SUITE FILE_PATH="coverage/data_challenge_3_project_2$xai_placeholder.coverage" NAME="xai_placeholder Coverage Results" MODIFIED="1669928773976" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/model_explainability" />
     <SUITE FILE_PATH="coverage/data_challenge_3_project_2$trees.coverage" NAME="trees Coverage Results" MODIFIED="1669896162759" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/modelling" />
-    <SUITE FILE_PATH="coverage/data_challenge_3_project_2$local_interpretable_model_agnostic_explanations.coverage" NAME="local_interpretable_model_agnostic_explanations Coverage Results" MODIFIED="1670433082438" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/model_explainability" />
+    <SUITE FILE_PATH="coverage/data_challenge_3_project_2$local_interpretable_model_agnostic_explanations.coverage" NAME="local_interpretable_model_agnostic_explanations Coverage Results" MODIFIED="1670531056100" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/model_explainability" />
     <SUITE FILE_PATH="coverage/data_challenge_3_project_2$local_model_agnostic_explanations.coverage" NAME="local_model_agnostic_explanations Coverage Results" MODIFIED="1670065056734" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/model_explainability" />
   </component>
 </project>
