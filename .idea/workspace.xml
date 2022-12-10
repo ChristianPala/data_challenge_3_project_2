@@ -7,11 +7,6 @@
     <list default="true" id="4d447eeb-afe4-4c39-a29d-18c581e29792" name="Changes" comment="Explanation results.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/model_explainability/local_interpretable_model_agnostic_explanations.py" beforeDir="false" afterPath="$PROJECT_DIR$/model_explainability/local_interpretable_model_agnostic_explanations.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/results/lime_results/lime_report_obs_5_gradientboostingclassifier.html" beforeDir="false" afterPath="$PROJECT_DIR$/results/lime_results/lime_report_obs_5_gradientboostingclassifier.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/results/lime_results/lime_report_obs_5_svc.html" beforeDir="false" afterPath="$PROJECT_DIR$/results/lime_results/lime_report_obs_5_svc.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/results/shap_results/shap_decision_plot_obs_5_sequential.png" beforeDir="false" afterPath="$PROJECT_DIR$/results/shap_results/shap_decision_plot_obs_5_sequential.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/results/shap_results/shap_force_plot_obs_5_sequential.png" beforeDir="false" afterPath="$PROJECT_DIR$/results/shap_results/shap_force_plot_obs_5_sequential.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/results/shap_results/shap_waterfall_plot_obs_5_sequential.png" beforeDir="false" afterPath="$PROJECT_DIR$/results/shap_results/shap_waterfall_plot_obs_5_sequential.png" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -215,6 +210,8 @@
       <workItem from="1670255950584" duration="7530000" />
       <workItem from="1670318893431" duration="6610000" />
       <workItem from="1670401143295" duration="35169000" />
+      <workItem from="1670677683298" duration="12000" />
+      <workItem from="1670677765856" duration="7000" />
     </task>
     <task id="LOCAL-00001" summary="Initial LIME implementation, not working.">
       <created>1669323224424</created>

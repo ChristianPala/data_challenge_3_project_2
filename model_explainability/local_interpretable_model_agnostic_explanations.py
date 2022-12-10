@@ -162,25 +162,25 @@ def lime_explanation(training: pd.DataFrame, testing: pd.DataFrame, target: str,
             explanation = explainer.explain_instance(x_test.iloc[tp_idx], predict_use_keras, top_labels=1)
 
             # save the html file
-            explanation.save_to_file(Path(lime_results_path, 'lime_report_tp_pred.html'))
+            explanation.save_to_file(Path(lime_results_path, f'lime_report_tp_pred_{tp_idx}_{model_name}.html'))
 
             # explain the true negative predicted instance
             explanation = explainer.explain_instance(x_test.iloc[tn_idx], predict_use_keras, top_labels=1)
 
             # save the html file
-            explanation.save_to_file(Path(lime_results_path, 'lime_report_tn_pred.html'))
+            explanation.save_to_file(Path(lime_results_path, f'lime_report_tn_pred_{tn_idx}_{model_name}.html'))
 
             # explain the false positive predicted instance
             explanation = explainer.explain_instance(x_test.iloc[fp_idx], predict_use_keras, top_labels=1)
 
             # save the html file
-            explanation.save_to_file(Path(lime_results_path, 'lime_report_fp_pred.html'))
+            explanation.save_to_file(Path(lime_results_path, f'lime_report_fp_pred_{fp_idx}_{model_name}.html'))
 
             # explain the false negative predicted instance
             explanation = explainer.explain_instance(x_test.iloc[fn_idx], predict_use_keras, top_labels=1)
 
             # save the html file
-            explanation.save_to_file(Path(lime_results_path, 'lime_report_fn_pred.html'))
+            explanation.save_to_file(Path(lime_results_path, f'lime_report_fn_pred_{fn_idx}_{model_name}.html'))
 
 
 def shap_explanation(training: pd.DataFrame, testing: pd.DataFrame, target: str, model: ...,
@@ -209,21 +209,16 @@ def shap_explanation(training: pd.DataFrame, testing: pd.DataFrame, target: str,
     y_test = testing[target]
 
     if explainer_type == "tree":
-        # data to train both explainers on
+        # data to train explainer on
         background = maskers.Independent(x_train)
 
         # y_pred = model.predict(x_test)
 
         # initialize the shapley values:
         explainer = shap.TreeExplainer(model, background)
-        shap_values = explainer.shap_values(x_test, check_additivity=False)
+        shap_values = explainer.shap_values(x_test.iloc[j, :], check_additivity=False)
 
-        # Code to be used with random forest
-        # shap.waterfall_plot(shap.Explanation(values=shap_values[0][j],
-        #                                      base_values=explainer.expected_value[0], data=x_test.iloc[j],
-        #                                      feature_names=x_test.columns.tolist()), show=False)
-
-        shap.waterfall_plot(shap.Explanation(values=shap_values[j, :],
+        shap.waterfall_plot(shap.Explanation(values=shap_values,
                                              base_values=explainer.expected_value,
                                              data=x_test.iloc[j],
                                              feature_names=x_test.columns.tolist()), show=False)
@@ -236,62 +231,40 @@ def shap_explanation(training: pd.DataFrame, testing: pd.DataFrame, target: str,
         plt.savefig(Path(shap_results_path, f'shap_waterfall_obs_{j}_{model_name}.png'))
         plt.close()
 
-        # shap.force_plot(explainer.expected_value[1],
-        #                 shap_values[1][j, :],
-        #                 x_test.values[j, :],
-        #                 feature_names=x_test.columns,
-        #                 matplotlib=True, show=False)
-
+        # force plot of the observation
         shap.force_plot(explainer.expected_value,
-                        shap_values[j, :],
+                        shap_values,
                         x_test.values[j, :],
                         feature_names=x_test.columns,
                         matplotlib=True, show=False)
+
         plt.gcf().set_size_inches(30, 5)
+        # Save the plot
         plt.savefig(Path(shap_results_path, f'shap_force_plot_obs_{j}_{model_name}.png'), dpi=300,
                     bbox_inches='tight')
         plt.close()
 
-        if with_global_summary_plots:
-            # Bar plots to show the weights of both classes
-            shap.summary_plot(shap_values, x_test.values, plot_type="bar", class_names=['did not default', 'default'],
-                              feature_names=x_test.columns, show=False)
-
-            # save the plot:
-            plt.savefig(Path(shap_results_path, f'shap_summary_plot_{model_name}.png'))
-            plt.close()
-
-            # Plot to show the weights of the positive class
-            shap.summary_plot(shap_values[0], x_test.values, feature_names=x_test.columns,
-                              plot_type="violin", show=False)
-
-            # save the plot:
-            plt.savefig(Path(shap_results_path, f'shap_summary_plot_class_not_default_{model_name}.png'))
-            plt.close()
-
-            # Plot to show the weights of the negative class
-            shap.summary_plot(shap_values[1], x_test.values, feature_names=x_test.columns,
-                              plot_type="violin", show=False)
-
-            # save the plot:
-            plt.savefig(Path(shap_results_path, f'shap_summary_plot_class_default_{model_name}.png'))
-            plt.close()
-
     elif explainer_type == "kernel_cnn":
         # initialize the shapley values:
-        # explainer = shap.DeepExplainer((model.layers[0].input, model.layers[-1].output), background)
         explainer = shap.KernelExplainer(model, x_train.iloc[:50, :])
-        shap_values = explainer.shap_values(x_test.values)
+        shap_values = explainer.shap_values(x_test.iloc[j, :])
 
-        shap.force_plot(explainer.expected_value[0], shap_values[0][j], features=x_test.columns,
+        # force plot of the observation
+        shap.force_plot(explainer.expected_value[0],
+                        shap_values[0],
+                        features=x_test.columns,
                         matplotlib=True, show=False)
 
         plt.savefig(Path(shap_results_path, f'shap_force_plot_obs_{j}_{model_name}.png'), dpi=300,
                     bbox_inches='tight')
         plt.close()
 
-        shap.decision_plot(explainer.expected_value[0], shap_values[0][j], features=x_test.iloc[0, :],
-                           feature_names=x_test.columns.tolist(), show=False)
+        # Decision plot of the observation
+        shap.decision_plot(explainer.expected_value[0],
+                           shap_values[0],
+                           features=x_test.iloc[0, :],
+                           feature_names=x_test.columns.tolist(),
+                           show=False)
 
         # increase the size of the plot:
         plt.gcf().set_size_inches(10, 15)
@@ -299,44 +272,38 @@ def shap_explanation(training: pd.DataFrame, testing: pd.DataFrame, target: str,
                     bbox_inches='tight')
         plt.close()
 
-        shap.plots._waterfall.waterfall_legacy(explainer.expected_value[0], shap_values[0][j],
-                                               feature_names=x_test.columns, show=False)
+        # Waterfall plot
+        shap.plots._waterfall.waterfall_legacy(explainer.expected_value[0],
+                                               shap_values[0],
+                                               feature_names=x_test.columns,
+                                               show=False)
         # increase the size of the plot:
         plt.gcf().set_size_inches(10, 5)
         plt.savefig(Path(shap_results_path, f'shap_waterfall_plot_obs_{j}_{model_name}.png'), dpi=300,
                     bbox_inches='tight')
         plt.close()
-
-        if with_global_summary_plots:
-            shap.summary_plot(shap_values, x_test.values, plot_type="bar", class_names=['default'],
-                              feature_names=x_test.columns, show=False)
-
-            # save the plot:
-            plt.savefig(Path(shap_results_path, f'shap_summary_plot_{model_name}.png'))
-            plt.close()
-
-            # Plot to show the weights of the positive class
-            shap.summary_plot(shap_values, x_test.values, feature_names=x_test.columns,
-                              plot_type="violin", show=False)
-
-            # save the plot:
-            plt.savefig(Path(shap_results_path, f'shap_summary_plot_class_default_{model_name}.png'))
-            plt.close()
 
     elif explainer_type == "kernel_svc":
         # initialize the shapley values:
         explainer = shap.KernelExplainer(model, x_train.iloc[:50, :], link="logit")
-        shap_values = explainer.shap_values(x_test)
+        shap_values = explainer.shap_values(x_test.iloc[j, :])
 
-        shap.force_plot(explainer.expected_value[1], shap_values[1][j, :], x_test.iloc[j, :],
-                        link="logit", matplotlib=True, show=False)
+        # Force plot
+        shap.force_plot(explainer.expected_value[1],
+                        shap_values[1],
+                        features=x_test.columns,
+                        matplotlib=True, show=False)
 
-        plt.savefig(Path(shap_results_path, f'shap_force_plot_obs_{j}_{model_name}.png'), dpi=300,
-                    bbox_inches='tight')
+        # plt.gcf().set_size_inches(15, 10)
+        plt.savefig(Path(shap_results_path, f'shap_force_plot_obs_{j}_{model_name}.png'))
         plt.close()
 
-        shap.decision_plot(explainer.expected_value[1], shap_values[1][j, :], features=x_test.iloc[j, :],
-                           feature_names=x_test.columns.tolist(), show=False)
+        # Decision plot
+        shap.decision_plot(explainer.expected_value[1],
+                           shap_values[1],
+                           features=x_test.iloc[j, :],
+                           feature_names=x_test.columns.tolist(),
+                           show=False)
 
         # increase the size of the plot:
         plt.gcf().set_size_inches(10, 15)
@@ -344,30 +311,17 @@ def shap_explanation(training: pd.DataFrame, testing: pd.DataFrame, target: str,
                     bbox_inches='tight')
         plt.close()
 
-        shap.plots._waterfall.waterfall_legacy(explainer.expected_value[1], shap_values[1][j],
-                                               feature_names=x_test.columns, show=False)
+        # Waterfall plot
+        shap.plots._waterfall.waterfall_legacy(explainer.expected_value[1],
+                                               shap_values[1],
+                                               feature_names=x_test.columns,
+                                               show=False)
 
         # increase the size of the plot:
         plt.gcf().set_size_inches(10, 5)
         plt.savefig(Path(shap_results_path, f'shap_waterfall_plot_obs_{j}_{model_name}.png'), dpi=300,
                     bbox_inches='tight')
         plt.close()
-
-        if with_global_summary_plots:
-            shap.summary_plot(shap_values, x_test.values, plot_type="bar", class_names=['default'],
-                              feature_names=x_test.columns, show=False)
-
-            # save the plot:
-            plt.savefig(Path(shap_results_path, f'shap_summary_plot_{model_name}.png'))
-            plt.close()
-
-            # Plot to show the weights of the positive class
-            shap.summary_plot(shap_values, x_test.values, feature_names=x_test.columns,
-                              plot_type="violin", show=False)
-
-            # save the plot:
-            plt.savefig(Path(shap_results_path, f'shap_summary_plot_violin_{model_name}.png'))
-            plt.close()
 
 
 @measure_time
@@ -394,6 +348,7 @@ def lime_and_shap_main() -> None:
     # Extracting the indexes of the worst prediction of our two surrogate models
     worst_surrogate_obs_logreg = [i for i in pred_logreg.iloc[:3, 0]]
     worst_surrogate_obs_rf = [i for i in pred_rf.iloc[:3, 0]]
+    worst_obs = worst_surrogate_obs_logreg + worst_surrogate_obs_rf
 
     for o in worst_surrogate_obs_logreg:
         lime_explanation(training, testing, 'default', bb, 'black_box', o)
@@ -412,23 +367,24 @@ def lime_and_shap_main() -> None:
 
     # train the model:
     for model in models:
-        lime_explanation(training=training, testing=testing, target="default",
-                         model=model, model_name=model.__class__.__name__.lower())
-        if model == cnn_model:
-            shap_explanation(training=training, testing=testing, target="default",
-                             model=model, model_name=model.__class__.__name__.lower(), explainer_type="kernel_cnn")
+        for idx in worst_obs:
+            lime_explanation(training=training, testing=testing, target="default", j=idx,
+                             model=model, model_name=model.__class__.__name__.lower())
+            if model == cnn_model:
+                shap_explanation(training=training, testing=testing, target="default", j=idx,
+                                 model=model, model_name=model.__class__.__name__.lower(), explainer_type="kernel_cnn")
 
-        elif model == gb_model:
-            shap_explanation(training=training, testing=testing, target="default",
-                             model=model, model_name=model.__class__.__name__.lower(), explainer_type="tree")
+            elif model == gb_model:
+                shap_explanation(training=training, testing=testing, target="default", j=idx,
+                                 model=model, model_name=model.__class__.__name__.lower(), explainer_type="tree")
 
-        elif model == svc_model:
-            shap_explanation(training=training, testing=testing, target="default",
-                             model=model.predict_proba, model_name=model.__class__.__name__.lower(),
-                             explainer_type="kernel_svc")
+            elif model == svc_model:
+                shap_explanation(training=training, testing=testing, target="default", j=idx,
+                                 model=model.predict_proba, model_name=model.__class__.__name__.lower(),
+                                 explainer_type="kernel_svc")
 
-        else:
-            raise ValueError("Model type not supported, please check the model type.")
+            else:
+                raise ValueError("Model type not supported, please check the model type.")
 
 
 # Driver code
