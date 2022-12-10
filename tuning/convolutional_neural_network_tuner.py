@@ -44,7 +44,7 @@ def load_best_dataset() -> tuple[pd.DataFrame, pd.Series, pd.DataFrame, pd.Serie
 
 def create_model_with_layers(model: Model, layers: list[Layer], dropout: float = 0.1,
                              optimizer: Optimizer = Adam(), loss: str = 'binary_crossentropy',
-                             metrics: list[str] = ['accuracy'], lr=0.001) -> Model:
+                             metrics: list[str] = ['accuracy']) -> Model:
     """
     Creates a model with the given layers, optimizer, loss function and metrics.
     @param model: keras.Model: the model to add the layers to
@@ -166,10 +166,10 @@ def objective(trial: Trial) -> float:
                   batch_size=trial.suggest_int("batch_size", 8, 128), verbose=0)
         
         # evaluate the model:
-        score = model.evaluate(x_test_cv, y_test_cv, verbose=0)
+        acc_score = model.evaluate(x_test_cv, y_test_cv, verbose=0)
 
         # append the score:
-        cv_scores.append(score[1])
+        cv_scores.append(acc_score[1])
         
     trial.report(sum(cv_scores) / len(cv_scores), 1)
 
