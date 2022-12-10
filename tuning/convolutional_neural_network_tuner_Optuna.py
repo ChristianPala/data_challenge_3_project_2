@@ -8,7 +8,7 @@ from optuna.pruners import MedianPruner
 from optuna.samplers import TPESampler
 # Modelling:
 from keras.models import Model, Sequential
-from keras.layers import Dense, Layer, Dropout
+from keras.layers import Dense, Layer, Dropout, Conv1D, MaxPooling1D, Flatten
 from keras.backend import clear_session
 from keras.optimizers import Adam, RMSprop, SGD, Optimizer
 from sklearn.model_selection import StratifiedKFold
@@ -24,7 +24,7 @@ import os
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 # How many trials to allow the tuner to run, time efficiency vs accuracy
-NUMBER_OF_TRIALS: int = 50
+NUMBER_OF_TRIALS: int = 30
 
 
 def load_best_dataset() -> tuple[pd.DataFrame, pd.Series, pd.DataFrame, pd.Series]:
@@ -91,6 +91,9 @@ def generate_model(trial: Trial) -> Model:
     :return: The model with the hyperparameters tuned by Optuna
     """
 
+    # keep the start of the model the same as it worked well in the baseline model
+
+
     # Generate layers between 2 and 6 layers according to optuna's trial
     layers_count = trial.suggest_int("Layers Count", 2, 6)
     layers = suggest_layers(trial, layers_count)
@@ -120,8 +123,14 @@ def suggest_layers(trial: Trial, count) -> list[Layer]:
     for i in range(count):
         neurons = trial.suggest_int("layer_{}".format(i), 10, 200)
         activation = trial.suggest_categorical("activation_layer_{}".format(i), ["relu", "tanh"])
+        # Values for i > 0 are ignored:
+        filters = trial.suggest_int("filters_layer_{}".format(i), 10, 200)
+        kernel_size = trial.suggest_int("kernel_size_layer_{}".format(i), 1, 10)
+        pool_size = trial.suggest_int("pool_size_layer_{}".format(i), 1, 10)
         if i == 0:
-            layers.append(Dense(neurons, activation=activation, input_dim=26))
+            layers.append(Conv1D(filters=filters, kernel_size=kernel_size, activation=activation, input_shape=(26, 1)))
+            layers.append(MaxPooling1D(pool_size=pool_size))
+            layers.append(Flatten())
         else:
             layers.append(Dense(neurons, activation=activation))
     layers.append(Dense(1, activation='sigmoid'))
@@ -187,36 +196,50 @@ def evaluate_best_model() -> None:
     Evaluates the best model found by the tuner and saves the results.
     """
     """
-    Params from 5 tries: 
-    Layers Count: 3
-    layer_0: 97
-    activation_layer_0: tanh
-    layer_1: 45
-    activation_layer_1: relu
-    layer_2: 112
-    activation_layer_2: tanh
-    optimizer: rmsprop
-    learning_rate: 0.004446683137584281
-    epochs: 96
-    batch_size: 74
+    Best params with 30 trials:
+    Layers Count': 6, 
+    layer_0': 152, 'activation_layer_0': 'relu', 'filters_layer_0': 168, 'kernel_size_layer_0': 10, 'pool_size_layer_0': 9, '
+    layer_1': 149, 'activation_layer_1': 'relu', 
+    layer_2': 72, 'activation_layer_2': 'tanh',  
+    layer_3': 121, 'activation_layer_3': 'tanh',
+    layer_4': 164, 'activation_layer_4': 'relu', 
+    'layer_5': 24, 'activation_layer_5': 'tanh',
+    'optimizer': 'sgd', 'learning_rate': 0.009833786177866802, 
+    'epochs': 52, 'batch_size': 128
+
     """
     # load the best dataset:
     x_train, y_train, x_val, y_val = load_best_dataset()
     # create the model with the best parameters:
     model = Sequential()
-    model = create_model_with_layers(model, layers=[Dense(97, activation='tanh', input_dim=26),
-                                                    Dense(45, activation='relu'),
-                                                    Dense(112, activation='tanh'),
+    model = create_model_with_layers(model, layers=[Conv1D(filters=168, kernel_size=10,
+                                                           activation='relu', input_shape=(26, 1)),
+                                                    MaxPooling1D(pool_size=9),
+                                                    Flatten(),
+                                                    Dropout(0.1),
+                                                    Dense(152, activation='relu'),
+                                                    Dropout(0.1),
+                                                    Dense(149, activation='relu'),
+                                                    Dropout(0.1),
+                                                    Dense(72, activation='tanh'),
+                                                    Dropout(0.1),
+                                                    Dense(121, activation='tanh'),
+                                                    Dropout(0.1),
+                                                    Dense(164, activation='relu'),
+                                                    Dropout(0.1),
+                                                    Dense(24, activation='tanh'),
+                                                    Dropout(0.1),
                                                     Dense(1, activation='sigmoid')],
-                                     optimizer=RMSprop(learning_rate=0.004446683137584281))
+                                     optimizer=SGD(learning_rate=0.009833786177866802))
     # fit the model:
-    model.fit(x_train, y_train, epochs=96, batch_size=74, verbose=0)
+    model.fit(x_train, y_train, epochs=52, batch_size=128, verbose=0)
     # evaluate the model on the f1 score:
     y_pred = model.predict(x_val)
     y_pred = (y_pred > 0.5)
     results = evaluate_model(y_val, y_pred)
     save_evaluation_results(results, "convolutional neural network", neural_tuned_results_path,
                             "best_cnn_model_evaluation_results")
+
 
 @measure_time
 def main() -> None:
