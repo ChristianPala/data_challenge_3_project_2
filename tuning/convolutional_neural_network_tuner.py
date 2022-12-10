@@ -1,40 +1,38 @@
 # Data manipulation:
 import pandas as pd
-
+from pathlib import Path
 # Tuning
 import optuna
 from optuna.trial import TrialState, Trial
-from tuning.balanced_neural_network import fit_model, predict_model, evaluate_model
 from optuna.pruners import MedianPruner
 from optuna.samplers import TPESampler
-
 # Modelling:
 from keras.models import Model, Sequential
 from keras.layers import Dense, Layer, Dropout
 from keras.backend import clear_session
 from keras.optimizers import Adam, RMSprop, SGD, Optimizer
-from pathlib import Path
-from modelling.train_test_validation_split import split_data
 from sklearn.model_selection import StratifiedKFold
-
 # Timing:
 from auxiliary.method_timer import measure_time
 
 # Global variables:
 from config import balanced_datasets_path, neural_tuned_results_path
-from config import scaled_datasets_path, undersampled_datasets_path
+
+# Tensorflow logging:
+import os
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
+# How many trials to allow the tuner to run
+NUMBER_OF_TRIALS: int = 5
 
 
-def load_best_dataset(path: Path = Path(balanced_datasets_path, "undersampled",
-                                        "minmax_scaler_scaling_most_frequent_imputation")) \
-        -> tuple[pd.DataFrame, pd.Series, pd.DataFrame, pd.Series]:
+def load_best_dataset() -> tuple[pd.DataFrame, pd.Series, pd.DataFrame, pd.Series]:
     """
     This function loads the best dataset from the balanced folder.
     :return: pd.DataFrame: the best dataset.
     """
     # load the dataset:
-    train = pd.read_csv(Path(path, "final_training.csv"))
-    val = pd.read_csv(Path(path, "final_validation.csv"))
+    train = pd.read_csv(Path(balanced_datasets_path, "smote_enn", "robust_scaler_scaling_drop", "final_training.csv"))
+    val = pd.read_csv(Path(balanced_datasets_path, "smote_enn", "robust_scaler_scaling_drop", "final_validation.csv"))
     # split the dataset into features and target:
     x_train = train.drop('default', axis=1)
     y_train = train['default']
@@ -63,6 +61,7 @@ def get_optimizer(choice: str, learning_rate: float = 0.001) -> Optimizer:
         return Adam(learning_rate=learning_rate)
     elif choice == "rmsprop":
         return RMSprop(learning_rate=learning_rate)
+    # else use SGD:
     return SGD(learning_rate=learning_rate)
 
 
@@ -72,8 +71,8 @@ def generate_model(trial: Trial) -> Model:
     :return: The model with the hyperparameters tuned by Optuna
     """
     
-    # Generate layers between 4 to 6 layers according to optuna's trial
-    layers_count = trial.suggest_int("Layers Count", 4, 6)
+    # Generate layers between 2 to 6 layers according to optuna's trial
+    layers_count = trial.suggest_int("Layers Count", 2, 6)
     layers = suggest_layers(trial, layers_count)
 
     # Optuna chooses an optimizer
@@ -82,7 +81,6 @@ def generate_model(trial: Trial) -> Model:
     optimizer = get_optimizer(opt_choice, learning_rate)
 
     # Define the base model and the input dimension
-    # input_dim = trial.suggest_int("input_dim", 20, 50)
     m = Sequential()
     model = create_model_with_layers(m, layers=layers, optimizer=optimizer)
 
@@ -103,7 +101,7 @@ def suggest_layers(trial: Trial, count) -> list[Layer]:
         neurons = trial.suggest_int("layer_{}".format(i), 10, 200)
         activation = trial.suggest_categorical("activation_layer_{}".format(i), ["relu", "tanh"])
         if i == 0:
-            layers.append(Dense(neurons, activation=activation, input_dim=23))
+            layers.append(Dense(neurons, activation=activation, input_dim=26))
         else:
             layers.append(Dense(neurons, activation=activation))
     layers.append(Dense(1, activation='sigmoid'))
@@ -120,22 +118,13 @@ def score(model: Sequential, x, y) -> float:
 def objective(trial: Trial):
     clear_session()
     # load the best dataset:
-    #x_train, y_train, x_val, y_val = load_best_dataset()
+    x_train, y_train, x_val, y_val = load_best_dataset()
 
-    csv_files: list[Path] = list(scaled_datasets_path.glob('*.csv'))
-    df = pd.read_csv(csv_files[0])
-    test_path = Path(undersampled_datasets_path, "minmax_scaler_scaling_drop", "test.csv")
-    test = pd.read_csv(test_path)
-
-    # split the data into train and test:
-    x_train, x_val, _, y_train, y_val, _ = split_data(df, 'default', validation=True)
-
-    x_test, x_val, _, y_test, y_val, _ = split_data(test, 'default', validation=True)
 
     # define the model:
     model = generate_model(trial=trial)
 
-    # use f1 score with cross validation:
+    # use cross validation:
     cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
     cv_scores = []
     for train_index, test_index in cv.split(x_train, y_train):
@@ -158,14 +147,8 @@ def objective(trial: Trial):
     val_score = model.evaluate(x_val, y_val)
     
     trial.report(val_score[1], 2)
-    y_pred = predict_model(model, x_test)
-    test_score = evaluate_model(y_test, y_pred)
 
-    trial.report(test_score[0], 3)
-
-    # return the score on the validation dataset:
-    return test_score[0]
-
+    return sum(cv_scores) / len(cv_scores)
 
 @measure_time
 def main():
@@ -174,9 +157,9 @@ def main():
     # set the pruner:
     pruner = MedianPruner(n_startup_trials=10, n_warmup_steps=5)
     # set the study:
-    study = optuna.create_study(direction="maximize", sampler=sampler, pruner=pruner)
+    study = optuna.create_study(study_name= "cnn_tuning", direction="maximize", sampler=sampler, pruner=pruner)
     # run the study:
-    study.optimize(objective, n_trials=10, n_jobs=-1, show_progress_bar=False)
+    study.optimize(objective, n_trials=NUMBER_OF_TRIALS, n_jobs=-1, show_progress_bar=False)
 
     # Take the aggregate results of the studies
     pruned_trials = study.get_trials(deepcopy=False, states=[TrialState.PRUNED])
