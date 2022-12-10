@@ -21,8 +21,8 @@ from config import balanced_datasets_path, neural_tuned_results_path
 # Tensorflow logging:
 import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
-# How many trials to allow the tuner to run
-NUMBER_OF_TRIALS: int = 5
+# How many trials to allow the tuner to run, time efficiency vs accuracy
+NUMBER_OF_TRIALS: int = 20
 
 
 def load_best_dataset() -> tuple[pd.DataFrame, pd.Series, pd.DataFrame, pd.Series]:
@@ -45,6 +45,17 @@ def load_best_dataset() -> tuple[pd.DataFrame, pd.Series, pd.DataFrame, pd.Serie
 def create_model_with_layers(model: Model, layers: list[Layer], dropout: float = 0.1,
                              optimizer: Optimizer = Adam(), loss: str = 'binary_crossentropy',
                              metrics: list[str] = ['accuracy'], lr=0.001) -> Model:
+    """
+    Creates a model with the given layers, optimizer, loss function and metrics.
+    @param model: keras.Model: the model to add the layers to
+    @param layers: keras.Layer: the layers to add to the model
+    @param dropout: keras.Dropout: the dropout layer to add to the model
+    @param optimizer: keras.Optimizer: the optimizer to use
+    @param loss: keras.Loss: the loss function to use
+    @param metrics: keras.Metrics: the metrics to use
+    @param lr: float: the learning rate to use
+    @return: keras.Model: the model with the given layers, optimizer, loss function and metrics.
+    """
     compiled_model = model
     for i in range(len(layers)):
         compiled_model.add(layers[i])
@@ -57,6 +68,12 @@ def create_model_with_layers(model: Model, layers: list[Layer], dropout: float =
 
 
 def get_optimizer(choice: str, learning_rate: float = 0.001) -> Optimizer:
+    """
+    Returns an optimizer based on the choice and learning rate, auxiliary function for generate_model.
+    @param choice: str: the optimizer to use, as a string
+    @param learning_rate: float: the learning rate to use
+    @return:
+    """
     if choice == "adam":
         return Adam(learning_rate=learning_rate)
     elif choice == "rmsprop":
@@ -68,10 +85,11 @@ def get_optimizer(choice: str, learning_rate: float = 0.001) -> Optimizer:
 def generate_model(trial: Trial) -> Model:
     """
     Generates a model with a number of levels and an optimizer chosen by Optuna.
+    @param trial: The current Optuna trial
     :return: The model with the hyperparameters tuned by Optuna
     """
     
-    # Generate layers between 2 to 6 layers according to optuna's trial
+    # Generate layers between 2 and 6 layers according to optuna's trial
     layers_count = trial.suggest_int("Layers Count", 2, 6)
     layers = suggest_layers(trial, layers_count)
 
@@ -110,16 +128,27 @@ def suggest_layers(trial: Trial, count) -> list[Layer]:
 
 
 def score(model: Sequential, x, y) -> float:
+    """
+    Scores the model using the validation set.
+    @param model: the model to score
+    @param x: the validation set's features
+    @param y: the validation set's target
+    @return: the model's accuracy score.
+    """
 
     score = model.evaluate(x, y)
     return score[1]
 
 
-def objective(trial: Trial):
+def objective(trial: Trial) -> float:
+    """
+    The objective function to be minimized by Optuna.
+    @param trial: the current Optuna trial
+    @return: float: the model's accuracy score on the validation set with the given hyperparameters and cross validation.
+    """
     clear_session()
     # load the best dataset:
     x_train, y_train, x_val, y_val = load_best_dataset()
-
 
     # define the model:
     model = generate_model(trial=trial)
@@ -150,8 +179,13 @@ def objective(trial: Trial):
 
     return sum(cv_scores) / len(cv_scores)
 
+
 @measure_time
-def main():
+def main() -> None:
+    """
+    The main function, runs the Optuna optimization.
+    @return: None. Saves the best model to a file in the neural_networks results folder.
+    """
     # set the sampler:
     sampler = TPESampler(seed=42)
     # set the pruner:
