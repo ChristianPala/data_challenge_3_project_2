@@ -24,7 +24,7 @@ import os
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 # How many trials to allow the tuner to run, time efficiency vs accuracy
-NUMBER_OF_TRIALS: int = 20
+NUMBER_OF_TRIALS: int = 50
 
 
 def load_best_dataset() -> tuple[pd.DataFrame, pd.Series, pd.DataFrame, pd.Series]:
@@ -260,5 +260,5 @@ def main() -> None:
 
 
 if __name__ == '__main__':
-    # main()
-    evaluate_best_model()
+    main()
+    # evaluate_best_model()
