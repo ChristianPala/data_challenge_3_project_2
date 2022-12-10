@@ -12,6 +12,7 @@ from keras.layers import Dense, Layer, Dropout
 from keras.backend import clear_session
 from keras.optimizers import Adam, RMSprop, SGD, Optimizer
 from sklearn.model_selection import StratifiedKFold
+from modelling.model_evaluator import evaluate_model, save_evaluation_results
 # Timing:
 from auxiliary.method_timer import measure_time
 
@@ -20,6 +21,7 @@ from config import balanced_datasets_path, neural_tuned_results_path
 
 # Tensorflow logging:
 import os
+
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 # How many trials to allow the tuner to run, time efficiency vs accuracy
 NUMBER_OF_TRIALS: int = 20
@@ -59,7 +61,7 @@ def create_model_with_layers(model: Model, layers: list[Layer], dropout: float =
     compiled_model = model
     for i in range(len(layers)):
         compiled_model.add(layers[i])
-        if i < len(layers)-1:
+        if i < len(layers) - 1:
             compiled_model.add(Dropout(dropout))
 
     compiled_model.compile(optimizer=optimizer, loss=loss, metrics=metrics)
@@ -88,7 +90,7 @@ def generate_model(trial: Trial) -> Model:
     @param trial: The current Optuna trial
     :return: The model with the hyperparameters tuned by Optuna
     """
-    
+
     # Generate layers between 2 and 6 layers according to optuna's trial
     layers_count = trial.suggest_int("Layers Count", 2, 6)
     layers = suggest_layers(trial, layers_count)
@@ -123,7 +125,7 @@ def suggest_layers(trial: Trial, count) -> list[Layer]:
         else:
             layers.append(Dense(neurons, activation=activation))
     layers.append(Dense(1, activation='sigmoid'))
-        
+
     return layers
 
 
@@ -164,21 +166,57 @@ def objective(trial: Trial) -> float:
         # fit the model:
         model.fit(x_train_cv, y_train_cv, epochs=trial.suggest_int("epochs", 10, 100),
                   batch_size=trial.suggest_int("batch_size", 8, 128), verbose=0)
-        
+
         # evaluate the model:
         acc_score = model.evaluate(x_test_cv, y_test_cv, verbose=0)
 
         # append the score:
         cv_scores.append(acc_score[1])
-        
+
     trial.report(sum(cv_scores) / len(cv_scores), 1)
 
     val_score = model.evaluate(x_val, y_val)
-    
+
     trial.report(val_score[1], 2)
 
     return sum(cv_scores) / len(cv_scores)
 
+
+def evaluate_best_model() -> None:
+    """
+    Evaluates the best model found by the tuner and saves the results.
+    """
+    """
+    Params from 5 tries: 
+    Layers Count: 3
+    layer_0: 97
+    activation_layer_0: tanh
+    layer_1: 45
+    activation_layer_1: relu
+    layer_2: 112
+    activation_layer_2: tanh
+    optimizer: rmsprop
+    learning_rate: 0.004446683137584281
+    epochs: 96
+    batch_size: 74
+    """
+    # load the best dataset:
+    x_train, y_train, x_val, y_val = load_best_dataset()
+    # create the model with the best parameters:
+    model = Sequential()
+    model = create_model_with_layers(model, layers=[Dense(97, activation='tanh', input_dim=26),
+                                                    Dense(45, activation='relu'),
+                                                    Dense(112, activation='tanh'),
+                                                    Dense(1, activation='sigmoid')],
+                                     optimizer=RMSprop(learning_rate=0.004446683137584281))
+    # fit the model:
+    model.fit(x_train, y_train, epochs=96, batch_size=74, verbose=0)
+    # evaluate the model on the f1 score:
+    y_pred = model.predict(x_val)
+    y_pred = (y_pred > 0.5)
+    results = evaluate_model(y_val, y_pred)
+    save_evaluation_results(results, "convolutional neural network", neural_tuned_results_path,
+                            "best_cnn_model_evaluation_results")
 
 @measure_time
 def main() -> None:
@@ -191,7 +229,7 @@ def main() -> None:
     # set the pruner:
     pruner = MedianPruner(n_startup_trials=10, n_warmup_steps=5)
     # set the study:
-    study = optuna.create_study(study_name= "cnn_tuning", direction="maximize", sampler=sampler, pruner=pruner)
+    study = optuna.create_study(study_name="cnn_tuning", direction="maximize", sampler=sampler, pruner=pruner)
     # run the study:
     study.optimize(objective, n_trials=NUMBER_OF_TRIALS, n_jobs=-1, show_progress_bar=False)
 
@@ -210,16 +248,17 @@ def main() -> None:
     trial = study.best_trial
 
     # Show the value of the best trial
-    print("  Value: ", trial.value)
+    print(f"  Value: {trial.value} ")
 
     # Show the parameters of the model with the best trial
     print("  Params: ")
     for key, value in trial.params.items():
-        print("    {}: {}".format(key, value))
+        print(f"    {key}: {value}")
 
     # save the results:
     study.trials_dataframe().to_csv(Path(neural_tuned_results_path, "neural_network_tuner.csv"))
 
 
 if __name__ == '__main__':
-    main()
+    # main()
+    evaluate_best_model()
