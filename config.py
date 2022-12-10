@@ -62,3 +62,6 @@ feature_permutation_results_path: Path = Path(results_path, "feature_permutation
 shap_results_path: Path = Path(results_path, "shap_results")
 # ---------------------------------------------------------------------------------------------------
 lime_results_path: Path = Path(results_path, "lime_results")
+# ---------------------------------------------------------------------------------------------------
+# Final models comparison:
+final_models_comparison_path: Path = Path(project_root_path, "final_models_comparison")

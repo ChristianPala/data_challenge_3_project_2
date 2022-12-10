@@ -5,6 +5,7 @@
 from pathlib import Path
 import os
 import pandas as pd
+from copy import deepcopy
 # Explaining:
 import shap
 # Plotting:
@@ -19,8 +20,6 @@ from sklearn.svm import SVC
 # Global variables:
 from config import final_models_path, final_test_csv_path, shap_results_path, final_train_csv_path, final_val_csv_path
 
-# Number of samples the kernel explainer will use to train and explain the model:
-NR_SAMPLES = 100
 # Tensorflow logging:
 warnings.filterwarnings('ignore')
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
@@ -52,7 +51,7 @@ def load_models() -> (GradientBoostingClassifier, Model, SVC):
     """
     # Load the trained models:
     gb_model = pd.read_pickle(Path(final_models_path, "gradient_boosting_model.pkl"))
-    cnn_model = pd.read_pickle(Path(final_models_path, "cnn_model_untuned.pkl"))
+    cnn_model = pd.read_pickle(Path(final_models_path, "cnn_model.pkl"))
     svm_model = pd.read_pickle(Path(final_models_path, "support_vector_machine_model.pkl"))
     return gb_model, cnn_model, svm_model
 
@@ -87,6 +86,7 @@ def save_shap_feature_importance(model: str, shap_values: list, x_test: pd.DataF
     # give the title a bit more space:
     plt.subplots_adjust(top=0.9)
     plt.savefig(Path(shap_results_path, f"{model.lower().replace(' ', '_')}_feature_importance.png"))
+    plt.close()
 
 
 def save_summary_plot(model: str, shap_values: list, x_test: pd.DataFrame) -> None:
@@ -101,6 +101,7 @@ def save_summary_plot(model: str, shap_values: list, x_test: pd.DataFrame) -> No
     # give the title a bit more space:
     plt.subplots_adjust(top=0.9)
     plt.savefig(Path(shap_results_path, f"{model.lower().replace(' ', '_')}_summary_plot.png"))
+    plt.close()
 
 
 def global_shap_main() -> None:
@@ -111,25 +112,20 @@ def global_shap_main() -> None:
     x_train, x_test, y_train, y_test = load_data()
     # Load the models:
     gb_model, cnn_model, svm_model = load_models()
-    # For time efficiency train and test the cnn and svm models on a subset of the data:
-    x_train_sample = x_train.sample(NR_SAMPLES)
-    x_test_sample = x_test.sample(NR_SAMPLES)
-    # Retrain the models on the sampled data:
-    cnn_model.fit(x_train, y_train, epochs=10, verbose=0)
-    svm_model.fit(x_train, y_train)
-
+    # For time efficiency train and test the cnn and svm models on a subset of the data sampled by shap.kmeans:
+    x_train_sample = shap.kmeans(x_train, 7)
     # Create the explainers:
     gb_explainer, cnn_explainer, svm_explainer = create_explainers(x_train_sample, gb_model, cnn_model, svm_model)
 
     # Explain the models:
     gb_shap_values = gb_explainer.shap_values(x_test)
-    cnn_shap_values = cnn_explainer.shap_values(x_test_sample)
-    svm_shap_values = svm_explainer.shap_values(x_test_sample)
+    cnn_shap_values = cnn_explainer.shap_values(x_test)
+    svm_shap_values = svm_explainer.shap_values(x_test)
 
     # save the plots:
-    # save_shap_feature_importance("Gradient Boosting", gb_shap_values, x_test)
-    # save_shap_feature_importance("Convoluted Neural Network", cnn_shap_values, x_test_sample)
-    # save_shap_feature_importance("Support Vector Machine", svm_shap_values, x_test_sample)
+    save_shap_feature_importance("Gradient Boosting", gb_shap_values, x_test)
+    save_shap_feature_importance("Convoluted Neural Network", cnn_shap_values, x_test_sample)
+    save_shap_feature_importance("Support Vector Machine", svm_shap_values, x_test_sample)
 
     # save the summary plots:
     save_summary_plot("Gradient Boosting", gb_shap_values, x_test)
