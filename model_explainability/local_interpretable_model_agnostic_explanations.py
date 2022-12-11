@@ -31,9 +31,9 @@ from config import final_models_path, final_test_csv_path, final_train_csv_path,
 shap_results_path.mkdir(parents=True, exist_ok=True)
 lime_results_path.mkdir(parents=True, exist_ok=True)
 
-# Tensorflow logging:
+# Tensorflow and scikit learn logging:
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
-warnings.filterwarnings("ignore", category=DeprecationWarning)
+warnings.filterwarnings("ignore")
 
 
 # Functions:
@@ -189,8 +189,7 @@ def lime_explanation(training: pd.DataFrame, testing: pd.DataFrame, target: str,
 
 
 def shap_explanation(training: pd.DataFrame, testing: pd.DataFrame, target: str, model: ...,
-                     explainer_type: Literal["tree", "kernel_cnn", "kernel_svc"], model_name: str, j: int = 5,
-                     with_global_summary_plots: bool = False, random_state: int = 42) -> None:
+                     explainer_type: Literal["tree", "kernel_cnn", "kernel_svc"], model_name: str, j: int = 5) -> None:
     """
     This function carry out a Local Model-agnostic Explanation of a pre-trained model using the shap library:
     https://shap.readthedocs.io/en/latest/index.html
@@ -202,16 +201,11 @@ def shap_explanation(training: pd.DataFrame, testing: pd.DataFrame, target: str,
     @param explainer_type: str: a string containing which type of algorithm our model is.
     @param model_name: ...: the name of out model, to save appropriately the results.
     @param j: int: index of the data our model will use for the prediction.
-    @param with_global_summary_plots: weather or not to create the global summary plots.
-    @param random_state: int: default = 42: the random state to be used for the split for reproducibility.
     """
 
     # Splitting the data:
     x_train = training.drop(target, axis=1)
-    y_train = training[target]
-
     x_test = testing.drop(target, axis=1)
-    y_test = testing[target]
 
     if explainer_type == "tree":
         # data to train explainer on
@@ -395,3 +389,4 @@ def lime_and_shap_main() -> None:
 # Driver code
 if __name__ == '__main__':
     lime_and_shap_main()
+
