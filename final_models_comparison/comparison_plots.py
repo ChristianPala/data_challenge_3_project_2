@@ -14,6 +14,7 @@ from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_sc
     roc_curve
 from sklearn.svm import SVC
 
+from auxiliary.method_timer import measure_time
 # Global variables:
 from config import final_models_path, final_test_csv_path, final_models_comparison_path
 
@@ -82,6 +83,7 @@ def barplot_accuracy_f1_recall_precision(y_true: pd.DataFrame, y_pred: pd.DataFr
                        "f1": [f1_score(y_true, y_pred)],
                        "recall": [recall_score(y_true, y_pred)],
                        "precision": [precision_score(y_true, y_pred)]})
+
     # Plot the barplot:
     plt.figure(figsize=(10, 10))
     sns.barplot(data=df)
@@ -115,7 +117,9 @@ def roc_auc_curve(y_true: pd.DataFrame, y_pred_proba: pd.DataFrame, model_name: 
     plt.savefig(Path(path, f"{model_name}_roc_auc_curve.png"))
     plt.close()
 
-def main():
+
+@measure_time
+def final_comparisons_main():
     """
     Main function.
     """
@@ -153,4 +157,4 @@ def main():
 
 # Driver code:
 if __name__ == "__main__":
-    main()
+    final_comparisons_main()

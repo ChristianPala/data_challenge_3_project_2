@@ -20,6 +20,7 @@ from model_explainability.global_model_interpration_with_shap import global_shap
 from model_explainability.local_interpretable_model_agnostic_explanations import lime_and_shap_main
 from model_explainability.partial_dependece_plot import pdp_main
 from model_explainability.permutation_importance import permutation_importance_main
+from final_models_comparison.comparison_plots import final_comparisons_main
 
 import pprint
 
@@ -105,6 +106,7 @@ def main() -> None:
     # simple_models_main()
     # Below we generate the 3 best models we found during the tuning phase for the explanation part:
     create_final_models_main()
+    final_comparisons_main()
     # Explaining:
     # ----------------------------------------------
     # Global:
