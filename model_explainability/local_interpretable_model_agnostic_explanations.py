@@ -5,6 +5,7 @@
 import pandas as pd
 import numpy as np
 from pathlib import Path
+import os
 # Randomness:
 import random
 # Plotting:
@@ -20,6 +21,8 @@ from typing import Literal
 from auxiliary.method_timer import measure_time
 # Keras model loading:
 from keras.models import load_model
+# Deprecation warnings:
+import warnings
 
 # Global variables:
 from config import final_models_path, final_test_csv_path, final_train_csv_path, final_val_csv_path, \
@@ -28,12 +31,15 @@ from config import final_models_path, final_test_csv_path, final_train_csv_path,
 shap_results_path.mkdir(parents=True, exist_ok=True)
 lime_results_path.mkdir(parents=True, exist_ok=True)
 
+# Tensorflow logging:
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
+warnings.filterwarnings("ignore", category=DeprecationWarning)
+
 
 # Functions:
 def lime_explanation(training: pd.DataFrame, testing: pd.DataFrame, target: str, model: ...,
                      model_name: str, j: int = 5,
                      with_wrong_prediction_analysis: bool = False, random_state: int = 42) -> None:
-    # TODO: not sure which type of data the function should expect from the parameter model
     """
     This function carry out a Local Model-agnostic Explanation of a pre-trained model using the lime framework:
     https://github.com/marcotcr/lime/blob/master/citation.bib
@@ -50,7 +56,6 @@ def lime_explanation(training: pd.DataFrame, testing: pd.DataFrame, target: str,
 
     # Splitting the data:
     x_train = training.drop(target, axis=1)
-    y_train = training[target]
 
     x_test = testing.drop(target, axis=1)
     y_test = testing[target]

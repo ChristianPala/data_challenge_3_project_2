@@ -124,13 +124,13 @@ def global_shap_main() -> None:
 
     # save the plots:
     save_shap_feature_importance("Gradient Boosting", gb_shap_values, x_test)
-    save_shap_feature_importance("Convoluted Neural Network", cnn_shap_values, x_test_sample)
-    save_shap_feature_importance("Support Vector Machine", svm_shap_values, x_test_sample)
+    save_shap_feature_importance("Convoluted Neural Network", cnn_shap_values, x_test)
+    save_shap_feature_importance("Support Vector Machine", svm_shap_values, x_test)
 
     # save the summary plots:
     save_summary_plot("Gradient Boosting", gb_shap_values, x_test)
-    save_summary_plot("Convoluted Neural Network", cnn_shap_values, x_test_sample)
-    save_summary_plot("Support Vector Machine", svm_shap_values, x_test_sample)
+    save_summary_plot("Convoluted Neural Network", cnn_shap_values, x_test)
+    save_summary_plot("Support Vector Machine", svm_shap_values, x_test)
 
 
 # Driver Code:

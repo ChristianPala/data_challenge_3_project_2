@@ -64,7 +64,6 @@ def normalize_data(training: pd.DataFrame, validation: pd.DataFrame, testing: pd
     @param columns: the list of columns to normalize.
     @return: the normalized dataset
     """
-    # Todo: Ask professor Mitrovic if we can normalize like this.
     # normalize the training data:
     training[columns] = normalize(training[columns])
     # normalize the validation data:

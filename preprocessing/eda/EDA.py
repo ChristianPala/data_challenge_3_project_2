@@ -167,7 +167,6 @@ def plot_categorical_correlation_with_target(df: pd.DataFrame, target: str) -> N
     @param target: str: the target feature.
     :return:
     """
-    # Todo: Davide, Fabio, is there a better way to do this?
     # select only the categorical features:
     categorical_features = df.select_dtypes(include='category').columns
     # remove the target:
