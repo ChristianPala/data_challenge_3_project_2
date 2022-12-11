@@ -115,25 +115,25 @@ def lime_explanation(training: pd.DataFrame, testing: pd.DataFrame, target: str,
             explanation = explainer.explain_instance(x_test.iloc[tp_idx], model.predict_proba)
 
             # save the html file
-            explanation.save_to_file(Path(lime_results_path, 'lime_report_tp_pred.html'))
+            explanation.save_to_file(Path(lime_results_path, f'lime_report_tp_pred_{tp_idx}_{model_name}.html'))
 
             # explain the true negative predicted instance
             explanation = explainer.explain_instance(x_test.iloc[tn_idx], model.predict_proba)
 
             # save the html file
-            explanation.save_to_file(Path(lime_results_path, 'lime_report_tn_pred.html'))
+            explanation.save_to_file(Path(lime_results_path, f'lime_report_tn_pred_{tn_idx}_{model_name}.html'))
 
             # explain the false positive predicted instance
             explanation = explainer.explain_instance(x_test.iloc[fp_idx], model.predict_proba)
 
             # save the html file
-            explanation.save_to_file(Path(lime_results_path, 'lime_report_fp_pred.html'))
+            explanation.save_to_file(Path(lime_results_path, f'lime_report_fp_pred_{fp_idx}_{model_name}.html'))
 
             # explain the false negative predicted instance
             explanation = explainer.explain_instance(x_test.iloc[fn_idx], model.predict_proba)
 
             # save the html file
-            explanation.save_to_file(Path(lime_results_path, 'lime_report_fn_pred.html'))
+            explanation.save_to_file(Path(lime_results_path, f'lime_report_fn_pred_{fn_idx}_{model_name}.html'))
 
     else:
         # Choose the j_th instance and use it to explain the model prediction
