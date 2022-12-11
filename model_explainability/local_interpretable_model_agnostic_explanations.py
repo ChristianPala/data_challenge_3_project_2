@@ -38,7 +38,7 @@ warnings.filterwarnings("ignore")
 
 # Functions:
 def lime_explanation(training: pd.DataFrame, testing: pd.DataFrame, target: str, model: ...,
-                     model_name: str, j: int = 5,
+                     model_name: str, j: int = 0,
                      with_wrong_prediction_analysis: bool = False, random_state: int = 42) -> None:
     """
     This function carry out a Local Model-agnostic Explanation of a pre-trained model using the lime framework:
@@ -48,7 +48,7 @@ def lime_explanation(training: pd.DataFrame, testing: pd.DataFrame, target: str,
     @param target: str: the target column's name.
     @param model: ...: our pre-trained black-box model, we will use it to perform a prediction and analyze it
     with our explainer.
-    @param model_name: ...: the name of out model, to save appropriately the results.
+    @param model_name: str: the name of out model, to save appropriately the results.
     @param j: int: index of the data our model will use for the prediction.
     @param with_wrong_prediction_analysis: weather or not to create the report of a random wrongly predicted instance.
     @param random_state: int: default = 42: the random state to be used for reproducibility.
@@ -189,7 +189,7 @@ def lime_explanation(training: pd.DataFrame, testing: pd.DataFrame, target: str,
 
 
 def shap_explanation(training: pd.DataFrame, testing: pd.DataFrame, target: str, model: ...,
-                     explainer_type: Literal["tree", "kernel_cnn", "kernel_svc"], model_name: str, j: int = 5) -> None:
+                     explainer_type: Literal["tree", "kernel_cnn", "kernel_svc"], model_name: str, j: int = 0) -> None:
     """
     This function carry out a Local Model-agnostic Explanation of a pre-trained model using the shap library:
     https://shap.readthedocs.io/en/latest/index.html
@@ -199,7 +199,7 @@ def shap_explanation(training: pd.DataFrame, testing: pd.DataFrame, target: str,
     @param model: ...: our pre-trained black-box model, we will use it to perform a prediction and analyze it
     with our explainer.
     @param explainer_type: str: a string containing which type of algorithm our model is.
-    @param model_name: ...: the name of out model, to save appropriately the results.
+    @param model_name: str: the name of out model, to save appropriately the results.
     @param j: int: index of the data our model will use for the prediction.
     """
 
