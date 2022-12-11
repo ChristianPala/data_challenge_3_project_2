@@ -16,6 +16,7 @@ from tuning.balanced_neural_network import balanced_neural_network_main
 from tuning.balanced_knn_logreg_naiveb_svc import balanced_other_models_main
 from model_explainability.create_final_models import create_final_models_main
 from model_explainability.global_surrogate import global_surrogate_main
+from model_explainability.global_model_interpration_with_shap import global_shap_main
 from model_explainability.local_interpretable_model_agnostic_explanations import lime_and_shap_main
 from model_explainability.partial_dependece_plot import pdp_main
 from model_explainability.permutation_importance import permutation_importance_main
@@ -106,16 +107,23 @@ def main() -> None:
     create_final_models_main()
     # Explaining:
     # ----------------------------------------------
+    # Global:
+    # ----------------------------------------------
     # feature permutation:
     # permutation_importance_main()
     # dependence plots:
     # pdp_main()
     # global surrogate:
     # global_surrogate_main()
+    # global shap:
+    # global_shap_main()
+    # Local:
+    # ----------------------------------------------
     # Lime and Shap:
     # lime_and_shap_main()
+    # ----------------------------------------------
     # pretty print the execution times dictionary:
-    # Due to the long execution time we saved th results of the explainability mains in the results' folder.
+    # Due to the long execution time we saved th results of the tuning and explainability mains in the results' folder.
     # All modules can be run independently, as long as the main pipeline is run first.
     pprint.pprint(execution_times)
     # Done:
