@@ -195,6 +195,27 @@ def plot_categorical_correlation_with_target(df: pd.DataFrame, target: str) -> N
     plt.close()
 
 
+def pie_chart(df: pd.DataFrame, feature: str, title: str) -> None:
+    """
+    Plot a pie chart of the distribution of the categorical feature.
+    @param df: pd.DataFrame: the dataframe with the feature.
+    @param feature: str: the feature to plot.
+    @param title: str: the title of the plot.
+    :return: None
+    """
+    plt.figure(figsize=(10, 10))
+    if feature == 'default':
+        # map 0 to 'No' and 1 to 'Yes':
+        df[feature] = df[feature].map({0: 'No', 1: 'Yes'})
+    plt.pie(df[feature].value_counts(), labels=df[feature].value_counts().index, autopct='%1.1f%%')
+    plt.legend(title=feature.capitalize())
+    plt.title(title)
+    # Save the plot:
+    plot_path.mkdir(parents=True, exist_ok=True)
+    plt.savefig(Path(plot_path, f'{feature}_pie_chart.png'))
+    plt.close()
+
+
 @measure_time
 def eda_main() -> None:
     """
@@ -221,6 +242,9 @@ def eda_main() -> None:
     plot_categorical_feature_distribution(df)
 
     # Plot the distribution of the numerical features:
+    plot_numerical_feature_distribution(df, log_transform=False)
+
+    # Plot the distribution of the numerical features after log transformation:
     plot_numerical_feature_distribution(df, log_transform=True)
 
     # Plot the correlation of the numerical features with the target:
@@ -228,6 +252,9 @@ def eda_main() -> None:
 
     # Plot the correlation of the categorical features with the target:
     plot_categorical_correlation_with_target(df, target='default')
+
+    # Plot the distribution of the target:
+    pie_chart(df, feature='default', title='Distribution of defaulters and non-defaulters in the original dataset')
 
 
 # Driver:

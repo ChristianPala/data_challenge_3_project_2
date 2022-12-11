@@ -8,7 +8,7 @@ from auxiliary.method_timer import measure_time
 from sklearn.preprocessing import PowerTransformer
 
 # Global variables:
-from config import logs_path
+from config import logs_path, data_path
 from modelling.train_test_validation_split import split_data
 
 if not logs_path.exists():
@@ -266,12 +266,14 @@ def skewness_main(filename: str, suppress_print=False) -> pd.DataFrame:
 
     # apply the yeo-johnson transformation:
     features = power_transform(training, validation, testing, numerical_features, "yeo-johnson")
+    # substitute the numerical features with the transformed features:
+    df[numerical_features] = features[numerical_features]
 
     if not suppress_print:
         print(estimate_skewness(df, "all"))
 
-    # substitute the numerical features with the transformed features:
-    df[numerical_features] = features[numerical_features]
-
     return df
 
+
+if __name__ == '__main__':
+    skewness_main(Path(data_path, "EDA", "dataset_for_eda.csv"))

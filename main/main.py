@@ -38,10 +38,12 @@ def main() -> None:
     """
     # Preprocessing:
     # ----------------------------------------------
-    preprocessor_main(suppress_print=True, missing_values_dominant_strategies=["drop"])
+    preprocessor_main(suppress_print=True,
+                      missing_values_dominant_strategies=["drop", "most_frequent_imputation", "supervised_imputation",
+                                                          "unsupervised_imputation"])
     feature_engineering_main(overwrite_original=True)
-    scaling_main(dominant_scaling_strategies=['robust_scaler'])
-    eda_main()
+    scaling_main(dominant_scaling_strategies=['standard_scaler', 'robust_scaler', 'minmax_scaler'])
+    # eda_main()
     # # Baseline models:
     # # ----------------------------------------------
     trees_main()
@@ -80,12 +82,12 @@ def main() -> None:
     # ----------------------------------------------
     # After tuning the balancing strategies, we selected smoteen, which was the best or
     # second best for all models.
-    balance_classes_main(dominant_strategies=['smote_enn'])
-    balanced_trees_main(dominant_model='gradient_boosting')
-    balanced_neural_network_main(dominant_model='convolutional')
-    balanced_other_models_main(dominant_model='svc')
-    evaluator_main(trees_balanced_results_path, neural_networks_balanced_results_path,
-                   other_models_balanced_results_path, suppress_print=True, balanced=True)
+    # balance_classes_main(dominant_strategies=['smote_enn'])
+    # balanced_trees_main(dominant_model='gradient_boosting')
+    # balanced_neural_network_main(dominant_model='convolutional')
+    # balanced_other_models_main(dominant_model='svc')
+    # evaluator_main(trees_balanced_results_path, neural_networks_balanced_results_path,
+    #               other_models_balanced_results_path, suppress_print=True, balanced=True)
     """
     Sample output:
     The best gradient boosting robust scaler drop, with an f1 score of 0.532
@@ -105,8 +107,8 @@ def main() -> None:
     # Below the tuning of the simple models:
     # simple_models_main()
     # Below we generate the 3 best models we found during the tuning phase for the explanation part:
-    create_final_models_main()
-    final_comparisons_main()
+    # create_final_models_main()
+    # final_comparisons_main()
     # Explaining:
     # ----------------------------------------------
     # Global:

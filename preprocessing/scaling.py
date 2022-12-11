@@ -77,7 +77,7 @@ def normalize_data(training: pd.DataFrame, validation: pd.DataFrame, testing: pd
 
 
 @measure_time
-def scaling_main(dominant_scaling_strategies: None) -> None:
+def scaling_main(dominant_scaling_strategies: [str] = None) -> None:
     """
     Main method to execute the scaling library
     @param dominant_scaling_strategies: the dominant scaling strategy to use, if it exists. If it does not exist,

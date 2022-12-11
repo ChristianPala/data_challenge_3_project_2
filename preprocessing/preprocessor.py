@@ -163,14 +163,15 @@ def preprocessor_main(suppress_print=False, missing_values_dominant_strategies: 
         # preprocess the training, validation and testing datasets:
         for method in methods:
             # preprocess the training dataset:
-            training_dataframe = handle_missing_values(training_dataframe, method)
+            training_dataframe_method = handle_missing_values(training_dataframe, method)
             # preprocess the validation dataset:
-            validation_dataframe = handle_missing_values(validation_dataframe, method)
+            validation_dataframe_method = handle_missing_values(validation_dataframe, method)
             # preprocess the testing dataset:
-            testing_dataframe = handle_missing_values(testing_dataframe, method)
+            testing_dataframe_method = handle_missing_values(testing_dataframe, method)
 
             # merge the training, validation and testing datasets:
-            dataframe = pd.DataFrame(pd.concat([training_dataframe, validation_dataframe, testing_dataframe],
+            dataframe = pd.DataFrame(pd.concat([training_dataframe_method, validation_dataframe_method,
+                                                testing_dataframe_method],
                                                axis=0))
             # save the preprocessed dataset in the missing_values_path:
             dataframe.to_csv(Path(missing_values_path, f"project_2_dataset_{method}.csv"), index=False)
@@ -182,17 +183,18 @@ def preprocessor_main(suppress_print=False, missing_values_dominant_strategies: 
     else:
         for method in missing_values_dominant_strategies:
             # preprocess the training dataset:
-            training_dataframe = handle_missing_values(training_dataframe, method)
+            training_dataframe_method = handle_missing_values(training_dataframe, method)
             # preprocess the validation dataset:
-            validation_dataframe = handle_missing_values(validation_dataframe, method)
+            validation_dataframe_method = handle_missing_values(validation_dataframe, method)
             # preprocess the testing dataset:
-            testing_dataframe = handle_missing_values(testing_dataframe, method)
+            testing_dataframe_method = handle_missing_values(testing_dataframe, method)
 
             # merge the training, validation and testing datasets:
-            dataframe = pd.DataFrame(pd.concat([training_dataframe, validation_dataframe, testing_dataframe],
-                                               axis=0))
+            dataframe_method = pd.DataFrame(pd.concat([training_dataframe_method, validation_dataframe_method,
+                                                       testing_dataframe_method],
+                                                      axis=0))
             # save the preprocessed dataset in the missing_values_path:
-            dataframe.to_csv(Path(missing_values_path, f"project_2_dataset_{method}.csv"), index=False)
+            dataframe_method.to_csv(Path(missing_values_path, f"project_2_dataset_{method}.csv"), index=False)
 
             if not suppress_print:
                 print("Preprocessing completed.")

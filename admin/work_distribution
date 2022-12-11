@@ -1,0 +1,23 @@
+Summary of the work distribution during the second data challenge 3 project:
+
+Preprocessing: week 1-2
+- missing values and feature skewness: Christian Pala
+- EDA: Fabbio Loddo (main) and Christian Pala (support)
+- scaling: Davide Gamba (main) and Christian Pala (support)
+
+Feature engineering and modeling: week 2
+Christian Pala
+
+Tuning: week 2-4
+Balancing and simple models: Christian Pala (main) and Davide Gamba (support)
+Hyperparameter tuning: Davide Gamba (main) and Christian Pala (support)
+
+Model explainability: week 2-4
+- Permutation importance: Fabio Loddo (main) and Christian Pala (support)
+- Partial dependence plots: Fabio Loddo (main) and Christian Pala (support)
+- Global surrogate: Christian Pala
+- LIME: Fabio Loddo
+- SHAP: Fabio Loddo (main) and Christian Pala (support)
+
+Report: week 4 +
+- Davide Gamba, Fabio Loddo, Christian Pala shared the work.
