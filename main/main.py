@@ -40,11 +40,10 @@ def main() -> None:
     # Preprocessing:
     # ----------------------------------------------
     preprocessor_main(suppress_print=True,
-                      missing_values_dominant_strategies=["drop", "most_frequent_imputation", "supervised_imputation",
-                                                          "unsupervised_imputation"])
+                      missing_values_dominant_strategies=['most_frequent_imputation', 'unsupervised_imputation'])
     feature_engineering_main(overwrite_original=True)
-    scaling_main(dominant_scaling_strategies=['standard_scaler', 'robust_scaler', 'minmax_scaler'])
-    # eda_main()
+    scaling_main(dominant_scaling_strategies=['robust_scaler'], save_non_normalized=False)
+    eda_main()
     # # Baseline models:
     # # ----------------------------------------------
     trees_main()
@@ -52,53 +51,21 @@ def main() -> None:
     other_models_main()
     evaluator_main(trees_results_path, neural_networks_results_path,
                    other_models_results_path, suppress_print=True)
-    """
-    Augmented vs non-augmented:
-    Augmented and not augmented are similar, but the best models, which for this task are also the more complex,
-    prefer the augmented data, so we will use only the augmented data.
-    Dropping the missing values was usually the best strategy, the difference in performance did not justify
-    the added time complexity of keeping the other strategies in the pipeline.
-    Scaling:
-    Robust scaling using yeo-johnson to handle skewness, and in particular negative skewness, was the best strategy.
-    
-    # Below an output example of the results with all possible strategies, which formed the basis of our decisions:
-    # Report summary with all strategies, on which we based the selection above:
-    # Note the trees are on non-preprocessed datasets:
-    The best decision tree drop, with an f1 score of 0.409
-    The best random forest drop augmented, with an f1 score of 0.483
-    The best gradient boosting drop, with an f1 score of 0.515
-    The best xgboost drop, with an f1 score of 0.477
-    The best neural network convoluted normalized robust scaler most frequent imputation, with an f1 score of 0.538
-    The best knn robust scaler drop, with an f1 score of 0.442
-    The best logreg normalized robust scaler drop augmented, with an f1 score of 0.51
-    The best naive bayes minmax scaler drop augmented, with an f1 score of 0.526
-    The best svc robust scaler drop augmented, with an f1 score of 0.532
-    
-    After a number of trials we settled on the following best models:
-    The best tree model: gradient boosting.
-    The best neural network model: convoluted neural network.
-    The best of the other models we tried: Support Vector Classifier.
-    """
+
     # Tuning:
     # ----------------------------------------------
-    # After tuning the balancing strategies, we selected smoteen, which was the best or
-    # second best for all models.
-    balance_classes_main(dominant_strategies=["undersampled", "oversampled"])
+    balance_classes_main(dominant_strategies=["undersampled", "oversampled", "svmsmote"])
     balanced_trees_main(dominant_model='gradient_boosting')
-    balanced_neural_network_main(dominant_model='dense')
-    balanced_other_models_main(domiant_model='svc')
+    balanced_neural_network_main()
+    balanced_other_models_main(dominant_model='naive_bayes')
+    balanced_other_models_main(dominant_model='svc')
     evaluator_main(trees_balanced_results_path, neural_networks_balanced_results_path,
                    other_models_balanced_results_path, suppress_print=True, balanced=True)
-    """
-    Sample output:
-    The best gradient boosting robust scaler drop, with an f1 score of 0.532
-    The best convolutional network robust scaler drop, with an f1 score of 0.538
-    The best svc robust scaler drop, with an f1 score of 0.539
-    """
-    # tuned trees:
-    # we consider gradient boosting for tuning since it achieved the best results in the baseline and balanced models
+
+    # Tuning:
+    # ----------------------------------------------
     # gb_main()
-    # tuned neural network, we consider the convolutional neural network as it was strictly better than the dense one.
+    # tuned neural network, we consider the dense model as the best one
     # tuned other models:
     # cv_main()
     # we consider svc for tuning since it achieved the best results in the baseline and balanced models, naive

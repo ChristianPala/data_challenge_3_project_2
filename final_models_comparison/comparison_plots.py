@@ -11,7 +11,7 @@ from keras import Model
 from sklearn.ensemble import GradientBoostingClassifier
 # Metrics:
 from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_score, roc_auc_score, confusion_matrix, \
-    roc_curve
+    roc_curve, precision_recall_curve
 from sklearn.svm import SVC
 
 from auxiliary.method_timer import measure_time
@@ -117,6 +117,26 @@ def roc_auc_curve(y_true: pd.DataFrame, y_pred_proba: pd.DataFrame, model_name: 
     plt.savefig(Path(path, f"{model_name}_roc_auc_curve.png"))
     plt.close()
 
+def precison_recall_curve(y_true: pd.DataFrame, y_pred_proba: pd.DataFrame, model_name: str) -> None:
+    """
+    Function to save the precision recall curve.
+    @param y_true: the true labels
+    @param y_pred_proba: the predicted labels, as probabilities
+    @param model_name: the name of the model
+    :return: None. Saves the precision recall curve.
+    """
+    precision, recall, thresholds = precision_recall_curve(y_true, y_pred_proba)
+    plt.figure(figsize=(10, 10))
+    plt.plot(recall, precision, label=f"{model_name} precision recall curve")
+    plt.xlabel('Recall')
+    plt.ylabel('Precision')
+    plt.title(f"{model_name} precision recall curve")
+    plt.legend(loc="lower right")
+    path = Path(final_models_comparison_path, "precision_recall_curves")
+    path.mkdir(parents=True, exist_ok=True)
+    plt.savefig(Path(path, f"{model_name}_precision_recall_curve.png"))
+    plt.close()
+
 
 @measure_time
 def final_comparisons_main():
@@ -153,6 +173,10 @@ def final_comparisons_main():
     roc_auc_curve(y_test, gp_pred_proba, model_names[0])
     roc_auc_curve(y_test, cnn_pred_proba, model_names[1])
     roc_auc_curve(y_test, svm_pred_proba, model_names[2])
+    # Save the precision recall curves:
+    precison_recall_curve(y_test, gp_pred_proba, model_names[0])
+    precison_recall_curve(y_test, cnn_pred_proba, model_names[1])
+    precison_recall_curve(y_test, svm_pred_proba, model_names[2])
 
 
 # Driver code:

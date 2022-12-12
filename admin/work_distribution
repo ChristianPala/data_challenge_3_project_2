@@ -5,7 +5,7 @@ Preprocessing: week 1-2
 - EDA: Fabbio Loddo (main) and Christian Pala (support)
 - scaling: Davide Gamba (main) and Christian Pala (support)
 
-Feature engineering and modeling: week 2
+Feature engineering, selection and modeling: week 2-3
 Christian Pala
 
 Tuning: week 2-4
@@ -13,6 +13,7 @@ Balancing and simple models: Christian Pala (main) and Davide Gamba (support)
 Hyperparameter tuning: Davide Gamba (main) and Christian Pala (support)
 
 Model explainability: week 2-4
+- whitebox model: Christian Pala
 - Permutation importance: Fabio Loddo (main) and Christian Pala (support)
 - Partial dependence plots: Fabio Loddo (main) and Christian Pala (support)
 - Global surrogate: Christian Pala

@@ -9,7 +9,7 @@ from tqdm import tqdm
 
 # SMOTE and Keras:
 from modelling.neural_network import fit_model, create_convolutional_model, evaluate_model, \
-    save_evaluation_results
+    save_evaluation_results, create_dense_model
 
 # Data manipulation:
 import pandas as pd
@@ -19,6 +19,7 @@ from pathlib import Path
 from config import scaled_datasets_path, neural_tuned_results_path
 from modelling.train_test_validation_split import split_data
 
+# Ensure the directory exists:
 neural_tuned_results_path.mkdir(parents=True, exist_ok=True)
 
 
@@ -35,43 +36,27 @@ def main() -> None:
     x_train, x_val, x_test, y_train, y_val, y_test = split_data(df, "default", validation=True)
 
     # Create over_samplers:
-    sampling_strategies = [0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.0]
-    over_samplers = [SMOTEENN(sampling_strategy=sampling_strategy, random_state=42)
-                     for sampling_strategy in sampling_strategies]
-    over_samplers += [RandomOverSampler(sampling_strategy=sampling_strategy, random_state=42)
-                      for sampling_strategy in sampling_strategies]
-    over_samplers += [BorderlineSMOTE(sampling_strategy=sampling_strategy, random_state=42)
-                      for sampling_strategy in sampling_strategies]
-    over_samplers += [SVMSMOTE(sampling_strategy=sampling_strategy, random_state=42)
-                      for sampling_strategy in sampling_strategies]
-    over_samplers += [ADASYN(sampling_strategy=sampling_strategy, random_state=42)
-                      for sampling_strategy in sampling_strategies]
-    over_samplers += [KMeansSMOTE(sampling_strategy=sampling_strategy, random_state=42)
-                      for sampling_strategy in sampling_strategies]
-    over_samplers += [SMOTETomek(sampling_strategy=sampling_strategy, random_state=42)
-                      for sampling_strategy in sampling_strategies]
-    over_samplers += [RandomOverSampler(sampling_strategy=sampling_strategy, random_state=42)
-                      for sampling_strategy in sampling_strategies]
+    sampling_strategies = [0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]  # test different values
+    samplers = [SVMSMOTE(sampling_strategy=sampling_strategy, random_state=42)
+                for sampling_strategy in sampling_strategies]
+    # samplers += [BorderlineSMOTE(sampling_strategy=sampling_strategy, random_state=42)
+    #                   for sampling_strategy in sampling_strategies]
+    # samplers += [ADASYN(sampling_strategy=sampling_strategy, random_state=42)
+    #                   for sampling_strategy in sampling_strategies]
+    # samplers += [KMeansSMOTE(sampling_strategy=sampling_strategy, random_state=42)
+    #                  for sampling_strategy in sampling_strategies]
+    samplers += [RandomOverSampler(sampling_strategy=sampling_strategy, random_state=42)
+                 for sampling_strategy in sampling_strategies]
+    samplers += [RandomUnderSampler(sampling_strategy=sampling_strategy, random_state=42)
+                 for sampling_strategy in sampling_strategies]
 
-    number_of_over_samplers = len(over_samplers) / len(sampling_strategies)
-    sampling_strategies = sampling_strategies * int(number_of_over_samplers)
-
-    # Does not seem to improve the scores, SMOTEENN already does some under sampling with the ENN part.
-    # under_sampling_strategies = [0.5, 0.49, 0.48, 0.47, 0.46, 0.45, 0.44, 0.43, 0.42, 0.41, 0.4]
-    # under_samplers = [RandomUnderSampler(sampling_strategy=under_sampling_strategy, random_state=42)
-    # for under_sampling_strategy in under_sampling_strategies]
-
-    # pipeline = [Pipeline([('over', over_sampler), ('under', under_sampler)]) for over_sampler in over_samplers
-    # for under_sampler in under_samplers]
-
-    for i, over_sampler in tqdm(enumerate(over_samplers), desc="Neural network",
-                                unit="over_sampler", total=len(over_samplers), colour="green"):
+    for i, sampler in tqdm(enumerate(samplers), desc="Neural network",
+                           unit="sampler", total=len(samplers), colour="green"):
         # Create the model:
-        model = create_convolutional_model(input_dim=26)
+        model = create_dense_model(input_dim=26)
 
         # Create the dataset with the pipeline or the over_sampler:
-        # x_train_resampled, y_train_resampled = pipeline[i].fit_resample(x_train, y_train)
-        x_train_resampled, y_train_resampled = over_sampler.fit_resample(x_train, y_train)
+        x_train_resampled, y_train_resampled = sampler.fit_resample(x_train, y_train)
 
         # Fit the model:
         model = fit_model(model, x_train_resampled, y_train_resampled)
@@ -84,14 +69,13 @@ def main() -> None:
 
         # Save the evaluation results:
         save_evaluation_results(evaluation_results=evaluation_results,
-                                model_type=f'{over_sampler.__class__.__name__}',
+                                model_type=f'{sampler.__class__.__name__}',
                                 save_path=neural_tuned_results_path,
-                                dataset_name=dataset_path.stem +
-                                             f"{over_sampler.__class__.__name__}_{sampling_strategies[i]}")
-        # f"{under_sampling_strategies[i]}.csv if under sampling is used")
+                                dataset_name=dataset_path.stem + "_" +
+                                f"{sampler.__class__.__name__}_{sampling_strategies[i % len(sampling_strategies)]}")
 
         # Conclusion:
-        #
+        # Use SVMSMOTE for balancing the neural network model.
         # Implemented.
 
 

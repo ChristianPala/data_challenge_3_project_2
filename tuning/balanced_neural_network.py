@@ -43,7 +43,7 @@ def load_balanced_datasets(folder: Path) -> list[tuple[pd.DataFrame, pd.DataFram
 
 
 @measure_time
-def balanced_neural_network_main(dominant_model: str = "convolutional") -> None:
+def balanced_neural_network_main(dominant_model: [str] = None) -> None:
     """
     This function runs the neural network with balanced data.
     @param dominant_model: str: the dominant model if it exists. If None, all models will be run.
@@ -69,21 +69,41 @@ def balanced_neural_network_main(dominant_model: str = "convolutional") -> None:
             elif dominant_model == "dense":
                 model = create_dense_model(x_train.shape[1])
             else:
-                model = create_convolutional_model(x_train.shape[1])
+                model_c = create_convolutional_model(x_train.shape[1])
+                model_d = create_dense_model(x_train.shape[1])
+                models = [model_c, model_d]
             # Fit the model:
-            fit_model(model, x_train, y_train)
-            # Predict the model:
-            y_pred = predict_model(model, x_validation)
-            # Evaluate the model:
-            evaluation_results = evaluate_model(y_validation, y_pred)
-            # Save the model:
-            models_path: Path = Path(neural_networks_balanced_results_path, "models")
-            models_path.mkdir(parents=True, exist_ok=True)
-            model.save(Path(models_path, f"{file_name}.h5"))
-            # Save the results:
-            save_evaluation_results(evaluation_results=evaluation_results, model_type=dominant_model + "_network",
-                                    save_path=neural_networks_balanced_results_path / sub / file_name,
-                                    dataset_name=file_name)
+            if model:
+                fit_model(model, x_train, y_train)
+                # Predict the model:
+                y_pred = predict_model(model, x_validation)
+                # Evaluate the model:
+                evaluation_results = evaluate_model(y_validation, y_pred)
+                # Save the model:
+                models_path: Path = Path(neural_networks_balanced_results_path, "models")
+                models_path.mkdir(parents=True, exist_ok=True)
+                model.save(Path(models_path, f"{file_name}.h5"))
+                # Save the results:
+                save_evaluation_results(evaluation_results=evaluation_results, model_type=dominant_model + "_network",
+                                        save_path=neural_networks_balanced_results_path / sub / file_name,
+                                        dataset_name=file_name)
+            else:
+                for i, model in enumerate(models):
+                    dominant_model = "convolutional" if i == 0 else "dense"
+                    fit_model(model, x_train, y_train)
+                    # Predict the model:
+                    y_pred = predict_model(model, x_validation)
+                    # Evaluate the model:
+                    evaluation_results = evaluate_model(y_validation, y_pred)
+                    # Save the model:
+                    models_path: Path = Path(neural_networks_balanced_results_path, "models")
+                    models_path.mkdir(parents=True, exist_ok=True)
+                    model.save(Path(models_path, f"{file_name}.h5"))
+                    # Save the results:
+                    save_evaluation_results(evaluation_results=evaluation_results, model_type=dominant_model
+                                                                                              + "_network",
+                                            save_path=neural_networks_balanced_results_path / sub / file_name,
+                                            dataset_name=file_name)
 
 
 # Driver:

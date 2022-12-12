@@ -57,6 +57,10 @@ def handle_missing_values(dataframe: pd.DataFrame, method: str = "drop",
         df = dataframe.copy()
         df["education"] = dataframe["education"].replace(np.nan, dataframe["education"].mode()[0])
         df["marriage"] = dataframe["marriage"].replace(np.nan, dataframe["marriage"].mode()[0])
+        # Save the dataset for EDA:
+        path = Path(data_path, "EDA")
+        path.mkdir(parents=True, exist_ok=True)
+        df.to_csv(Path(path, "dataset_for_eda.csv"), index=False)
 
     elif method == "supervised_imputation":
         # Impute the missing values with a supervised method:

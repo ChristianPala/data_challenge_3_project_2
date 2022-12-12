@@ -77,11 +77,12 @@ def normalize_data(training: pd.DataFrame, validation: pd.DataFrame, testing: pd
 
 
 @measure_time
-def scaling_main(dominant_scaling_strategies: [str] = None) -> None:
+def scaling_main(dominant_scaling_strategies: [str] = None, save_non_normalized: bool = False) -> None:
     """
     Main method to execute the scaling library
     @param dominant_scaling_strategies: the dominant scaling strategy to use, if it exists. If it does not exist,
     all scaling strategies will be used.
+    @param save_non_normalized: whether to also save the non-normalized datasets.
     :return: None: execute the scaling library.
     """
 
@@ -107,6 +108,7 @@ def scaling_main(dominant_scaling_strategies: [str] = None) -> None:
         methods = ["standard_scaler", "minmax_scaler", "robust_scaler"]
 
         if not dominant_scaling_strategies:
+
             for method in methods:
 
                 if method in ["standard_scaler", "robust_scaler"]:
@@ -120,10 +122,11 @@ def scaling_main(dominant_scaling_strategies: [str] = None) -> None:
                 # add back the target column:
                 dataframe["default"] = pd.concat([y_train, y_val, y_test], axis=0)
 
-                # Save the scaled data in the scaled_datasets folder:
-                dataframe.to_csv(Path(scaled_datasets_path,
-                                      f"project_2_dataset_{method}_scaling_{'_'.join(missing_values_method)}.csv"),
-                                 index=False)
+                # Save the scaled data in the scaled_datasets folder if also the non-normalized data is saved:
+                if save_non_normalized:
+                    dataframe.to_csv(Path(scaled_datasets_path,
+                                          f"project_2_dataset_{method}_scaling_{'_'.join(missing_values_method)}.csv"),
+                                     index=False)
 
                 # Normalize the data if the method is Standard or Robust, since min-max scaling is already normalized:
                 if method in ["standard_scaler", "robust_scaler"]:
@@ -151,10 +154,24 @@ def scaling_main(dominant_scaling_strategies: [str] = None) -> None:
                 # add back the target column:
                 dataframe["default"] = pd.concat([y_train, y_val, y_test], axis=0)
 
-                # Save the scaled data in the scaled_datasets folder:
-                dataframe.to_csv(Path(scaled_datasets_path,
-                                      f"project_2_dataset_{method}_scaling_{'_'.join(missing_values_method)}.csv"),
-                                 index=False)
+                # Save the scaled data in the scaled_datasets folder if also the non-normalized data is saved:
+                if save_non_normalized:
+                    dataframe.to_csv(Path(scaled_datasets_path,
+                                          f"project_2_dataset_{method}_scaling_{'_'.join(missing_values_method)}.csv"),
+                                     index=False)
+
+                # Normalize the data if the method is Standard or Robust, since min-max scaling is already normalized:
+                if method in ["standard_scaler", "robust_scaler"]:
+                    dataframe: pd.DataFrame = normalize_data(x_train, x_val, x_test, x_train.columns)
+
+                    # add back the target column:
+                    dataframe["default"] = pd.concat([y_train, y_val, y_test], axis=0)
+
+                    # Save the normalized data:
+                    dataframe.to_csv(Path(scaled_datasets_path,
+                                          f"project_2_dataset_normalized_{method}_{'_'.join(missing_values_method)}.csv"),
+                                     index=False)
+
 
 # Driver code:
 if __name__ == "__main__":

@@ -13,7 +13,7 @@ from tqdm import tqdm
 from auxiliary.method_timer import measure_time
 # Modelling:
 from modelling.train_test_validation_split import split_data
-from imblearn.over_sampling import SMOTE, RandomOverSampler, BorderlineSMOTE
+from imblearn.over_sampling import SMOTE, RandomOverSampler, BorderlineSMOTE, SVMSMOTE
 from imblearn.under_sampling import RandomUnderSampler
 from imblearn.pipeline import Pipeline
 from imblearn.combine import SMOTETomek, SMOTEENN
@@ -49,7 +49,7 @@ def undersample_transform(train: pd.DataFrame, target: str) -> pd.DataFrame:
     x = df.drop([target], axis=1)
 
     # Defining our under-sampler
-    under = RandomUnderSampler(sampling_strategy=0.5, random_state=42)
+    under = RandomUnderSampler(sampling_strategy='auto', random_state=42)
 
     # Transform the dataset
     x, y = under.fit_resample(x, y)
@@ -103,7 +103,7 @@ def smote_transform(train: pd.DataFrame, target: str) -> pd.DataFrame:
     x = df.drop([target], axis=1)
 
     # Defining our over-sampler and under-sampler
-    over = SMOTE(sampling_strategy=0.35, random_state=42, n_jobs=-1)
+    over = SMOTE(sampling_strategy='auto', random_state=42, n_jobs=-1)
 
     # Transform the dataset
     x, y = over.fit_resample(x, y)
@@ -129,7 +129,7 @@ def borderline_smote(train: pd.DataFrame, target: str) -> pd.DataFrame:
     X = df.drop([target], axis=1)
 
     # Defining our over-sampler
-    over = BorderlineSMOTE(sampling_strategy=0.35, random_state=42, n_jobs=-1)
+    over = BorderlineSMOTE(sampling_strategy='auto', random_state=42, n_jobs=-1)
 
     # Transform the dataset
     x, y = over.fit_resample(X, y)
@@ -155,7 +155,7 @@ def smote_tomek(train: pd.DataFrame, target: str) -> pd.DataFrame:
     x = df.drop([target], axis=1)
 
     # Defining our over-sampler
-    over = SMOTETomek(sampling_strategy=0.35, random_state=42, n_jobs=-1)
+    over = SMOTETomek(sampling_strategy='auto', random_state=42, n_jobs=-1)
 
     # Transform the dataset
     x, y = over.fit_resample(x, y)
@@ -181,7 +181,33 @@ def smote_enn(train: pd.DataFrame, target: str) -> pd.DataFrame:
     x = df.drop([target], axis=1)
 
     # Defining our over-sampler
-    over = SMOTEENN(sampling_strategy=0.35, random_state=42, n_jobs=-1)
+    over = SMOTEENN(sampling_strategy='auto', random_state=42, n_jobs=-1)
+
+    # Transform the dataset
+    x, y = over.fit_resample(x, y)
+
+    # merge the target feature with the rest of the features
+    df = pd.DataFrame(pd.concat([x, y], axis=1))
+
+    return df
+
+
+def svmsmote(train: pd.DataFrame, target: str) -> pd.DataFrame:
+    """
+    Transformation using the imbalance learn implementation of SVM SMOTE:
+    https://imbalanced-learn.org/stable/references/generated/imblearn.over_sampling.SVMSMOTE.html
+    :param train: the dataframe to be analyzed
+    :param target: the column name of the target feature
+    :return: pd.Dataframe: the balanced dataframe
+    """
+    df = train.copy()
+
+    # We split the target and the rest of the features
+    y = df[target]
+    x = df.drop([target], axis=1)
+
+    # Defining our over-sampler
+    over = SVMSMOTE(sampling_strategy='auto', random_state=42, n_jobs=-1)
 
     # Transform the dataset
     x, y = over.fit_resample(x, y)
@@ -241,6 +267,8 @@ def perform_balancing(tr: pd.DataFrame, vl: pd.DataFrame, tst: pd.DataFrame, tar
         tr = smote_tomek(tr, target)
     elif method == "smote_enn":
         tr = smote_enn(tr, target)
+    elif method == "svmsmote":
+        tr = svmsmote(tr, target)
     else:
         raise ValueError(f"Unknown method {method}")
 
@@ -284,7 +312,8 @@ def balance_classes_main(suppress_print=True, dominant_strategies: List[str] = N
 
         # perform the balancing with all the methods:
         if not dominant_strategies:
-            methods = ["undersampled", "oversampled", "smote", "borderline_smote", "smote_tomek_links", "smote_enn"]
+            methods = ["undersampled", "oversampled", "smote", "borderline_smote", "smote_tomek_links", "smote_enn",
+                       "svmsmote"]
             for method in tqdm(methods, total=len(methods), desc="Balancing methods", unit="method"):
                 perform_balancing(training_dataframe, validation_dataframe, test_dataframe, "default", method,
                                   file.stem)
