@@ -267,7 +267,7 @@ def perform_balancing(tr: pd.DataFrame, vl: pd.DataFrame, tst: pd.DataFrame, tar
         tr = smote_tomek(tr, target)
     elif method == "smote_enn":
         tr = smote_enn(tr, target)
-    elif method == "svmsmote":
+    elif method == "svm_smote":
         tr = svmsmote(tr, target)
     else:
         raise ValueError(f"Unknown method {method}")
