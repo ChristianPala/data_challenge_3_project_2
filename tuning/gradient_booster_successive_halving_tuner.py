@@ -114,7 +114,7 @@ def evaluate_models(tuned_models: List[GradientBoostingClassifier], validation_c
     results = pd.DataFrame(results, columns=['model', 'score'])
     # save the results:
     results.to_csv(Path(trees_balanced_results_path, "gradient_booster_successive_halving_tuner_results.csv"),
-                        index=False)
+                   index=False)
     # select the best model:
     best_model = results.loc[results['score'].idxmax(), 'model']
     # print the best model parameters:
@@ -128,7 +128,7 @@ def gb_main() -> None:
     :return: None
     """
     # create the list of paths to the csv files in the balanced folder:
-    training_csv_list, validation_csv_list = create_csv_list(added_path=Path('smote_tomek_links'))
+    training_csv_list, validation_csv_list = create_csv_list(added_path=Path('svm_smote'))
     # tune the model:
     tuned_models = tune_model(training_csv_list)
     # evaluate the tuned models:
@@ -137,8 +137,3 @@ def gb_main() -> None:
 
 if __name__ == '__main__':
     gb_main()
-
-
-
-
-

@@ -9,6 +9,7 @@ import os
 
 # Modelling:
 import tensorflow as tf
+from keras.utils import plot_model
 from tensorflow import keras
 from keras.models import Model, Sequential
 from keras.layers import Dense, Dropout, Layer, Conv1D, MaxPooling1D, Flatten
@@ -87,6 +88,16 @@ def predict_model(model: Sequential, x_test: np.array) -> np.array:
     return model.predict(x_test, verbose=0)
 
 
+def print_model_architecture(model: Sequential) -> None:
+    """
+    This function prints the model architecture.
+    @param model: Sequential: the model to be printed.
+    :return: None.
+    """
+    plot_model(model, to_file=Path(neural_networks_results_path, 'plot.png'), show_shapes=True,
+               show_layer_names=True)
+
+
 @measure_time
 def neural_network_main() -> None:
     """
@@ -146,8 +157,13 @@ def neural_network_main() -> None:
         model_dense.save(models_path / f'{csv_file.stem}_dense.h5')
         model_conv.save(models_path / f'{csv_file.stem}_convolutional.h5')
 
+        # print the model architecture:
+        print_model_architecture(model_dense)
+        print_model_architecture(model_conv)
+
 
 if __name__ == '__main__':
     neural_network_main()
+
 
 
