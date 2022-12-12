@@ -43,11 +43,14 @@ final_models_path: Path = Path(model_explainability, "final_models")
 
 # final dataset:
 # ---------------------------------------------------------------------------------------------------
-final_test_csv_path: Path = Path(balanced_datasets_path, "smote_enn", "robust_scaler_scaling_drop",
+final_test_csv_path: Path = Path(balanced_datasets_path, "undersampled",
+                                 "minmax_scaler_scaling_unsupervised_imputation",
                                  "final_testing.csv")
-final_train_csv_path: Path = Path(balanced_datasets_path, "smote_enn", "robust_scaler_scaling_drop",
+final_train_csv_path: Path = Path(balanced_datasets_path, "undersampled",
+                                  "minmax_scaler_scaling_unsupervised_imputation",
                                   "final_training.csv")
-final_val_csv_path: Path = Path(balanced_datasets_path, "smote_enn", "robust_scaler_scaling_drop",
+final_val_csv_path: Path = Path(balanced_datasets_path, "undersampled",
+                                "minmax_scaler_scaling_unsupervised_imputation",
                                 "final_validation.csv")
 # ---------------------------------------------------------------------------------------------------
 final_neural_network_path: Path = Path(final_models_path, "cnn_model.pkl")
@@ -63,5 +66,6 @@ shap_results_path: Path = Path(results_path, "shap_results")
 # ---------------------------------------------------------------------------------------------------
 lime_results_path: Path = Path(results_path, "lime_results")
 # ---------------------------------------------------------------------------------------------------
+white_box_model_explanation_path: Path = Path(results_path, "white_box_model_explanation")
 # Final models comparison:
 final_models_comparison_path: Path = Path(project_root_path, "final_models_comparison")

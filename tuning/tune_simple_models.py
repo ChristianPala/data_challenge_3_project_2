@@ -15,47 +15,13 @@ from sklearn.tree import DecisionTreeClassifier
 # Timing:
 from tqdm import tqdm
 
+# Feature selection:
+from feature_selection.remove_correlated_features import simplify_dataset
+
 from auxiliary.method_timer import measure_time
 # Global variables:
 from config import final_train_csv_path, final_val_csv_path, other_models_tuned_results_path
 
-
-def simplify_dataset() -> (pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame):
-    """
-    This function simplifies the dataset by removing the columns with the highest correlation.
-    :return: None
-    """
-    # Load the data:
-    train_df = pd.read_csv(final_train_csv_path)
-    val_df = pd.read_csv(final_val_csv_path)
-
-    x_train = train_df.drop(columns=['default'])
-    y_train = train_df['default']
-
-    x_val = val_df.drop(columns=['default'])
-    y_val = val_df['default']
-
-    # since we already created total pay_status_cumulative, we can remove the other pay_status columns:
-    x_train = x_train.drop(columns=['pay_stat_sep', 'pay_stat_aug', 'pay_stat_jul', 'pay_stat_jun',
-                                    'pay_stat_may', 'pay_stat_apr'])
-    x_val = x_val.drop(columns=['pay_stat_sep', 'pay_stat_aug', 'pay_stat_jul', 'pay_stat_jun',
-                                'pay_stat_may', 'pay_stat_apr'])
-
-    # since we already created total_bill_amount, we can remove the other bill_amt columns:
-    x_train = x_train.drop(columns=['bill_amt_sep', 'bill_amt_aug', 'bill_amt_jul', 'bill_amt_jun',
-                                    'bill_amt_may', 'bill_amt_apr'])
-
-    x_val = x_val.drop(columns=['bill_amt_sep', 'bill_amt_aug', 'bill_amt_jul', 'bill_amt_jun',
-                                'bill_amt_may', 'bill_amt_apr'])
-
-    # since we already created total_paid_amount, we can remove the other pay_amt columns:
-    x_train = x_train.drop(columns=['pay_amt_sep', 'pay_amt_aug', 'pay_amt_jul', 'pay_amt_jun',
-                                    'pay_amt_may', 'pay_amt_apr'])
-
-    x_val = x_val.drop(columns=['pay_amt_sep', 'pay_amt_aug', 'pay_amt_jul', 'pay_amt_jun',
-                                'pay_amt_may', 'pay_amt_apr'])
-
-    return x_train, y_train, x_val, y_val
 
 
 def create_models() -> List[Tuple[str, object]]:
@@ -82,7 +48,7 @@ def tuner(x_train: pd.DataFrame, y_train: pd.DataFrame) -> List[Tuple[str, objec
     # define the parameters to be tuned:
     decision_tree_params = {'max_depth': [3, 5, 7, 9, 11],
                             'min_samples_leaf': [1, 2, 3, 4, 5],
-                            'min_samples_split': [1, 2, 3, 4, 5],
+                            'min_samples_split': [2, 3, 4, 5],
                             'criterion': ['gini', 'entropy']}
 
     knn_params = {'n_neighbors': [3, 5, 7, 9, 11, 13],
@@ -151,7 +117,7 @@ def simple_models_main() -> None:
     :return: None
     """
     # Simplify the dataset:
-    x_train, y_train, x_val, y_val = simplify_dataset()
+    x_train, y_train, x_val, y_val = simplify_dataset(final_train_csv_path, final_val_csv_path)
 
     # Tune the models:
     tuned_models = tuner(x_train, y_train)

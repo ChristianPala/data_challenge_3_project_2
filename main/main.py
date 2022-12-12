@@ -14,6 +14,7 @@ from tuning.balance_classes import balance_classes_main
 from tuning.balanced_trees import balanced_trees_main
 from tuning.balanced_neural_network import balanced_neural_network_main
 from tuning.balanced_knn_logreg_naiveb_svc import balanced_other_models_main
+from model_explainability.white_box_model import white_box_main
 from model_explainability.create_final_models import create_final_models_main
 from model_explainability.global_surrogate import global_surrogate_main
 from model_explainability.global_model_interpration_with_shap import global_shap_main
@@ -82,12 +83,12 @@ def main() -> None:
     # ----------------------------------------------
     # After tuning the balancing strategies, we selected smoteen, which was the best or
     # second best for all models.
-    # balance_classes_main(dominant_strategies=['smote_enn'])
-    # balanced_trees_main(dominant_model='gradient_boosting')
-    # balanced_neural_network_main(dominant_model='convolutional')
-    # balanced_other_models_main(dominant_model='svc')
-    # evaluator_main(trees_balanced_results_path, neural_networks_balanced_results_path,
-    #               other_models_balanced_results_path, suppress_print=True, balanced=True)
+    balance_classes_main(dominant_strategies=["undersampled", "oversampled"])
+    balanced_trees_main(dominant_model='gradient_boosting')
+    balanced_neural_network_main(dominant_model='dense')
+    balanced_other_models_main(domiant_model='svc')
+    evaluator_main(trees_balanced_results_path, neural_networks_balanced_results_path,
+                   other_models_balanced_results_path, suppress_print=True, balanced=True)
     """
     Sample output:
     The best gradient boosting robust scaler drop, with an f1 score of 0.532
@@ -113,6 +114,8 @@ def main() -> None:
     # ----------------------------------------------
     # Global:
     # ----------------------------------------------
+    # white box:
+    # white_box_main()
     # feature permutation:
     # permutation_importance_main()
     # dependence plots:

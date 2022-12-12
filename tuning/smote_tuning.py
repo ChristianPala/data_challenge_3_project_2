@@ -1,6 +1,6 @@
 # Library to tune the SMOTE algorithm combined with the neural network algorithm.
 from imblearn.combine import SMOTEENN, SMOTETomek
-from imblearn.over_sampling import SMOTE, BorderlineSMOTE, SVMSMOTE, ADASYN, KMeansSMOTE
+from imblearn.over_sampling import SMOTE, BorderlineSMOTE, SVMSMOTE, ADASYN, KMeansSMOTE, RandomOverSampler
 from imblearn.pipeline import Pipeline
 from imblearn.under_sampling import RandomUnderSampler
 from tqdm import tqdm
@@ -28,14 +28,33 @@ def main() -> None:
     :return: None
     """
     # Load the data:
-    df = pd.read_csv(Path(scaled_datasets_path, "project_2_dataset_robust_scaler_scaling_drop_augmented.csv"))
+    dataset_path = Path(scaled_datasets_path,
+                        "project_2_dataset_minmax_scaler_scaling_most_frequent_imputation_augmented.csv")
+    df = pd.read_csv(dataset_path)
 
     x_train, x_val, x_test, y_train, y_val, y_test = split_data(df, "default", validation=True)
 
     # Create over_samplers:
-    sampling_strategies = [0.3, 0.31, 0.32, 0.33, 0.34, 0.35, 0.36, 0.37, 0.38, 0.39, 0.4]
-    over_samplers = [SMOTEENN(sampling_strategy=sampling_strategy, random_state=42)  # SMOTEENN gave the best results
+    sampling_strategies = [0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.0]
+    over_samplers = [SMOTEENN(sampling_strategy=sampling_strategy, random_state=42)
                      for sampling_strategy in sampling_strategies]
+    over_samplers += [RandomOverSampler(sampling_strategy=sampling_strategy, random_state=42)
+                      for sampling_strategy in sampling_strategies]
+    over_samplers += [BorderlineSMOTE(sampling_strategy=sampling_strategy, random_state=42)
+                      for sampling_strategy in sampling_strategies]
+    over_samplers += [SVMSMOTE(sampling_strategy=sampling_strategy, random_state=42)
+                      for sampling_strategy in sampling_strategies]
+    over_samplers += [ADASYN(sampling_strategy=sampling_strategy, random_state=42)
+                      for sampling_strategy in sampling_strategies]
+    over_samplers += [KMeansSMOTE(sampling_strategy=sampling_strategy, random_state=42)
+                      for sampling_strategy in sampling_strategies]
+    over_samplers += [SMOTETomek(sampling_strategy=sampling_strategy, random_state=42)
+                      for sampling_strategy in sampling_strategies]
+    over_samplers += [RandomOverSampler(sampling_strategy=sampling_strategy, random_state=42)
+                      for sampling_strategy in sampling_strategies]
+
+    number_of_over_samplers = len(over_samplers) / len(sampling_strategies)
+    sampling_strategies = sampling_strategies * int(number_of_over_samplers)
 
     # Does not seem to improve the scores, SMOTEENN already does some under sampling with the ENN part.
     # under_sampling_strategies = [0.5, 0.49, 0.48, 0.47, 0.46, 0.45, 0.44, 0.43, 0.42, 0.41, 0.4]
@@ -67,12 +86,12 @@ def main() -> None:
         save_evaluation_results(evaluation_results=evaluation_results,
                                 model_type=f'{over_sampler.__class__.__name__}',
                                 save_path=neural_tuned_results_path,
-                                dataset_name=f"project_2_dataset_robust_scaler_scaling_drop_augmented_balanced"
+                                dataset_name=dataset_path.stem +
                                              f"{over_sampler.__class__.__name__}_{sampling_strategies[i]}")
         # f"{under_sampling_strategies[i]}.csv if under sampling is used")
 
         # Conclusion:
-        # seems worthwhile to try to use the SMOTEENN with a sampling strategy of ~0.35.
+        #
         # Implemented.
 
 
