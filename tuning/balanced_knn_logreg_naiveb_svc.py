@@ -21,7 +21,7 @@ from config import balanced_datasets_path, other_models_balanced_results_path
 
 # Functions:
 @measure_time
-def balanced_other_models_main(dominant_model: str = None) -> None:
+def balanced_other_models_main(dominant_models: [str] = None) -> None:
     """
     This function runs the tree models with balanced data.
     @param dominant_model: str: the dominant model if it exists. If None, all models will be run.
@@ -43,7 +43,7 @@ def balanced_other_models_main(dominant_model: str = None) -> None:
             y_validation = validation["default"]
 
             # create the models:
-            if not dominant_model:
+            if not dominant_models:
                 knn_model = create_knn_model()
                 logreg_model = create_logreg_model()
                 naive_bayes_model = create_naive_bayes_model()
@@ -66,51 +66,55 @@ def balanced_other_models_main(dominant_model: str = None) -> None:
                                             save_path=other_models_balanced_results_path / sub / file_name,
                                             dataset_name=file_name)
 
-            elif dominant_model == "knn":
-                knn_model = create_knn_model()
-                # Fit the model:
-                fit_model(knn_model, x_train, y_train)
-                # Predict the model:
-                y_pred = predict_model(knn_model, x_validation)
-                # Evaluate the model:
-                evaluation = evaluate_model(y_validation, y_pred)
-                # Save the results:
-                save_evaluation_results(evaluation_results=evaluation, model_type="knn",
-                                        save_path=other_models_balanced_results_path / sub / file_name,
-                                        dataset_name=file_name)
-            elif dominant_model == "logreg":
-                logreg_model = create_logreg_model()
-                # Fit the model:
-                fit_model(logreg_model, x_train, y_train)
-                # Predict the model:
-                y_pred = predict_model(logreg_model, x_validation)
-                # Evaluate the model:
-                evaluation = evaluate_model(y_validation, y_pred)
-                # Save the results:
-                save_evaluation_results(evaluation_results=evaluation, model_type="logreg",
-                                        save_path=other_models_balanced_results_path / sub / file_name,
-                                        dataset_name=file_name)
-            elif dominant_model == "naive_bayes":
-                naive_bayes_model = create_naive_bayes_model()
-                # Fit the model:
-                fit_model(naive_bayes_model, x_train, y_train)
-                # Predict the model:
-                y_pred = predict_model(naive_bayes_model, x_validation)
-                # Evaluate the model:
-                evaluation = evaluate_model(y_validation, y_pred)
-                # Save the results:
-                save_evaluation_results(evaluation_results=evaluation, model_type="naive_bayes",
-                                        save_path=other_models_balanced_results_path / sub / file_name,
-                                        dataset_name=file_name)
-            elif dominant_model == "svc":
-                svm_model = create_svc_model()
-                # Fit the model:
-                fit_model(svm_model, x_train, y_train)
-                # Predict the model:
-                y_pred = predict_model(svm_model, x_validation)
-                # Evaluate the model:
-                evaluation = evaluate_model(y_validation, y_pred)
-                # Save the results:
-                save_evaluation_results(evaluation_results=evaluation, model_type="svc",
-                                        save_path=other_models_balanced_results_path / sub / file_name,
-                                        dataset_name=file_name)
+            elif dominant_models:
+                for dominant_model in dominant_models:
+                    if dominant_model == "knn":
+                        knn_model = create_knn_model()
+                        # Fit the model:
+                        fit_model(knn_model, x_train, y_train)
+                        # Predict the model:
+                        y_pred = predict_model(knn_model, x_validation)
+                        # Evaluate the model:
+                        evaluation = evaluate_model(y_validation, y_pred)
+                        # Save the results:
+                        save_evaluation_results(evaluation_results=evaluation, model_type="knn",
+                                                save_path=other_models_balanced_results_path / sub / file_name,
+                                                dataset_name=file_name)
+                    elif dominant_model == "logreg":
+                        logreg_model = create_logreg_model()
+                        # Fit the model:
+                        fit_model(logreg_model, x_train, y_train)
+                        # Predict the model:
+                        y_pred = predict_model(logreg_model, x_validation)
+                        # Evaluate the model:
+                        evaluation = evaluate_model(y_validation, y_pred)
+                        # Save the results:
+                        save_evaluation_results(evaluation_results=evaluation, model_type="logreg",
+                                                save_path=other_models_balanced_results_path / sub / file_name,
+                                                dataset_name=file_name)
+                    elif dominant_model == "naive_bayes":
+                        naive_bayes_model = create_naive_bayes_model()
+                        # Fit the model:
+                        fit_model(naive_bayes_model, x_train, y_train)
+                        # Predict the model:
+                        y_pred = predict_model(naive_bayes_model, x_validation)
+                        # Evaluate the model:
+                        evaluation = evaluate_model(y_validation, y_pred)
+                        # Save the results:
+                        save_evaluation_results(evaluation_results=evaluation, model_type="naive_bayes",
+                                                save_path=other_models_balanced_results_path / sub / file_name,
+                                                dataset_name=file_name)
+                    elif dominant_model == "svc":
+                        svm_model = create_svc_model()
+                        # Fit the model:
+                        fit_model(svm_model, x_train, y_train)
+                        # Predict the model:
+                        y_pred = predict_model(svm_model, x_validation)
+                        # Evaluate the model:
+                        evaluation = evaluate_model(y_validation, y_pred)
+                        # Save the results:
+                        save_evaluation_results(evaluation_results=evaluation, model_type="svc",
+                                                save_path=other_models_balanced_results_path / sub / file_name,
+                                                dataset_name=file_name)
+                    else:
+                        raise ValueError("The dominant model is not currently supported.")

@@ -39,30 +39,27 @@ def main() -> None:
     """
     # Preprocessing:
     # ----------------------------------------------
-    preprocessor_main(suppress_print=True,
-                      missing_values_dominant_strategies=['most_frequent_imputation', 'unsupervised_imputation'])
+    preprocessor_main(suppress_print=True, missing_values_dominant_strategies=['most_frequent_imputation'])
     feature_engineering_main(overwrite_original=True)
     scaling_main(dominant_scaling_strategies=['robust_scaler'], save_non_normalized=False)
     eda_main()
-    # # Baseline models:
-    # # ----------------------------------------------
+    # Baseline models:
+    # ----------------------------------------------
     trees_main()
     neural_network_main()
     other_models_main()
     evaluator_main(trees_results_path, neural_networks_results_path,
                    other_models_results_path, suppress_print=True)
-
     # Tuning:
     # ----------------------------------------------
+    # Balancing the classes and running the models again:
     balance_classes_main(dominant_strategies=["undersampled", "oversampled", "svmsmote"])
     balanced_trees_main(dominant_model='gradient_boosting')
     balanced_neural_network_main()
-    balanced_other_models_main(dominant_model='naive_bayes')
-    balanced_other_models_main(dominant_model='svc')
+    balanced_other_models_main(dominant_models=['naive_bayes', 'svc'])
     evaluator_main(trees_balanced_results_path, neural_networks_balanced_results_path,
                    other_models_balanced_results_path, suppress_print=True, balanced=True)
-
-    # Tuning:
+    # Hyper-parameter Tuning:
     # ----------------------------------------------
     # gb_main()
     # tuned neural network, we consider the dense model as the best one
