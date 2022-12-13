@@ -3,6 +3,8 @@
 # Data manipulation:
 from pathlib import Path
 from typing import List
+
+import numpy as np
 import pandas as pd
 from tuning.gradient_booster_successive_halving_tuner import create_csv_list
 from sklearn.metrics import f1_score
@@ -26,7 +28,7 @@ def create_model() -> SVC:
     :return: model: the model to be tuned.
     """
     # Create the model:
-    model = SVC(random_state=42)
+    model = SVC(random_state=42, probability=True)
 
     return model
 
@@ -39,9 +41,9 @@ def tune_model(training_csv_list: List[Path]) -> list[SVC]:
     """
     # define the parameter space:
     param_space = {
-        'C': [4800, 4900, 5000, 5100, 5200, 5300, 5400],
-        'gamma': [10 ** -5, 10 ** -6, 10 ** -7, 10 ** -8, 10 ** -9, 10 ** -10, 10 ** -11],
-        'kernel': ['rbf', 'poly', 'sigmoid']
+        'C': [0.5, 1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5],
+        'kernel': ['rbf', 'poly', 'sigmoid'],
+        'degree': [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
     }
 
     # create the model:
@@ -99,6 +101,7 @@ def evaluate_models(tuned_models: List[SVC], validation_csv_list: List[Path]) ->
         y = validation['default']
         # evaluate the tuned model:
         y_pred = tuned_model.predict(x)
+        y_pred = np.where(y_pred > 0.5, 1, 0)
         # calculate the f1 score:
         f1 = f1_score(y, y_pred)
         # save the results:
@@ -107,7 +110,7 @@ def evaluate_models(tuned_models: List[SVC], validation_csv_list: List[Path]) ->
     results = pd.DataFrame(results, columns=['model', 'f1 score', 'balancing method'])
 
     # save the results:
-    results.to_csv(other_models_tuned_results_path, index=False)
+    results.to_csv(Path(other_models_tuned_results_path, "svc_tuned.csv"), index=False)
 
 
 @measure_time

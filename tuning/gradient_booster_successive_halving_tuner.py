@@ -38,7 +38,7 @@ def create_csv_list(added_path: Path = None) -> Tuple[list[Path], list[Path]]:
     This function creates a list of paths to the csv files in the balanced folder.
     :return: list[Path]: a list of paths to the csv files in the balanced folder.
     """
-    # if a subfolder is specified:
+    # if a sub folder is specified:
     path = balanced_datasets_path if added_path is None else balanced_datasets_path / added_path
 
     # create the list of paths:
@@ -119,6 +119,13 @@ def evaluate_models(tuned_models: List[GradientBoostingClassifier], validation_c
     best_model = results.loc[results['score'].idxmax(), 'model']
     # print the best model parameters:
     print(best_model.get_params())
+    """
+    {'ccp_alpha': 0.0, 'criterion': 'friedman_mse', 'init': None, 'learning_rate': 0.2, 
+    'loss': 'log_loss', 'max_depth': 10, 'max_features': None, 'max_leaf_nodes': None, 
+    'min_impurity_decrease': 0.0, 'min_samples_leaf': 5, 'min_samples_split': 5, 
+    'min_weight_fraction_leaf': 0.0, 'n_estimators': 800, 'n_iter_no_change': None, '
+    random_state': 42, 'subsample': 1.0, 'tol': 0.0001, 'validation_fraction': 0.1, 'verbose': 0, 'warm_start': False}
+    """
 
 
 @measure_time

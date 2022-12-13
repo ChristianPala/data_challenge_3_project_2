@@ -1,6 +1,7 @@
 # Data manipulation:
 import pandas as pd
 from pathlib import Path
+import os
 # Tuning
 import optuna
 from optuna.trial import TrialState, Trial
@@ -17,14 +18,15 @@ from modelling.model_evaluator import evaluate_model, save_evaluation_results
 from auxiliary.method_timer import measure_time
 
 # Global variables:
-from config import balanced_datasets_path, neural_tuned_results_path
+from config import neural_tuned_results_path, final_train_csv_path, final_val_csv_path
+
+# Ensure the directory exists:
+neural_tuned_results_path.mkdir(parents=True, exist_ok=True)
 
 # Tensorflow logging:
-import os
-
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 # How many trials to allow the tuner to run, time efficiency vs accuracy
-NUMBER_OF_TRIALS: int = 30
+NUMBER_OF_TRIALS: int = 10
 
 
 def load_best_dataset() -> tuple[pd.DataFrame, pd.Series, pd.DataFrame, pd.Series]:
@@ -33,8 +35,8 @@ def load_best_dataset() -> tuple[pd.DataFrame, pd.Series, pd.DataFrame, pd.Serie
     :return: pd.DataFrame: the best dataset.
     """
     # load the dataset:
-    train = pd.read_csv(Path(balanced_datasets_path, "smote_enn", "robust_scaler_scaling_drop", "final_training.csv"))
-    val = pd.read_csv(Path(balanced_datasets_path, "smote_enn", "robust_scaler_scaling_drop", "final_validation.csv"))
+    train = pd.read_csv(Path(final_train_csv_path))
+    val = pd.read_csv(Path(final_val_csv_path))
     # split the dataset into features and target:
     x_train = train.drop('default', axis=1)
     y_train = train['default']
@@ -196,7 +198,7 @@ def evaluate_best_model() -> None:
     Evaluates the best model found by the tuner and saves the results.
     """
     """
-    Best params with 30 trials:
+    Best params with 10 trials:
     Layers Count': 2, 
     layer_0': 10, 'activation_layer_0': 'tanh', 'filters_layer_0': 114, 
     kernel_size_layer_0': 8, 'pool_size_layer_0': 6, '
@@ -267,7 +269,28 @@ def main() -> None:
     # save the results:
     study.trials_dataframe().to_csv(Path(neural_tuned_results_path, "neural_network_tuner.csv"))
 
+    """
+    Best trial:
+  Value: 0.8298506259918212 
+  Params: 
+    Layers Count: 2
+    layer_0: 23
+    activation_layer_0: relu
+    filters_layer_0: 140
+    kernel_size_layer_0: 7
+    pool_size_layer_0: 3
+    layer_1: 133
+    activation_layer_1: tanh
+    filters_layer_1: 128
+    kernel_size_layer_1: 7
+    pool_size_layer_1: 4
+    optimizer: adam
+    learning_rate: 0.006679385448500152
+    epochs: 73
+    batch_size: 93
+    
+    """
+
 
 if __name__ == '__main__':
-    # main()
-    evaluate_best_model()
+    main()

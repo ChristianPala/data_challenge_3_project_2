@@ -12,7 +12,7 @@ from keras.models import load_model
 from sklearn.exceptions import ConvergenceWarning
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import mean_squared_error
-# experimental tuning with halvingrandomsearchcv: see
+# experimental tuning with halving random search cv:
 # https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.HalvingRandomSearchCV.html
 from sklearn.experimental import enable_halving_search_cv  # NOQA
 from sklearn.model_selection import HalvingRandomSearchCV

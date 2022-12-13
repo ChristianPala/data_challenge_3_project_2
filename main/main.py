@@ -53,7 +53,9 @@ def main() -> None:
     # Tuning:
     # ----------------------------------------------
     # Balancing the classes and running the models again:
-    balance_classes_main(dominant_strategies=["svm_smote"])  # best balancing strategy we found for our dataset.
+    balance_classes_main(dominant_strategies=["svm_smote", "undersampled"])
+    # best balancing strategy we found for our dataset is svm_smote, we also kept undesampling
+    # to have a smaller dataset.
     balanced_trees_main(dominant_model='gradient_boosting')
     balanced_neural_network_main()
     balanced_other_models_main(dominant_models=['naive_bayes', 'svc'])

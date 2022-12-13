@@ -2,25 +2,24 @@
 # Libraries:
 # Data manipulation:
 from pathlib import Path
-
-import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
-from keras import Model, Sequential
-from keras.layers import Conv1D, MaxPooling1D, Flatten, Dense
-from keras.optimizers import RMSprop
+# Plotting:
+import matplotlib.pyplot as plt
 # Modelling:
 from sklearn.ensemble import GradientBoostingClassifier
 from sklearn.metrics import f1_score, confusion_matrix, ConfusionMatrixDisplay
-from tuning.convolutional_neural_network_tuner_Optuna import create_model_with_layers
-
 from sklearn.svm import SVC
 from sklearn.metrics import classification_report
+from keras import Model, Sequential
+from keras.layers import Conv1D, MaxPooling1D, Flatten, Dense
+from keras.optimizers import RMSprop, Adam
 
 # Global variables:
 from config import final_train_csv_path, final_val_csv_path, final_models_path, final_test_csv_path
 from tuning.convolutional_neural_network_tuner_Optuna import create_model_with_layers
 
+# Ensure the directory exists:
 final_models_path.mkdir(parents=True, exist_ok=True)
 
 
@@ -28,12 +27,22 @@ def gradient_boosting_model(x_train: np.ndarray, y_train: np.ndarray) -> Gradien
     """
     This function creates a gradient boosting model.
     :return: GradientBoostingClassifier: the model.
+    Best parames from the tuner:
+
+    {'ccp_alpha': 0.0, 'criterion': 'friedman_mse', 'init': None, 'learning_rate': 0.2,
+    'loss': 'log_loss', 'max_depth': 10, 'max_features': None, 'max_leaf_nodes': None,
+    'min_impurity_decrease': 0.0, 'min_samples_leaf': 5, 'min_samples_split': 5,
+    'min_weight_fraction_leaf': 0.0, 'n_estimators': 800, 'n_iter_no_change': None, '
+    random_state': 42, 'subsample': 1.0, 'tol': 0.0001, 'validation_fraction': 0.1, 'verbose': 0, 'warm_start': False}
     """
-    gb = GradientBoostingClassifier(learning_rate=0.22271924404121154, loss='exponential', max_depth=7,
-                                    max_leaf_nodes=4, min_impurity_decrease=0.35176743416487977,
-                                    min_samples_leaf=1, min_samples_split=5,
-                                    min_weight_fraction_leaf=0.000723912587745684, n_estimators=593,
-                                    subsample=0.7424194687719635, random_state=42)
+    gb = GradientBoostingClassifier(ccp_alpha=0.0, criterion='friedman_mse',
+                                    init=None, learning_rate=0.2, loss='log_loss',
+                                    max_depth=10, max_features=None, max_leaf_nodes=None,
+                                    min_impurity_decrease=0.0, min_samples_leaf=5,
+                                    min_samples_split=5, min_weight_fraction_leaf=0.0,
+                                    n_estimators=800, n_iter_no_change=None, random_state=42,
+                                    subsample=1.0, tol=0.0001, validation_fraction=0.1, verbose=0,
+                                    warm_start=False)
 
     gb.fit(x_train, y_train)
     # save the model:
@@ -46,17 +55,34 @@ def neural_network_model(x_train: np.ndarray, y_train: np.ndarray) -> Model:
     This function creates a neural network model.
     :return: Model: the model.
     """
+    """
+    Best trial:
+    Value: 0.8298506259918212 
+      Params: 
+        Layers Count: 2
+        layer_0: 23
+        activation_layer_0: relu
+        filters_layer_0: 140
+        kernel_size_layer_0: 7
+        pool_size_layer_0: 3
+        layer_1: 133
+        activation_layer_1: tanh
+        optimizer: adam
+        learning_rate: 0.006679385448500152
+        epochs: 73
+        batch_size: 93
+    """
     # create the tuned model:
     model = Sequential()
     model = create_model_with_layers(model, layers=[
-                                            Conv1D(filters=114, kernel_size=8, activation='tanh', input_shape=(26, 1)),
-                                            MaxPooling1D(pool_size=6),
+                                            Conv1D(filters=140, kernel_size=7, activation='tanh', input_shape=(26, 1)),
+                                            MaxPooling1D(pool_size=3),
                                             Flatten(),
-                                            Dense(52, activation='tanh'),
+                                            Dense(133, activation='tanh'),
                                             Dense(1, activation='sigmoid')
-                                        ], optimizer=RMSprop(learning_rate=0.0030372259351153204))
+                                        ], optimizer=Adam(learning_rate=0.006679385448500152))
     # fit the model:
-    model.fit(x_train, y_train, epochs=54, batch_size=55, verbose=0)
+    model.fit(x_train, y_train, epochs=73, batch_size=93, verbose=0)
 
     # save the model as a .h5 file and as a pickle file:
     model.save(Path(final_models_path, "cnn_model.h5"))
@@ -70,7 +96,7 @@ def supper_vector_machine_model(x_train: np.ndarray, y_train: np.ndarray) -> SVC
     This function creates a support vector machine model.
     :return: SVC: the model.
     """
-    svc = SVC(random_state=42, C=4900, gamma=10 ** -5, probability=True)
+    svc = SVC(random_state=42, C=2.0, kernel='rbf', probability=True)
     svc.fit(x_train, y_train)
     # save the model:
     pd.to_pickle(svc, Path(final_models_path, "support_vector_machine_model.pkl"))

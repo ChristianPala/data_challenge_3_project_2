@@ -45,14 +45,14 @@ final_models_path: Path = Path(model_explainability, "final_models")
 
 # final dataset:
 # ---------------------------------------------------------------------------------------------------
-final_test_csv_path: Path = Path(balanced_datasets_path, "undersampled",
-                                 "minmax_scaler_scaling_unsupervised_imputation",
+final_test_csv_path: Path = Path(balanced_datasets_path, "svm_smote",
+                                 "normalized_robust_scaler_most_frequent_imputation",
                                  "final_testing.csv")
-final_train_csv_path: Path = Path(balanced_datasets_path, "undersampled",
-                                  "minmax_scaler_scaling_unsupervised_imputation",
+final_train_csv_path: Path = Path(balanced_datasets_path, "svm_smote",
+                                  "normalized_robust_scaler_most_frequent_imputation",
                                   "final_training.csv")
-final_val_csv_path: Path = Path(balanced_datasets_path, "undersampled",
-                                "minmax_scaler_scaling_unsupervised_imputation",
+final_val_csv_path: Path = Path(balanced_datasets_path, "svm_smote",
+                                "normalized_robust_scaler_most_frequent_imputation",
                                 "final_validation.csv")
 # ---------------------------------------------------------------------------------------------------
 final_neural_network_path: Path = Path(final_models_path, "cnn_model.pkl")

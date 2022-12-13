@@ -30,6 +30,7 @@ def objective(space, x_train: pd.DataFrame, y_train: pd.DataFrame, x_test: pd.Da
     model = SVC(C=space['C'],
                 kernel=space['kernel'],
                 degree=space['degree'],
+                gamma=space['gamma'],
                 random_state=42)
 
     # define the model evaluation data
@@ -69,7 +70,7 @@ def tuner(x_train: pd.DataFrame, y_train: pd.DataFrame,
 
     # define the search space, choose the parameters to tune:
     space = {
-        'C': hp.uniform('C', 10, 1000),
+        'C': hp.uniform('C', 0.1, 1),
         'kernel': hp.choice('kernel', ['linear', 'rbf', 'sigmoid', 'poly']),
         'degree': hp.choice('degree', [2, 3, 4, 5, 6]),
     }
@@ -108,11 +109,11 @@ def main() -> None:
     # print(best)
 
     """
-        {'C': 28.357438855797135, 'degree': 1, 'kernel': rbf}
+        {'C': 0.13, 'degree': 1, 'kernel': rbf}
         """
 
     # train the model with the best parameters:
-    model = SVC(random_state=42, C=4900, gamma=10 ** -5)
+    model = SVC(random_state=42, C=2.0, degree=2, kernel='rbf')
     model.fit(x_train, y_train)
 
     # train the model:

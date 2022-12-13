@@ -104,6 +104,7 @@ def main() -> None:
 
         # Conclusion:
         # SVM-smote is the best over-sampler for this dataset and our choices.
+        # 0.88 is a good sampling strategy.
 
 
 # Driver:

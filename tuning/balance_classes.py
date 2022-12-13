@@ -207,7 +207,7 @@ def svmsmote(train: pd.DataFrame, target: str) -> pd.DataFrame:
     x = df.drop([target], axis=1)
 
     # Defining our over-sampler
-    over = SVMSMOTE(sampling_strategy='auto', random_state=42, n_jobs=-1)
+    over = SVMSMOTE(sampling_strategy=0.88, random_state=42, n_jobs=-1)  # 0.88 is the result of the tuning.
 
     # Transform the dataset
     x, y = over.fit_resample(x, y)
