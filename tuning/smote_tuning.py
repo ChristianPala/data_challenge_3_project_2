@@ -37,7 +37,7 @@ def main() -> None:
     x_train, x_val, x_test, y_train, y_val, y_test = split_data(df, "default", validation=True)
 
     # Create over_samplers:
-    sampling_strategies = [0.84, 0.85, 0.86, 0.90, 0.92, 0.93, 'auto']  # test different values
+    sampling_strategies = [0.84, 0.85, 0.86, 0.88, 0.90, 0.92, 'auto']  # test different values
     samplers = [SVMSMOTE(sampling_strategy=sampling_strategy, random_state=42)
                 for sampling_strategy in sampling_strategies]
     # samplers += [BorderlineSMOTE(sampling_strategy=sampling_strategy, random_state=42)
@@ -51,8 +51,8 @@ def main() -> None:
     # samplers += [RandomUnderSampler(sampling_strategy=sampling_strategy, random_state=42)
     #                   for sampling_strategy in sampling_strategies]
 
-    # we also had a part where we tried to combine the SMOTE with the undersampling, using a pipeline,
-    # but it didn't improve, so we decided to leave it out.
+    # we also had a part where we tried to combine the SMOTE with the under-sampling, using a pipeline,
+    # but it didn't improve, so we decided to remove it.
 
     for i, sampler in tqdm(enumerate(samplers), desc="SMOTE tuning",
                            unit="sampler", total=len(samplers), colour="green"):
@@ -103,8 +103,8 @@ def main() -> None:
                                     dataset_name=f"{model_name}_{sampling_strategies[i % len(sampling_strategies)]}")
 
         # Conclusion:
-        # SVM-smote is the best over-sampler for this dataset and our choices.
-        # 0.88 is a good sampling strategy.
+        # SVM-smote is the best over-sampler for this dataset and our choices, 88:100 was the best sampling strategy.
+        # Under-sample with a 1:2 ratio provided the best performances.
 
 
 # Driver:

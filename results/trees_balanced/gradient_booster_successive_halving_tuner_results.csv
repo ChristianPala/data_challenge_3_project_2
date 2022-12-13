@@ -1,0 +1,4 @@
+model,score
+"GradientBoostingClassifier(learning_rate=0.2, max_depth=10, min_samples_leaf=5,
+                           min_samples_split=5, n_estimators=800,
+                           random_state=42)",0.5826771653543306

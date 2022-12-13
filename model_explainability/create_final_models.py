@@ -27,22 +27,15 @@ def gradient_boosting_model(x_train: np.ndarray, y_train: np.ndarray) -> Gradien
     """
     This function creates a gradient boosting model.
     :return: GradientBoostingClassifier: the model.
-    Best parames from the tuner:
-
-    {'ccp_alpha': 0.0, 'criterion': 'friedman_mse', 'init': None, 'learning_rate': 0.2,
-    'loss': 'log_loss', 'max_depth': 10, 'max_features': None, 'max_leaf_nodes': None,
-    'min_impurity_decrease': 0.0, 'min_samples_leaf': 5, 'min_samples_split': 5,
-    'min_weight_fraction_leaf': 0.0, 'n_estimators': 800, 'n_iter_no_change': None, '
-    random_state': 42, 'subsample': 1.0, 'tol': 0.0001, 'validation_fraction': 0.1, 'verbose': 0, 'warm_start': False}
     """
-    gb = GradientBoostingClassifier(ccp_alpha=0.0, criterion='friedman_mse',
-                                    init=None, learning_rate=0.2, loss='log_loss',
-                                    max_depth=10, max_features=None, max_leaf_nodes=None,
-                                    min_impurity_decrease=0.0, min_samples_leaf=5,
-                                    min_samples_split=5, min_weight_fraction_leaf=0.0,
-                                    n_estimators=800, n_iter_no_change=None, random_state=42,
-                                    subsample=1.0, tol=0.0001, validation_fraction=0.1, verbose=0,
-                                    warm_start=False)
+    """
+    Best parames from the tuner:
+    {'learning_rate': 0.07637482347210844, 'min_impurity_decrease': 0.396168876060142, 
+    'min_weight_fraction_leaf': 0.1544843582939203, 'subsample': 0.9125473459161672}
+    F1: 0.5477707006369428
+    """
+    gb = GradientBoostingClassifier(learning_rate=0.07637482347210844, min_impurity_decrease=0.396168876060142,
+                                    min_weight_fraction_leaf=0.1544843582939203, subsample=0.9125473459161672)
 
     gb.fit(x_train, y_train)
     # save the model:
@@ -96,7 +89,14 @@ def supper_vector_machine_model(x_train: np.ndarray, y_train: np.ndarray) -> SVC
     This function creates a support vector machine model.
     :return: SVC: the model.
     """
-    svc = SVC(random_state=42, C=2.0, kernel='rbf', probability=True)
+    """
+        Best trial with successive halving on the under-sampled data, with 5 fold stratified cross-validation:
+        SVC(C=7, degree=9, gamma='auto', kernel='sigmoid', probability=True,
+        random_state=42)
+        F1:0.5242290748898678, method: undersampling, scaler: RobustScaler, normalization: True
+    """
+
+    svc = SVC(random_state=42, C=7.0, kernel='sigmoid', probability=True, gamma='auto', degree=9)
     svc.fit(x_train, y_train)
     # save the model:
     pd.to_pickle(svc, Path(final_models_path, "support_vector_machine_model.pkl"))
@@ -138,6 +138,7 @@ def create_final_models_main() -> None:
     cm_gb.figure_.savefig(Path(final_models_path, "gb_confusion_matrix.png"))
     plt.close(cm_gb.figure_)
 
+    print("Convolutional Neural Network Model:")
     cnn_predictions = cnn.predict(x_test)
     cnn_predictions = np.where(cnn_predictions > 0.5, 1, 0)
     class_rep_cnn = classification_report(y_test, cnn_predictions)

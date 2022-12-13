@@ -1,3 +1,6 @@
+# Tune the models we did not select with optuna:
+# See the Optuna library documentation for more information: https://optuna.readthedocs.io/en/stable/
+
 # Data manipulation:
 from pathlib import Path
 import pandas as pd
@@ -10,7 +13,6 @@ from sklearn.svm import SVC
 from sklearn.naive_bayes import GaussianNB
 from sklearn.model_selection import StratifiedKFold
 from keras.backend import clear_session
-from modelling.model_evaluator import  evaluate_model
 from modelling.train_test_validation_split import split_data
 from modelling.knn_logreg_naiveb_svc import fit_model, evaluate_model, predict_model
 
@@ -25,6 +27,7 @@ from auxiliary.method_timer import measure_time
 
 # Global variables:
 from config import other_models_tuned_results_path, balanced_datasets_path
+from tuning.convolutional_neural_network_tuner_Optuna import load_best_dataset
 
 
 def generate_model(trial: Trial, model) -> BaseEstimator:
@@ -52,16 +55,10 @@ def generate_model(trial: Trial, model) -> BaseEstimator:
 def objective(trial: Trial):
     clear_session()
     # load the best dataset:
-    # x_train, y_train, x_val, y_val = load_best_dataset()
-
-    csv_files: list[Path] = list(balanced_datasets_path.rglob("*.csv"))
-    df = pd.read_csv(csv_files[0])
-
-    # split the data into train and test:
-    x_train, x_val, _, y_train, y_val, _ = split_data(df, 'default', validation=True)
+    x_train, y_train, x_val, y_val = load_best_dataset()
 
     # define the model:
-    estimator = KNeighborsClassifier()
+    estimator = KNeighborsClassifier()  # change this to the model you want to tune
     model = generate_model(trial, estimator)
 
     # use cross validation to evaluate the model:
@@ -128,6 +125,7 @@ def main():
 
     # save the results:
     study.trials_dataframe().to_csv(Path(other_models_tuned_results_path, "other_models_tuner.csv"))
+
 
 if __name__ == '__main__':
     main()

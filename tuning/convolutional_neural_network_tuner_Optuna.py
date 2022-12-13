@@ -26,8 +26,7 @@ neural_tuned_results_path.mkdir(parents=True, exist_ok=True)
 # Tensorflow logging:
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 # How many trials to allow the tuner to run, time efficiency vs accuracy
-NUMBER_OF_TRIALS: int = 10
-
+NUMBER_OF_TRIALS: int = 20
 
 def load_best_dataset() -> tuple[pd.DataFrame, pd.Series, pd.DataFrame, pd.Series]:
     """
@@ -35,8 +34,8 @@ def load_best_dataset() -> tuple[pd.DataFrame, pd.Series, pd.DataFrame, pd.Serie
     :return: pd.DataFrame: the best dataset.
     """
     # load the dataset:
-    train = pd.read_csv(Path(final_train_csv_path))
-    val = pd.read_csv(Path(final_val_csv_path))
+    train = pd.read_csv(Path(final_train_under_csv_path))
+    val = pd.read_csv(Path(final_val_under_csv_path))
     # split the dataset into features and target:
     x_train = train.drop('default', axis=1)
     y_train = train['default']
@@ -92,9 +91,6 @@ def generate_model(trial: Trial) -> Model:
     @param trial: The current Optuna trial
     :return: The model with the hyperparameters tuned by Optuna
     """
-
-    # keep the start of the model the same as it worked well in the baseline model
-
 
     # Generate layers between 2 and 6 layers according to optuna's trial
     layers_count = trial.suggest_int("Layers Count", 2, 6)
@@ -268,28 +264,6 @@ def main() -> None:
 
     # save the results:
     study.trials_dataframe().to_csv(Path(neural_tuned_results_path, "neural_network_tuner.csv"))
-
-    """
-    Best trial:
-  Value: 0.8298506259918212 
-  Params: 
-    Layers Count: 2
-    layer_0: 23
-    activation_layer_0: relu
-    filters_layer_0: 140
-    kernel_size_layer_0: 7
-    pool_size_layer_0: 3
-    layer_1: 133
-    activation_layer_1: tanh
-    filters_layer_1: 128
-    kernel_size_layer_1: 7
-    pool_size_layer_1: 4
-    optimizer: adam
-    learning_rate: 0.006679385448500152
-    epochs: 73
-    batch_size: 93
-    
-    """
 
 
 if __name__ == '__main__':

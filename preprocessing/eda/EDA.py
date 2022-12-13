@@ -188,7 +188,7 @@ def plot_categorical_correlation_with_target(df: pd.DataFrame, target: str) -> N
     plt.xlabel('Features')
     plt.ylabel('Pearson Correlation')
     # rotate the x-axis labels and decrease the font size:
-    plt.xticks(rotation=90, fontsize=8)
+    plt.xticks(rotation=90, fontsize=12)
     # Save the plot:
     plot_path.mkdir(parents=True, exist_ok=True)
     plt.savefig(Path(plot_path, f'correlation_with_{target}_one_hot_encoded.png'))

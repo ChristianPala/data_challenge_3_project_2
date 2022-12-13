@@ -61,10 +61,10 @@ def pdp_main() -> None:
     support_vector_machine_model = pd.read_pickle(Path(final_models_path, "support_vector_machine_model.pkl"))
 
     # plot the partial dependence of all features:
-    for feature_name in x_train.columns:
-        plot_dependence(feature_name, gradient_boosting_model, x_train)
-        plot_dependence(feature_name, support_vector_machine_model, x_train)
-        plt.close()
+    # for feature_name in x_train.columns:
+    #     plot_dependence(feature_name, gradient_boosting_model, x_train)
+    #     plot_dependence(feature_name, support_vector_machine_model, x_train)
+    #     plt.close()
 
     # examine limit_bal and pay_status_total combined:
     plot_dependence(['limit_bal', 'pay_status_total'], gradient_boosting_model, x_train)

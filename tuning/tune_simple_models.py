@@ -1,5 +1,7 @@
 # The simple models like decision trees, knn and logistic regression
-# suffer from multicollinearity with this dataset, so we try them on a reduced dataset.
+# suffer from multicollinearity within this dataset, so we simplified the dataset
+# The search was done with grid search,
+# see: https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.GridSearchCV.html for more info.
 # Libraries:
 # Data manipulation:
 import pandas as pd
@@ -21,7 +23,6 @@ from feature_selection.remove_correlated_features import simplify_dataset
 from auxiliary.method_timer import measure_time
 # Global variables:
 from config import final_train_under_csv_path, final_val_under_csv_path, other_models_tuned_results_path
-
 
 
 def create_models() -> List[Tuple[str, object]]:
@@ -116,7 +117,7 @@ def simple_models_main() -> None:
     This function is the main function of the script.
     :return: None
     """
-    # Simplify the dataset:
+    # Simplify the dataset, our quick feature selection:
     x_train, y_train, x_val, y_val = simplify_dataset(final_train_under_csv_path, final_val_under_csv_path)
 
     # Tune the models:

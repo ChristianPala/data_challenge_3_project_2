@@ -49,7 +49,7 @@ def undersample_transform(train: pd.DataFrame, target: str) -> pd.DataFrame:
     x = df.drop([target], axis=1)
 
     # Defining our under-sampler
-    under = RandomUnderSampler(sampling_strategy='auto', random_state=42)
+    under = RandomUnderSampler(sampling_strategy=0.5, random_state=42)
 
     # Transform the dataset
     x, y = under.fit_resample(x, y)

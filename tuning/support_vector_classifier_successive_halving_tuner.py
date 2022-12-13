@@ -1,25 +1,29 @@
 # Library to tune the support vector classifier model with successive halving.
+# See https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.HalvingRandomSearchCV.html
 # Libraries:
 # Data manipulation:
 from pathlib import Path
 from typing import List
-
 import numpy as np
 import pandas as pd
+# Import datasets:
 from tuning.gradient_booster_successive_halving_tuner import create_csv_list
-from sklearn.metrics import f1_score
-
 # Hyperparameter tuning:
-from sklearn.svm import SVC
 # experimental tuning with halving random search cv:
 from sklearn.experimental import enable_halving_search_cv  # NOQA
 from sklearn.model_selection import HalvingRandomSearchCV, StratifiedKFold  # NOQA
-
+# Modeling and metrics:
+from sklearn.svm import SVC
+from sklearn.metrics import f1_score
 # Time:
 from auxiliary.method_timer import measure_time
 from tqdm import tqdm
+
 # Global variables:
 from config import other_models_tuned_results_path
+
+# Ensure the directory exists:
+other_models_tuned_results_path.mkdir(parents=True, exist_ok=True)
 
 
 def create_model() -> SVC:
@@ -41,9 +45,10 @@ def tune_model(training_csv_list: List[Path]) -> list[SVC]:
     """
     # define the parameter space:
     param_space = {
-        'C': [0.5, 1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5],
+        'C': [5, 6, 7, 8, 9, 10, 100, 1000],
         'kernel': ['rbf', 'poly', 'sigmoid'],
         'degree': [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+        'gamma': ['scale', 'auto', 10 ** -5, 10 ** -4, 10 ** -3],
     }
 
     # create the model:
@@ -68,7 +73,8 @@ def tune_model(training_csv_list: List[Path]) -> list[SVC]:
             cv=cv,
             n_jobs=-1,
             random_state=42,
-            verbose=0
+            verbose=1  # verbose=1 to print the progress, since it's pretty nice.
+            # for larger datasets like svm_smote, aggressive_elimination=True makes sense.
         )
 
         halving_random_search_cv.fit(X, y)
@@ -120,7 +126,7 @@ def svc_main() -> None:
     :return: None
     """
     # create the list of paths to the csv files in the balanced folder:
-    training_csv_list, validation_csv_list = create_csv_list()
+    training_csv_list, validation_csv_list = create_csv_list(added_path=Path('undersampled'))
     # tune the model:
     tuned_models = tune_model(training_csv_list)
     # evaluate the tuned models:

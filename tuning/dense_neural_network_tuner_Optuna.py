@@ -1,10 +1,10 @@
 # Data manipulation:
 import pandas as pd
 
-# Tuning
+# Tuning, see the Optuna documentation for more information: https://optuna.readthedocs.io/en/stable/
 import optuna
 from optuna.trial import TrialState, Trial
-from tuning.balanced_neural_network import fit_model, predict_model, evaluate_model
+from tuning.balanced_neural_network import predict_model, evaluate_model
 from optuna.pruners import MedianPruner
 from optuna.samplers import TPESampler
 
@@ -22,18 +22,19 @@ from auxiliary.method_timer import measure_time
 
 # Global variables:
 from config import balanced_datasets_path, neural_tuned_results_path
-from config import scaled_datasets_path, undersampled_datasets_path
+from config import scaled_datasets_path, undersampled_datasets_path, \
+final_train_under_csv_path, final_val_under_csv_path
 
 
-def load_best_dataset(path: Path = Path(balanced_datasets_path, "smote_enn", "robust_scaler_scaling_drop",)) \
+def load_best_dataset() \
         -> tuple[pd.DataFrame, pd.Series, pd.DataFrame, pd.Series]:
     """
     This function loads the best dataset from the balanced folder.
     :return: pd.DataFrame: the best dataset.
     """
     # load the dataset:
-    train = pd.read_csv(Path(path, "final_training.csv"))
-    val = pd.read_csv(Path(path, "final_validation.csv"))
+    train = pd.read_csv(final_train_under_csv_path)
+    val = pd.read_csv(final_val_under_csv_path)
     # split the dataset into features and target:
     x_train = train.drop('default', axis=1)
     y_train = train['default']
@@ -121,17 +122,7 @@ def score(model: Sequential, x, y) -> float:
 def objective(trial: Trial):
     clear_session()
     # load the best dataset:
-    #x_train, y_train, x_val, y_val = load_best_dataset()
-
-    csv_files: list[Path] = list(scaled_datasets_path.glob('*.csv'))
-    df = pd.read_csv(csv_files[0])
-    test_path = Path(undersampled_datasets_path, "minmax_scaler_scaling_drop", "test.csv")
-    test = pd.read_csv(test_path)
-
-    # split the data into train and test:
-    x_train, x_val, _, y_train, y_val, _ = split_data(df, 'default', validation=True)
-
-    x_test, x_val, _, y_test, y_val, _ = split_data(test, 'default', validation=True)
+    x_train, y_train, x_val, y_val = load_best_dataset()
 
     # define the model:
     model = generate_model(trial=trial)
@@ -175,7 +166,7 @@ def main():
     # set the pruner:
     pruner = MedianPruner(n_startup_trials=10, n_warmup_steps=5)
     # set the study:
-    study = optuna.create_study(direction="maximize", sampler=sampler, pruner=pruner)
+    study = optuna.create_study(study_name="dense-nn", direction="maximize", sampler=sampler, pruner=pruner)
     # run the study:
     study.optimize(objective, n_trials=10, n_jobs=-1, show_progress_bar=False)
 

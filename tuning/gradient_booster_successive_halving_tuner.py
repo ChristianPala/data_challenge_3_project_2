@@ -135,7 +135,7 @@ def gb_main() -> None:
     :return: None
     """
     # create the list of paths to the csv files in the balanced folder:
-    training_csv_list, validation_csv_list = create_csv_list(added_path=Path('svm_smote'))
+    training_csv_list, validation_csv_list = create_csv_list(added_path=Path('undersampled'))
     # tune the model:
     tuned_models = tune_model(training_csv_list)
     # evaluate the tuned models:

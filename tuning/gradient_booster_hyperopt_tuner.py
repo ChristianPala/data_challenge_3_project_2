@@ -1,13 +1,15 @@
 # Auxiliary library to tune the gradient booster model.
+# Note: the code was adapted from the following the xgbost tuner of project 1 by Christian Berchtold and Christian Pala.
+# Library used: hyperopt, see: http://hyperopt.github.io/hyperopt/
 # Libraries:
 # Data manipulation:
 from __future__ import annotations
 import pandas as pd
 # Modelling:
 from hyperopt import hp, Trials, fmin, STATUS_OK, tpe
-from sklearn.metrics import f1_score, make_scorer, classification_report
+from sklearn.metrics import f1_score, make_scorer
 from sklearn.model_selection import cross_val_score, StratifiedKFold
-from config import final_train_csv_path, final_val_csv_path
+from config import final_train_under_csv_path, final_val_under_csv_path
 from sklearn.ensemble import GradientBoostingClassifier
 # Type hints:
 from typing import Dict, Any
@@ -49,13 +51,13 @@ def objective(space, x_train: pd.DataFrame, y_train: pd.DataFrame, x_test: pd.Da
     if fast:
         cv = 2
 
-    # since we are interested in churners, the positive class, the f1 is a good metric:
+    # define the evaluation metric:
     metric = make_scorer(f1_score)
 
     # evaluate the model:
     f1 = cross_val_score(model, X, y, scoring=metric, cv=cv, n_jobs=-1).mean()
 
-    # return the loss, 1 - f1 score since we want to maximize the f1 score:
+    # return the loss metric:
     return {'loss': 1 - f1, 'status': STATUS_OK}
 
 
@@ -97,8 +99,9 @@ def tuner(x_train: pd.DataFrame, y_train: pd.DataFrame,
                                                   cross_validation, fast),
                 space=space, algo=tpe.suggest, max_evals=max_evaluations, trials=trials)
 
-    # filter out the parameters that are 0:
+    # filter out the parameters that are 0 or non-numerical, to avoid halting the program:
     best = {k: v for k, v in best.items() if v != 0}
+    best = {k: v for k, v in best.items() if isinstance(v, int) or isinstance(v, float)}
 
     return best
 
@@ -109,8 +112,8 @@ def main() -> None:
     @return: None. The best hyperparameters are printed.
     """
     # load the data:
-    training = pd.read_csv(final_train_csv_path)
-    validation = pd.read_csv(final_val_csv_path)
+    training = pd.read_csv(final_train_under_csv_path)
+    validation = pd.read_csv(final_val_under_csv_path)
 
     # split the data into features and labels:
     x_train = training.drop('default', axis=1)
@@ -119,26 +122,21 @@ def main() -> None:
     y_test = validation['default']
 
     # tune the model:
-    # best = tuner(x_train, y_train, x_test, y_test, max_evaluations=100, cross_validation=5, fast=False)
-    """
-    {'learning_rate': 0.22271924404121154, 'loss': exponential, 'max_depth': 7, 'max_leaf_nodes': 4,
-     'min_impurity_decrease': 0.35176743416487977, 'min_samples_leaf': 1, 'min_samples_split': 5,
-     'min_weight_fraction_leaf': 0.000723912587745684, 'n_estimators': 593, 'subsample': 0.7424194687719635}
-     """
+    best = tuner(x_train, y_train, x_test, y_test, max_evaluations=100, cross_validation=5, fast=False)
+
+    # print the best hyperparameters:
+    # check the hyperparameters are implemented correctly below:
+    print(best)
 
     # train the model with the best parameters:
-    model = GradientBoostingClassifier(learning_rate=0.22271924404121154, loss='exponential', max_depth=7,
-                                       max_leaf_nodes=4, min_impurity_decrease=0.35176743416487977,
-                                       min_samples_leaf=1, min_samples_split=5,
-                                       min_weight_fraction_leaf=0.000723912587745684, n_estimators=593,
-                                       subsample=0.7424194687719635, random_state=42)
+    model = GradientBoostingClassifier(random_state=42, **best)
 
     # train the model:
     model.fit(x_train, y_train)
 
-    # evaluate the model:
+    # evaluate the model on the validation set:
     y_pred = model.predict(x_test)
-    print(f1_score(y_test, y_pred))
+    print(f"F1: {f1_score(y_test, y_pred)}")
 
 
 if __name__ == '__main__':

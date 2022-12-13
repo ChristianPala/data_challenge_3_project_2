@@ -2,6 +2,7 @@
 # - Convoluted Neural Network (CNN)
 # - Gradient Boosting Machine (GBM)
 # - Support Vector Machine Classifier (SVM)
+# using ELI5 documentation: https://eli5.readthedocs.io/en/latest/overview.html
 # Libraries:
 # Data manipulation:
 from pathlib import Path
@@ -146,7 +147,7 @@ def permutation_importance_main() -> None:
     testing = pd.read_csv(final_test_under_csv_path)
 
     # load the convoluted neural network model:
-    cnn_model = pd.read_pickle(Path(final_models_path, 'cnn_model_untuned.pkl'), )
+    cnn_model = pd.read_pickle(Path(final_models_path, 'cnn_model.pkl'), )
 
     # load the gradient boosting model:
     gb_model = pd.read_pickle(Path(final_models_path, 'gradient_boosting_model.pkl'))
@@ -159,10 +160,8 @@ def permutation_importance_main() -> None:
     permutation_feature_importance(testing, target='default', model=gb_model)
     permutation_feature_importance(testing, target='default', model=svc_model)
 
-    # perform partial dependence plots:
-    # pass
-
 
 # Driver Code:
 if __name__ == '__main__':
     permutation_importance_main()
+

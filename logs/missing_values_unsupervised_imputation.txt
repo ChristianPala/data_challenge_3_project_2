@@ -1,0 +1,5 @@
+Missing values for education: Int64Index([15108, 3770, 27271, 24138], dtype='int64', name='id')
+Missing values for marriage: Int64Index([12079, 29112, 18536, 8887, 7956, 23030, 5006], dtype='int64', name='id')
+Missing values imputed with: unsupervised_imputation
+imputed values for education: [2. 2. 2. 2.]
+imputed values for marriage: [1. 1. 1. 1. 2. 1. 1.]

@@ -61,7 +61,10 @@ def main() -> None:
     balanced_other_models_main(dominant_models=['naive_bayes', 'svc'])
     evaluator_main(trees_balanced_results_path, neural_networks_balanced_results_path,
                    other_models_balanced_results_path, suppress_print=True, balanced=True)
-    # Hyper-parameter Tuning:
+
+    # Hyperparameter Tuning:
+    # We added the 3 results to the creation of the final models, separate tunings can be done uncommenting
+    # the following:
     # ----------------------------------------------
     # gb_main()
     # tuned neural network, we consider the dense model as the best one
@@ -74,9 +77,11 @@ def main() -> None:
     # Below the tuning of the simple models:
     # simple_models_main()
     # Below we generate the 3 best models we found during the tuning phase for the explanation part:
-    # create_final_models_main()
-    # final_comparisons_main()
+    create_final_models_main()
+    final_comparisons_main()
     # Explaining:
+    # The results are in the respective folders in the results folder, to run the respective codes,
+    # uncomment the following:
     # ----------------------------------------------
     # Global:
     # ----------------------------------------------
