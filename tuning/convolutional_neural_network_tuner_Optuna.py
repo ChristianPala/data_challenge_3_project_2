@@ -18,7 +18,7 @@ from modelling.model_evaluator import evaluate_model, save_evaluation_results
 from auxiliary.method_timer import measure_time
 
 # Global variables:
-from config import neural_tuned_results_path, final_train_csv_path, final_val_csv_path
+from config import neural_tuned_results_path, final_train_under_csv_path, final_val_under_csv_path
 
 # Ensure the directory exists:
 neural_tuned_results_path.mkdir(parents=True, exist_ok=True)

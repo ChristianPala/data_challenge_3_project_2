@@ -58,7 +58,7 @@ def create_naive_bayes_model() -> GaussianNB:
     return model
 
 
-def fit_model(model, x_train, y_train) -> BaseEstimator:
+def fit_model(model, x_train, y_train) -> KNeighborsClassifier or LogisticRegression or SVC or GaussianNB:
     """
     This function fits the model to the training data.
     @param model: model: the model to be fitted.

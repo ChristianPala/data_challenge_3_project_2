@@ -20,7 +20,7 @@ from sklearn.model_selection import StratifiedKFold
 from auxiliary.method_timer import measure_time
 # Global variables:
 from config import feature_permutation_results_path, partial_dependence_results_path, \
-    final_test_csv_path, final_models_path
+    final_test_under_csv_path, final_models_path
 # Tensorflow logging level:
 import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
@@ -143,7 +143,7 @@ def permutation_importance_main() -> None:
     """
 
     # Load the data:
-    testing = pd.read_csv(final_test_csv_path)
+    testing = pd.read_csv(final_test_under_csv_path)
 
     # load the convoluted neural network model:
     cnn_model = pd.read_pickle(Path(final_models_path, 'cnn_model_untuned.pkl'), )

@@ -20,7 +20,7 @@ from feature_selection.remove_correlated_features import simplify_dataset
 
 from auxiliary.method_timer import measure_time
 # Global variables:
-from config import final_train_csv_path, final_val_csv_path, other_models_tuned_results_path
+from config import final_train_under_csv_path, final_val_under_csv_path, other_models_tuned_results_path
 
 
 
@@ -117,7 +117,7 @@ def simple_models_main() -> None:
     :return: None
     """
     # Simplify the dataset:
-    x_train, y_train, x_val, y_val = simplify_dataset(final_train_csv_path, final_val_csv_path)
+    x_train, y_train, x_val, y_val = simplify_dataset(final_train_under_csv_path, final_val_under_csv_path)
 
     # Tune the models:
     tuned_models = tuner(x_train, y_train)

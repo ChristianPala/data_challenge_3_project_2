@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 
 
 # Global variables:
-from config import final_train_csv_path, final_val_csv_path, white_box_model_explanation_path
+from config import final_train_under_csv_path, final_val_under_csv_path, white_box_model_explanation_path
 
 # Ensure the directory exists:
 white_box_model_explanation_path.mkdir(parents=True, exist_ok=True)
@@ -25,7 +25,7 @@ def white_box_main() -> None:
     model = DecisionTreeClassifier(criterion='gini', max_depth=9, min_samples_leaf=1, min_samples_split=2)
 
     # get the simplified dataset:
-    x_train, y_train, x_val, y_val = simplify_dataset(final_train_csv_path, final_val_csv_path)
+    x_train, y_train, x_val, y_val = simplify_dataset(final_train_under_csv_path, final_val_under_csv_path)
 
     # Fit the model:
     model.fit(x_train, y_train)
@@ -46,7 +46,7 @@ def white_box_main() -> None:
     plt.title('Feature importance for the decision tree white box model')
     plt.xlabel('Feature importance')
     plt.ylabel('Feature')
-    # give more space to the y axis:
+    # give more space to the y-axis:
     plt.subplots_adjust(left=0.3)
     plt.savefig(white_box_model_explanation_path / 'feature_importance.png')
 

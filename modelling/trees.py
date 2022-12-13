@@ -22,7 +22,8 @@ if not trees_results_path.exists():
     trees_results_path.mkdir(parents=True)
 
 
-def generate_tree_model(model_type: str) -> BaseEstimator:
+def generate_tree_model(model_type: str) \
+        -> DecisionTreeClassifier or RandomForestClassifier or GradientBoostingClassifier or XGBClassifier:
     """
     This function generates one of the tree models.
     @param model_type: str: the type of the model to be generated. Supported:
@@ -44,7 +45,9 @@ def generate_tree_model(model_type: str) -> BaseEstimator:
         raise ValueError('The model type is not supported.')
 
 
-def fit_model(model: BaseEstimator, x_train: np.array, y_train: np.array) -> BaseEstimator:
+def fit_model(model: DecisionTreeClassifier or RandomForestClassifier or GradientBoostingClassifier or XGBClassifier,
+              x_train: np.array, y_train: np.array) \
+        -> DecisionTreeClassifier or RandomForestClassifier or GradientBoostingClassifier or XGBClassifier:
     """
     This function fits the model to the training data.
     @param model: BaseEstimator: the model to be fitted.
@@ -56,7 +59,8 @@ def fit_model(model: BaseEstimator, x_train: np.array, y_train: np.array) -> Bas
     return model
 
 
-def predict_model(model: BaseEstimator, x_test: np.array) -> np.array:
+def predict_model(model: DecisionTreeClassifier or RandomForestClassifier or GradientBoostingClassifier or XGBClassifier
+                  , x_test: np.array) -> np.array:
     """
     This function predicts the target values for the test data.
     @param model: BaseEstimator: the model to be used for prediction.

@@ -7,7 +7,8 @@ import pandas as pd
 from hyperopt import hp, Trials, fmin, STATUS_OK, tpe
 from sklearn.metrics import f1_score, make_scorer
 from sklearn.model_selection import cross_val_score, StratifiedKFold
-from config import final_train_csv_path, final_val_csv_path
+from config import final_train_full_csv_path, final_val_full_csv_path, final_train_under_csv_path, \
+    final_val_under_csv_path
 from sklearn.svm import SVC
 
 # Type hints:
@@ -95,8 +96,8 @@ def main() -> None:
     @return: None. The best hyperparameters are printed.
     """
     # load the data:
-    training = pd.read_csv(final_train_csv_path)
-    validation = pd.read_csv(final_val_csv_path)
+    training = pd.read_csv(final_train_under_csv_path)
+    validation = pd.read_csv(final_val_under_csv_path)
 
     # split the data into features and labels:
     x_train = training.drop('default', axis=1)

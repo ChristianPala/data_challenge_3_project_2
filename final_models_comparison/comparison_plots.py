@@ -16,7 +16,7 @@ from sklearn.svm import SVC
 
 from auxiliary.method_timer import measure_time
 # Global variables:
-from config import final_models_path, final_test_csv_path, final_models_comparison_path
+from config import final_models_path, final_test_under_csv_path, final_models_comparison_path
 
 # tensorflow loggings:
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
@@ -31,7 +31,7 @@ def load_test_data() -> (pd.DataFrame, pd.DataFrame):
     :return: the test data
     """
     # Load the test data:
-    test_df = pd.read_csv(final_test_csv_path)
+    test_df = pd.read_csv(final_test_under_csv_path)
     x_test = test_df.drop("default", axis=1)
     y_test = test_df["default"]
     return x_test, y_test

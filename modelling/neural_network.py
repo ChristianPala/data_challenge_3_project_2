@@ -11,8 +11,8 @@ import os
 import tensorflow as tf
 from keras.utils import plot_model
 from tensorflow import keras
-from keras.models import Model, Sequential
-from keras.layers import Dense, Dropout, Layer, Conv1D, MaxPooling1D, Flatten
+from keras.models import Sequential
+from keras.layers import Dense, Dropout, Conv1D, MaxPooling1D, Flatten
 from modelling.train_test_validation_split import split_data
 from modelling.model_evaluator import save_evaluation_results, evaluate_model
 #  Timing:

@@ -5,7 +5,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 # Modelling:
-from keras.models import Model, load_model
+from keras.models import Model
 # Interpretability:
 from sklearn.inspection import PartialDependenceDisplay
 # Plotting:
@@ -13,8 +13,8 @@ import matplotlib.pyplot as plt
 # Timing:
 from auxiliary.method_timer import measure_time
 # Global variables:
-from config import final_train_csv_path, final_val_csv_path, partial_dependence_results_path, final_neural_network_path, \
-    final_models_path
+from config import final_train_under_csv_path, final_val_under_csv_path, partial_dependence_results_path, \
+    final_neural_network_path, final_models_path
 # Ensure the folders are created:
 partial_dependence_results_path.mkdir(parents=True, exist_ok=True)
 
@@ -48,14 +48,15 @@ def pdp_main() -> None:
     This function is the main function.
     :return: None
     """
-    training = pd.read_csv(final_train_csv_path)
-    validation = pd.read_csv(final_val_csv_path)
+    training = pd.read_csv(final_train_under_csv_path)
+    validation = pd.read_csv(final_val_under_csv_path)
 
     # concatenate the training and validation data:
     training = pd.concat([training, validation], axis=0)
     x_train = training.drop(columns=["default"])
 
     # import the models:
+    # Note, we did not use the neural network model, because it is not supported by the library:
     gradient_boosting_model = pd.read_pickle(Path(final_models_path, "gradient_boosting_model.pkl"))
     support_vector_machine_model = pd.read_pickle(Path(final_models_path, "support_vector_machine_model.pkl"))
 
@@ -66,9 +67,14 @@ def pdp_main() -> None:
         plt.close()
 
     # examine limit_bal and pay_status_total combined:
-    # Todo: check interesting features to plot the partial dependence of.
     plot_dependence(['limit_bal', 'pay_status_total'], gradient_boosting_model, x_train)
     plot_dependence(['limit_bal', 'pay_status_total'], support_vector_machine_model, x_train)
+    plot_dependence(['education', 'pay_status_total'], gradient_boosting_model, x_train)
+    plot_dependence(['education', 'pay_status_total'], support_vector_machine_model, x_train)
+    plot_dependence(['education', 'total_paid_amount'], gradient_boosting_model, x_train)
+    plot_dependence(['education', 'total_paid_amount'], support_vector_machine_model, x_train)
+    plot_dependence(['total_bill_amount', 'pay_status_total'], gradient_boosting_model, x_train)
+    plot_dependence(['total_bill_amount', 'pay_status_total'], support_vector_machine_model, x_train)
     plt.close()
 
 

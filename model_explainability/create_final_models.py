@@ -13,10 +13,10 @@ from sklearn.svm import SVC
 from sklearn.metrics import classification_report
 from keras import Model, Sequential
 from keras.layers import Conv1D, MaxPooling1D, Flatten, Dense
-from keras.optimizers import RMSprop, Adam
+from keras.optimizers import Adam
 
 # Global variables:
-from config import final_train_csv_path, final_val_csv_path, final_models_path, final_test_csv_path
+from config import final_train_under_csv_path, final_val_under_csv_path, final_models_path, final_test_under_csv_path
 from tuning.convolutional_neural_network_tuner_Optuna import create_model_with_layers
 
 # Ensure the directory exists:
@@ -109,9 +109,9 @@ def create_final_models_main() -> None:
     :return: None
     """
     # load the data:
-    training = pd.read_csv(final_train_csv_path)
-    validation = pd.read_csv(final_val_csv_path)
-    testing = pd.read_csv(final_test_csv_path)
+    training = pd.read_csv(final_train_under_csv_path)
+    validation = pd.read_csv(final_val_under_csv_path)
+    testing = pd.read_csv(final_test_under_csv_path)
 
     # concatenate training and validation:
     training = pd.concat([training, validation], axis=0)

@@ -18,7 +18,11 @@ from sklearn.ensemble import GradientBoostingClassifier
 from sklearn.svm import SVC
 
 # Global variables:
-from config import final_models_path, final_test_csv_path, shap_results_path, final_train_csv_path, final_val_csv_path
+from config import final_models_path, final_test_under_csv_path, final_train_under_csv_path, final_val_under_csv_path, \
+    shap_results_path
+
+# Ensure directory exists:
+shap_results_path.mkdir(parents=True, exist_ok=True)
 
 # Tensorflow logging:
 warnings.filterwarnings('ignore')
@@ -30,14 +34,14 @@ def load_data() -> (pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame):
     Function to load the data for the explainability analysis with the SHAP library.
     """
     # load the training data:
-    train_df = pd.read_csv(final_train_csv_path)
-    val_df = pd.read_csv(final_val_csv_path)
+    train_df = pd.read_csv(final_train_under_csv_path)
+    val_df = pd.read_csv(final_val_under_csv_path)
     # concatenate the training and validation data:
     train_df = pd.concat([train_df, val_df], axis=0)
     x_train = train_df.drop("default", axis=1)
     y_train = train_df["default"]
     # Load the test data:
-    test_df = pd.read_csv(final_test_csv_path)
+    test_df = pd.read_csv(final_test_under_csv_path)
     x_test = test_df.drop("default", axis=1)
     y_test = test_df["default"]
 

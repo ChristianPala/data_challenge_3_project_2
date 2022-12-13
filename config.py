@@ -45,13 +45,23 @@ final_models_path: Path = Path(model_explainability, "final_models")
 
 # final dataset:
 # ---------------------------------------------------------------------------------------------------
-final_test_csv_path: Path = Path(balanced_datasets_path, "svm_smote",
+final_test_full_csv_path: Path = Path(balanced_datasets_path, "svm_smote",
                                  "normalized_robust_scaler_most_frequent_imputation",
                                  "final_testing.csv")
-final_train_csv_path: Path = Path(balanced_datasets_path, "svm_smote",
+final_train_full_csv_path: Path = Path(balanced_datasets_path, "svm_smote",
                                   "normalized_robust_scaler_most_frequent_imputation",
                                   "final_training.csv")
-final_val_csv_path: Path = Path(balanced_datasets_path, "svm_smote",
+final_val_full_csv_path: Path = Path(balanced_datasets_path, "svm_smote",
+                                "normalized_robust_scaler_most_frequent_imputation",
+                                "final_validation.csv")
+
+final_test_under_csv_path: Path = Path(balanced_datasets_path, "undersampled",
+                                 "normalized_robust_scaler_most_frequent_imputation",
+                                 "final_testing.csv")
+final_train_under_csv_path: Path = Path(balanced_datasets_path, "undersampled",
+                                  "normalized_robust_scaler_most_frequent_imputation",
+                                  "final_training.csv")
+final_val_under_csv_path: Path = Path(balanced_datasets_path, "undersampled",
                                 "normalized_robust_scaler_most_frequent_imputation",
                                 "final_validation.csv")
 # ---------------------------------------------------------------------------------------------------
