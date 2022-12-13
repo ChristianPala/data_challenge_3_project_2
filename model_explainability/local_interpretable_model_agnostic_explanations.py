@@ -17,10 +17,15 @@ import shap
 from shap import maskers
 # Type hinting:
 from typing import Literal
+from typing import Union
 # Timing:
 from auxiliary.method_timer import measure_time
 # Keras model loading:
 from keras.models import load_model
+# Modelling:
+from keras import Model
+from sklearn.ensemble import GradientBoostingClassifier
+from sklearn.svm import SVC
 # Deprecation warnings:
 import warnings
 
@@ -37,7 +42,8 @@ warnings.filterwarnings("ignore")
 
 
 # Functions:
-def lime_explanation(training: pd.DataFrame, testing: pd.DataFrame, target: str, model: ...,
+def lime_explanation(training: pd.DataFrame, testing: pd.DataFrame, target: str,
+                     model: Union[GradientBoostingClassifier, Model, SVC],
                      model_name: str, j: int = 0,
                      with_wrong_prediction_analysis: bool = False, random_state: int = 42) -> None:
     """
@@ -46,7 +52,7 @@ def lime_explanation(training: pd.DataFrame, testing: pd.DataFrame, target: str,
     @param training: pd.DataFrame: the training dataset.
     @param testing: pd.DataFrame: the testing dataset.
     @param target: str: the target column's name.
-    @param model: ...: our pre-trained black-box model, we will use it to perform a prediction and analyze it
+    @param model: our pre-trained black-box model, we will use it to perform a prediction and analyze it
     with our explainer.
     @param model_name: str: the name of out model, to save appropriately the results.
     @param j: int: index of the data our model will use for the prediction.
@@ -188,7 +194,8 @@ def lime_explanation(training: pd.DataFrame, testing: pd.DataFrame, target: str,
             explanation.save_to_file(Path(lime_results_path, f'lime_report_fn_pred_{fn_idx}_{model_name}.html'))
 
 
-def shap_explanation(training: pd.DataFrame, testing: pd.DataFrame, target: str, model: ...,
+def shap_explanation(training: pd.DataFrame, testing: pd.DataFrame, target: str,
+                     model: Union[GradientBoostingClassifier, Model, SVC],
                      explainer_type: Literal["tree", "kernel_cnn", "kernel_svc"], model_name: str, j: int = 0) -> None:
     """
     This function carry out a Local Model-agnostic Explanation of a pre-trained model using the shap library:
@@ -196,7 +203,7 @@ def shap_explanation(training: pd.DataFrame, testing: pd.DataFrame, target: str,
     @param training: pd.DataFrame: the training dataset.
     @param testing: pd.DataFrame: the testing dataset.
     @param target: str: the target column's name.
-    @param model: ...: our pre-trained black-box model, we will use it to perform a prediction and analyze it
+    @param model: our pre-trained black-box model, we will use it to perform a prediction and analyze it
     with our explainer.
     @param explainer_type: str: a string containing which type of algorithm our model is.
     @param model_name: str: the name of out model, to save appropriately the results.
