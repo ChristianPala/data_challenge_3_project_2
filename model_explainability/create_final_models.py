@@ -113,8 +113,8 @@ def create_final_models_main() -> None:
     validation = pd.read_csv(final_val_under_csv_path)
     testing = pd.read_csv(final_test_under_csv_path)
 
-    # concatenate training and validation:
-    training = pd.concat([training, validation], axis=0)
+    # concatenate the training and validation data:
+    training = pd.concat([training, validation], ignore_index=True)
 
     # create the final models:
     x_train = training.drop("default", axis=1)

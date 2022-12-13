@@ -337,7 +337,7 @@ def lime_and_shap_main() -> None:
     training = pd.concat([training, validation], axis=0)
 
     # Explaining surrogate model worst predictions
-    bb = load_model(Path(global_surrogate_models_path, 'black_box_model.h5'))
+    bb = load_model(Path(global_surrogate_models_path, 'final_models/black_box_model.h5'))
     lr = pd.read_pickle(Path(global_surrogate_models_path, 'logistic_regression_surrogate_model.pkl'))
     rf = pd.read_pickle(Path(global_surrogate_models_path, 'random_forest_surrogate_model.pkl'))
 

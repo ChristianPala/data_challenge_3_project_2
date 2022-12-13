@@ -80,7 +80,7 @@ def main() -> None:
     create_final_models_main()
     final_comparisons_main()
     # Explaining:
-    # The results are in the respective folders in the results folder, to run the respective codes,
+    # The results are in the respective folders in the results' folder, to run the respective codes,
     # uncomment the following:
     # ----------------------------------------------
     # Global:
