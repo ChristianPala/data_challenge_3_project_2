@@ -1,0 +1,211 @@
+Trees path: trees_baseline
+Neural networks path: neural_network_baseline
+Other models path: other_models_baseline
+The best decision tree unsupervised imputation augmented, with an f1 score of 0.471
+The best random forest unsupervised imputation augmented, with an f1 score of 0.508
+The best gradient boosting most frequent imputation augmented, with an f1 score of 0.545
+The best xgboost most frequent imputation augmented, with an f1 score of 0.52
+The best neural network dense normalized robust scaler most frequent imputation augmented, with an f1 score of 0.535
+The best knn robust scaler unsupervised imputation augmented, with an f1 score of 0.492
+The best logreg normalized robust scaler most frequent imputation augmented, with an f1 score of 0.44
+The best naive bayes minmax scaler most frequent imputation augmented, with an f1 score of 0.548
+The best svc normalized robust scaler most frequent imputation augmented, with an f1 score of 0.5
+
+Trees path: trees_baseline
+Neural networks path: neural_network_baseline
+Other models path: other_models_baseline
+The best decision tree unsupervised imputation augmented, with an f1 score of 0.471
+The best random forest unsupervised imputation augmented, with an f1 score of 0.508
+The best gradient boosting most frequent imputation augmented, with an f1 score of 0.545
+The best xgboost most frequent imputation augmented, with an f1 score of 0.52
+The best neural network dense normalized robust scaler unsupervised imputation augmented, with an f1 score of 0.541
+The best knn normalized robust scaler unsupervised imputation augmented, with an f1 score of 0.484
+The best logreg normalized robust scaler most frequent imputation augmented, with an f1 score of 0.44
+The best naive bayes normalized robust scaler most frequent imputation augmented, with an f1 score of 0.517
+The best svc normalized robust scaler most frequent imputation augmented, with an f1 score of 0.5
+
+Trees path: trees_baseline
+Neural networks path: neural_network_baseline
+Other models path: other_models_baseline
+The best decision tree unsupervised imputation augmented, with an f1 score of 0.471
+The best random forest unsupervised imputation augmented, with an f1 score of 0.508
+The best gradient boosting most frequent imputation augmented, with an f1 score of 0.545
+The best xgboost most frequent imputation augmented, with an f1 score of 0.52
+The best neural network dense normalized robust scaler unsupervised imputation augmented, with an f1 score of 0.538
+The best knn normalized robust scaler unsupervised imputation augmented, with an f1 score of 0.484
+The best logreg normalized robust scaler most frequent imputation augmented, with an f1 score of 0.44
+The best naive bayes normalized robust scaler most frequent imputation augmented, with an f1 score of 0.517
+The best svc normalized robust scaler most frequent imputation augmented, with an f1 score of 0.5
+
+Trees path: trees_baseline
+Neural networks path: neural_network_baseline
+Other models path: other_models_baseline
+The best decision tree most frequent imputation augmented, with an f1 score of 0.451
+The best random forest most frequent imputation augmented, with an f1 score of 0.507
+The best gradient boosting most frequent imputation augmented, with an f1 score of 0.545
+The best xgboost most frequent imputation augmented, with an f1 score of 0.52
+The best neural network dense normalized robust scaler most frequent imputation augmented, with an f1 score of 0.516
+The best knn normalized robust scaler most frequent imputation augmented, with an f1 score of 0.483
+The best logreg normalized robust scaler most frequent imputation augmented, with an f1 score of 0.44
+The best naive bayes normalized robust scaler most frequent imputation augmented, with an f1 score of 0.517
+The best svc normalized robust scaler most frequent imputation augmented, with an f1 score of 0.5
+
+Trees path: trees_baseline
+Neural networks path: neural_network_baseline
+Other models path: other_models_baseline
+The best decision tree most frequent imputation augmented, with an f1 score of 0.451
+The best random forest most frequent imputation augmented, with an f1 score of 0.507
+The best gradient boosting most frequent imputation augmented, with an f1 score of 0.545
+The best xgboost most frequent imputation augmented, with an f1 score of 0.52
+The best neural network dense normalized robust scaler most frequent imputation augmented, with an f1 score of 0.521
+The best knn normalized robust scaler most frequent imputation augmented, with an f1 score of 0.483
+The best logreg normalized robust scaler most frequent imputation augmented, with an f1 score of 0.44
+The best naive bayes normalized robust scaler most frequent imputation augmented, with an f1 score of 0.517
+The best svc normalized robust scaler most frequent imputation augmented, with an f1 score of 0.5
+
+Trees path: trees_baseline
+Neural networks path: neural_network_baseline
+Other models path: other_models_baseline
+The best decision tree most frequent imputation augmented, with an f1 score of 0.451
+The best random forest most frequent imputation augmented, with an f1 score of 0.507
+The best gradient boosting most frequent imputation augmented, with an f1 score of 0.545
+The best xgboost most frequent imputation augmented, with an f1 score of 0.52
+The best neural network convoluted normalized robust scaler most frequent imputation augmented, with an f1 score of 0.517
+The best knn normalized robust scaler most frequent imputation augmented, with an f1 score of 0.483
+The best logreg normalized robust scaler most frequent imputation augmented, with an f1 score of 0.44
+The best naive bayes normalized robust scaler most frequent imputation augmented, with an f1 score of 0.517
+The best svc normalized robust scaler most frequent imputation augmented, with an f1 score of 0.5
+
+Trees path: trees_baseline
+Neural networks path: neural_network_baseline
+Other models path: other_models_baseline
+The best decision tree most frequent imputation augmented, with an f1 score of 0.451
+The best random forest most frequent imputation augmented, with an f1 score of 0.507
+The best gradient boosting most frequent imputation augmented, with an f1 score of 0.545
+The best xgboost most frequent imputation augmented, with an f1 score of 0.52
+The best neural network dense normalized robust scaler most frequent imputation augmented, with an f1 score of 0.526
+The best knn normalized robust scaler most frequent imputation augmented, with an f1 score of 0.483
+The best logreg normalized robust scaler most frequent imputation augmented, with an f1 score of 0.44
+The best naive bayes normalized robust scaler most frequent imputation augmented, with an f1 score of 0.517
+The best svc normalized robust scaler most frequent imputation augmented, with an f1 score of 0.5
+
+Trees path: trees_balanced
+Neural networks path: neural_network_balanced
+Other models path: other_models_balanced
+The best gradient boosting normalized robust scaler most frequent imputation, with an f1 score of 0.572
+The best convolutional network normalized robust scaler most frequent imputation, with an f1 score of 0.495
+The best svc normalized robust scaler most frequent imputation, with an f1 score of 0.557
+Trees path: trees_baseline
+Neural networks path: neural_network_baseline
+Other models path: other_models_baseline
+The best decision tree most frequent imputation augmented, with an f1 score of 0.451
+The best random forest most frequent imputation augmented, with an f1 score of 0.507
+The best gradient boosting most frequent imputation augmented, with an f1 score of 0.545
+The best xgboost most frequent imputation augmented, with an f1 score of 0.52
+The best neural network dense normalized robust scaler most frequent imputation augmented, with an f1 score of 0.518
+The best knn normalized robust scaler most frequent imputation augmented, with an f1 score of 0.483
+The best logreg normalized robust scaler most frequent imputation augmented, with an f1 score of 0.44
+The best naive bayes normalized robust scaler most frequent imputation augmented, with an f1 score of 0.517
+The best svc normalized robust scaler most frequent imputation augmented, with an f1 score of 0.5
+
+Trees path: trees_balanced
+Neural networks path: neural_network_balanced
+Other models path: other_models_balanced
+The best gradient boosting normalized robust scaler most frequent imputation, with an f1 score of 0.572
+The best convolutional network normalized robust scaler most frequent imputation, with an f1 score of 0.547
+The best svc normalized robust scaler most frequent imputation, with an f1 score of 0.557
+Trees path: trees_baseline
+Neural networks path: neural_network_baseline
+Other models path: other_models_baseline
+The best decision tree most frequent imputation augmented, with an f1 score of 0.451
+The best random forest most frequent imputation augmented, with an f1 score of 0.507
+The best gradient boosting most frequent imputation augmented, with an f1 score of 0.545
+The best xgboost most frequent imputation augmented, with an f1 score of 0.52
+The best neural network dense normalized robust scaler most frequent imputation augmented, with an f1 score of 0.539
+The best knn normalized robust scaler most frequent imputation augmented, with an f1 score of 0.483
+The best logreg normalized robust scaler most frequent imputation augmented, with an f1 score of 0.44
+The best naive bayes normalized robust scaler most frequent imputation augmented, with an f1 score of 0.517
+The best svc normalized robust scaler most frequent imputation augmented, with an f1 score of 0.5
+
+Trees path: trees_balanced
+Neural networks path: neural_network_balanced
+Other models path: other_models_balanced
+The best gradient boosting normalized robust scaler most frequent imputation, with an f1 score of 0.556
+The best convolutional network normalized robust scaler most frequent imputation, with an f1 score of 0.544
+The best svc normalized robust scaler most frequent imputation, with an f1 score of 0.567
+Trees path: trees_baseline
+Neural networks path: neural_network_baseline
+Other models path: other_models_baseline
+The best decision tree most frequent imputation augmented, with an f1 score of 0.451
+The best random forest most frequent imputation augmented, with an f1 score of 0.507
+The best gradient boosting most frequent imputation augmented, with an f1 score of 0.545
+The best xgboost most frequent imputation augmented, with an f1 score of 0.52
+The best neural network dense normalized robust scaler most frequent imputation augmented, with an f1 score of 0.519
+The best knn normalized robust scaler most frequent imputation augmented, with an f1 score of 0.483
+The best logreg normalized robust scaler most frequent imputation augmented, with an f1 score of 0.44
+The best naive bayes normalized robust scaler most frequent imputation augmented, with an f1 score of 0.517
+The best svc normalized robust scaler most frequent imputation augmented, with an f1 score of 0.5
+
+Trees path: trees_balanced
+Neural networks path: neural_network_balanced
+Other models path: other_models_balanced
+The best gradient boosting normalized robust scaler most frequent imputation, with an f1 score of 0.565
+The best convolutional network normalized robust scaler most frequent imputation, with an f1 score of 0.552
+The best svc normalized robust scaler most frequent imputation, with an f1 score of 0.567
+Trees path: trees_baseline
+Neural networks path: neural_network_baseline
+Other models path: other_models_baseline
+The best decision tree most frequent imputation augmented, with an f1 score of 0.451
+The best random forest most frequent imputation augmented, with an f1 score of 0.507
+The best gradient boosting most frequent imputation augmented, with an f1 score of 0.545
+The best xgboost most frequent imputation augmented, with an f1 score of 0.52
+The best neural network convoluted normalized robust scaler most frequent imputation augmented, with an f1 score of 0.5
+The best knn normalized robust scaler most frequent imputation augmented, with an f1 score of 0.483
+The best logreg normalized robust scaler most frequent imputation augmented, with an f1 score of 0.44
+The best naive bayes normalized robust scaler most frequent imputation augmented, with an f1 score of 0.517
+The best svc normalized robust scaler most frequent imputation augmented, with an f1 score of 0.5
+
+Trees path: trees_balanced
+Neural networks path: neural_network_balanced
+Other models path: other_models_balanced
+The best gradient boosting normalized robust scaler most frequent imputation, with an f1 score of 0.565
+The best convolutional network normalized robust scaler most frequent imputation, with an f1 score of 0.514
+The best svc normalized robust scaler most frequent imputation, with an f1 score of 0.567
+Trees path: trees_baseline
+Neural networks path: neural_network_baseline
+Other models path: other_models_baseline
+The best decision tree most frequent imputation augmented, with an f1 score of 0.451
+The best random forest most frequent imputation augmented, with an f1 score of 0.507
+The best gradient boosting most frequent imputation augmented, with an f1 score of 0.545
+The best xgboost most frequent imputation augmented, with an f1 score of 0.52
+The best neural network convoluted normalized robust scaler most frequent imputation augmented, with an f1 score of 0.512
+The best knn normalized robust scaler most frequent imputation augmented, with an f1 score of 0.483
+The best logreg normalized robust scaler most frequent imputation augmented, with an f1 score of 0.44
+The best naive bayes normalized robust scaler most frequent imputation augmented, with an f1 score of 0.517
+The best svc normalized robust scaler most frequent imputation augmented, with an f1 score of 0.5
+
+Trees path: trees_balanced
+Neural networks path: neural_network_balanced
+Other models path: other_models_balanced
+The best gradient boosting normalized robust scaler most frequent imputation, with an f1 score of 0.567
+The best convolutional network normalized robust scaler most frequent imputation, with an f1 score of 0.557
+The best svc normalized robust scaler most frequent imputation, with an f1 score of 0.567
+Trees path: trees_baseline
+Neural networks path: neural_network_baseline
+Other models path: other_models_baseline
+The best decision tree most frequent imputation augmented, with an f1 score of 0.451
+The best random forest most frequent imputation augmented, with an f1 score of 0.507
+The best gradient boosting most frequent imputation augmented, with an f1 score of 0.545
+The best xgboost most frequent imputation augmented, with an f1 score of 0.52
+The best neural network dense normalized robust scaler most frequent imputation augmented, with an f1 score of 0.53
+The best knn normalized robust scaler most frequent imputation augmented, with an f1 score of 0.483
+The best logreg normalized robust scaler most frequent imputation augmented, with an f1 score of 0.44
+The best naive bayes normalized robust scaler most frequent imputation augmented, with an f1 score of 0.517
+The best svc normalized robust scaler most frequent imputation augmented, with an f1 score of 0.5
+
+Trees path: trees_balanced
+Neural networks path: neural_network_balanced
+Other models path: other_models_balanced
+The best gradient boosting normalized robust scaler most frequent imputation, with an f1 score of 0.567
+The best convolutional network normalized robust scaler most frequent imputation, with an f1 score of 0.532
+The best svc normalized robust scaler most frequent imputation, with an f1 score of 0.567

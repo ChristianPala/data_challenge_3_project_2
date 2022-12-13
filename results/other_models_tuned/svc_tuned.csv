@@ -1,0 +1,3 @@
+model,f1 score,balancing method
+"SVC(C=7, degree=9, gamma='auto', kernel='sigmoid', probability=True,
+    random_state=42)",0.5242290748898678,undersampled
